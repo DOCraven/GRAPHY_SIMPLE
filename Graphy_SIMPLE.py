@@ -57,6 +57,13 @@ from fcn_GUI import GRAPH_GUI, GUI_Solar
 from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 
+### CLASSES ###
+
+class ReturnValue(object):
+    def __init__(self, daily_average, weekly_average):
+        self.daily_average = daily_average
+        self.weekly_average = weekly_average
+
 ### FUNCTIONS ###
 def DailyAverage(monthly_data):
     """
@@ -143,24 +150,40 @@ def Data_Consistency_Checker(Dataframe_to_check):
     
     return Dataframe_to_check
 
-def Data_Analyser(Interval_Data, Solar_Data = None): #assuming solar data is not added, using 'NONE' is bad juju, but fix it later
+def Data_Analyser(Interval_Data, Solar_Data = None): #assuming solar data is not added using 'NONE' is bad juju, but fix it later
     """ 
     Holding Function to do all the data analysis functions 
     """
     ### STEP 1: Check for NaN in dataframe, and interpolate if necessary
     
     Checked_Interval_Data = Data_Consistency_Checker(Interval_Data)
-    print('Testing')
-    Checked_Interval_Data[0].to_csv('Should be interpolated.csv')
-    Checked_Interval_Data[1].to_csv('NOT be interpolated.csv')
+    
     ### STEP 2: concat solar data (if required)
     if Solar_Data: 
         Checked_Solar_Data = Data_Consistency_Checker(Solar_Data)
         Full_Interval_Data = dataJoiner(Interval_Data, Checked_Solar_Data)
+    else: 
+        Full_Interval_Data = Checked_Interval_Data
+    
+    ### STEP 3: Calculate Averages
+    ### STEP 3a: Calculate Daily Average
+    Full_Interval_Data_DAILY = DailyAverage(Full_Interval_Data)
 
+    ### STEP 3b: Calculate Weekly Average
+    Full_Interval_Data_WEEKLY = WeeklyAverage(Full_Interval_Data)
+
+    return ReturnValue(Full_Interval_Data_DAILY, Full_Interval_Data_WEEKLY)
+
+def ProgressBar(): 
+    """Simple progress bar """
+    ### PLACEHOLDER FOR UPDATE BAR ###
+    layout = [[sg.Text('Please be Patient')],      
+                    [sg.Text('This window will close when the analysis is complete')]]      
+
+    window = sg.Window('Progress', layout)    
+
+    event, values = window.read()    
     return #nothing
-
-
 
 def main():
     """ Main fcn"""
@@ -169,32 +192,53 @@ def main():
     ## Create the MAIN GUI LANDING PAGE ##
     sg.theme('Light Blue 2')
 
-    layout = [[sg.Text('NEW Landing Page')],
+    layout_landing = [[sg.Text('NEW Landing Page')],
             [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
             [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
             [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
             [sg.Submit(), sg.Cancel()]]
 
-    window = sg.Window('NEW Graphy (Simple)', layout)
+    window = sg.Window('NEW Graphy (Simple)', layout_landing)
 
     event, values = window.read()
-    # window.close() #dont close teh window
-    print(f'You clicked {event}')
-    print(f'You chose filenames {values[0]} and {values[1]}')
+    window.close()
+
+    # ProgressBar() #placeholder for progress/update bar while the fcn Data_Analysis is occuring
 
     ## STEP 1: read files, check extensions are valid, and import as dataframes
-    try: #read the inverval data
-        Interval_Data = Extension_Checker(values[0])
+    try: #read the inverval load data
+        Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass
     try: #read the solar data
         if values[1]: #only read if solar data is input
-            Solar_Data = Extension_Checker(values[1])
+            Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass
 
-    Data_Analyser(Interval_Data = Interval_Data)
+    if values[1]: #combine Solar data to back of the interval load data if it exists
+        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+    else: #does not combine the solar data to the back of the interval load data
+        Full_Interval_Data = Interval_Data
 
+    ## STEP 2: Do the data analysis
+    Data_Analyser(Interval_Data = Full_Interval_Data) #do all the magic data analysis
+
+    
+    ## STEP 3: PLOT IT NICELY 
+    # Plotting_GUI()
+
+    layout = [[sg.Text('My one-shot window.')],      
+                 [sg.InputText()],      
+                 [sg.Submit(), sg.Cancel()]]      
+
+    window = sg.Window('Window Title', layout)    
+
+    event, values = window.read()    
+    window.close()
+
+    text_input = values[0]    
+    sg.popup('You entered', text_input)
 
     return #nothing main
 
