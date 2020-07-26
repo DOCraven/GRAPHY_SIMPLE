@@ -57,13 +57,6 @@ from fcn_GUI import GRAPH_GUI, GUI_Solar
 from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 
-### CLASSES ###
-
-class ReturnValue(object):
-    def __init__(self, daily_average, weekly_average):
-        self.daily_average = daily_average
-        self.weekly_average = weekly_average
-
 ### FUNCTIONS ###
 def DailyAverage(monthly_data):
     """
@@ -143,37 +136,13 @@ def Data_Consistency_Checker(Dataframe_to_check):
     """Used to check if the dataframe is fully populated, and returns a interpolated dataframe is necessary"""
     
     ### STEP 1: Ensure all data is consistent (ie, exists)
-    ############ CHECK THAT I DO NOT NEED TO RETURN ANYTHING, AND IT CHANGES THE DATAFRAME IN PLACE ############
     for x in  range(0, len(Dataframe_to_check)):
         if Dataframe_to_check[x].isnull().any().any(): #returns TRUE if NaN exists in teh dataframe
             Dataframe_to_check[x] = intervalResampler(Dataframe_to_check[x])
     
     return Dataframe_to_check
 
-def Data_Analyser(Interval_Data, Solar_Data = None): #assuming solar data is not added using 'NONE' is bad juju, but fix it later
-    """ 
-    Holding Function to do all the data analysis functions 
-    """
-    ### STEP 1: Check for NaN in dataframe, and interpolate if necessary
-    
-    Checked_Interval_Data = Data_Consistency_Checker(Interval_Data)
-    
-    ### STEP 2: concat solar data (if required)
-    if Solar_Data: 
-        Checked_Solar_Data = Data_Consistency_Checker(Solar_Data)
-        Full_Interval_Data = dataJoiner(Interval_Data, Checked_Solar_Data)
-    else: 
-        Full_Interval_Data = Checked_Interval_Data
-    
-    ### STEP 3: Calculate Averages
-    ### STEP 3a: Calculate Daily Average
-    Full_Interval_Data_DAILY = DailyAverage(Full_Interval_Data)
-
-    ### STEP 3b: Calculate Weekly Average
-    Full_Interval_Data_WEEKLY = WeeklyAverage(Full_Interval_Data)
-
-    return ReturnValue(Full_Interval_Data_DAILY, Full_Interval_Data_WEEKLY)
-
+   
 def ProgressBar(): 
     """Simple progress bar """
     ### PLACEHOLDER FOR UPDATE BAR ###
@@ -187,6 +156,10 @@ def ProgressBar():
 
 def main():
     """ Main fcn"""
+    
+    ### VARS ###
+    Solar_Exists = False
+    
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
@@ -212,33 +185,45 @@ def main():
         pass
     try: #read the solar data
         if values[1]: #only read if solar data is input
+            Solar_Exists = True #for data handling later on. 
             Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass
-
-    if values[1]: #combine Solar data to back of the interval load data if it exists
+    
+    ## STEP 1A: join the solar data to the dataframe (if necessary)
+    if Solar_Exists: #combine Solar data to back of the interval load data if it exists
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
 
-    ## STEP 2: Do the data analysis
-    Data_Analyser(Interval_Data = Full_Interval_Data) #do all the magic data analysis
+    ## STEP 2: Check for consistency, and interpolate if requried
+    Checked_Interval_Data = Data_Consistency_Checker(Full_Interval_Data)
+
+    ## STEP 3: Calculate Weekly averages
+    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data)
+
+    ## STEP 4: Calculate Daily Averages
+    Daily_Interval_Data = DailyAverage(Checked_Interval_Data)
+        
+    
+
+    
 
     
     ## STEP 3: PLOT IT NICELY 
     # Plotting_GUI()
 
-    layout = [[sg.Text('My one-shot window.')],      
-                 [sg.InputText()],      
-                 [sg.Submit(), sg.Cancel()]]      
+    # layout = [[sg.Text('My one-shot window.')],      
+    #              [sg.InputText()],      
+    #              [sg.Submit(), sg.Cancel()]]      
 
-    window = sg.Window('Window Title', layout)    
+    # window = sg.Window('Window Title', layout)    
 
-    event, values = window.read()    
-    window.close()
+    # event, values = window.read()    
+    # window.close()
 
-    text_input = values[0]    
-    sg.popup('You entered', text_input)
+    # text_input = values[0]    
+    # sg.popup('You entered', text_input)
 
     return #nothing main
 
