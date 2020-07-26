@@ -5,7 +5,6 @@ import pandas as pd
 # import datetime as dt
 # from calendar import day_name
 
-
 def dataJoiner(Full_df, incomplete_df):
     """
     function to join merge a smaller dataframe to a larger on, on a common index 
@@ -71,5 +70,35 @@ def intervalResampler(input_df, chosen_interval = 30):
     resampledDF.reset_index(inplace = True)
     
     return resampledDF
+
+def Data_Consistency_Checker(Dataframe_to_check):
+    """Used to check if the dataframe is fully populated, and returns a interpolated dataframe is necessary"""
+    
+    ### STEP 1: Ensure all data is consistent (ie, exists)
+    for x in  range(0, len(Dataframe_to_check)):
+        if Dataframe_to_check[x].isnull().any().any(): #returns TRUE if NaN exists in teh dataframe
+            Dataframe_to_check[x] = intervalResampler(Dataframe_to_check[x])
+    
+    return Dataframe_to_check
+
+def CopyCat(dataframe_to_copy):
+    """ Function to return a copy of a dataframe passed in """
+    list_of_copied_dataframes = []
+    for x in  range(0, len(dataframe_to_copy)):
+        copied_dataframe = dataframe_to_copy[x].copy()
+        list_of_copied_dataframes.append(copied_dataframe)
+    
+    return list_of_copied_dataframes
+
+# def ProgressBar(): 
+#     """Simple progress bar """
+#     ### PLACEHOLDER FOR UPDATE BAR ###
+#     layout = [[sg.Text('Please be Patient')],      
+#                     [sg.Text('This window will close when the analysis is complete')]]      
+
+#     window = sg.Window('Progress', layout)    
+
+#     event, values = window.read()    
+#     return #nothing
 
 

@@ -54,7 +54,7 @@ import PySimpleGUI as sg
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker
+from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 
 ### FUNCTIONS ###
@@ -139,37 +139,6 @@ def MonthToDaySum(df):
         sampled.append(SUMMED) #append to all 
             
     return sampled
-
-def Data_Consistency_Checker(Dataframe_to_check):
-    """Used to check if the dataframe is fully populated, and returns a interpolated dataframe is necessary"""
-    
-    ### STEP 1: Ensure all data is consistent (ie, exists)
-    for x in  range(0, len(Dataframe_to_check)):
-        if Dataframe_to_check[x].isnull().any().any(): #returns TRUE if NaN exists in teh dataframe
-            Dataframe_to_check[x] = intervalResampler(Dataframe_to_check[x])
-    
-    return Dataframe_to_check
-
-
-def CopyCat(dataframe_to_copy):
-    """ Function to return a copy of a dataframe passed in """
-    list_of_copied_dataframes = []
-    for x in  range(0, len(dataframe_to_copy)):
-        copied_dataframe = dataframe_to_copy[x].copy()
-        list_of_copied_dataframes.append(copied_dataframe)
-    
-    return list_of_copied_dataframes
-
-def ProgressBar(): 
-    """Simple progress bar """
-    ### PLACEHOLDER FOR UPDATE BAR ###
-    layout = [[sg.Text('Please be Patient')],      
-                    [sg.Text('This window will close when the analysis is complete')]]      
-
-    window = sg.Window('Progress', layout)    
-
-    event, values = window.read()    
-    return #nothing
 
 def main():
     """ Main fcn"""
