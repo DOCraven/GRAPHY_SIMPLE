@@ -2,7 +2,7 @@ import pandas as pd
 import cufflinks as cf
 import matplotlib.pyplot as plt
 import datetime as dt
-import PySimpleGUIWeb as sg
+import PySimpleGUI as sg
 import xlsxwriter
 
 ## MY FUNCTIONS ##
@@ -54,25 +54,21 @@ def Average_Plotter(df = None, TITLE = 'DAILY MEAN', X_LABEL = 'Time', Y_LABEL =
 
     return #nothing
 
-def GRAPH_GUI(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, DAILY_EXTERNAL_MEAN_2020 = None, WEEKLY_EXTERNAL_MEDIAN_2018 = None, WEEKLY_EXTERNAL_MEDIAN_2019 = None, WEEKLY_EXTERNAL_MEDIAN_2020 = None, DAILY_WWTP_MEAN_2019 = None, DAILY_WWTP_MEAN_2020 = None, WEEKLY_WWTP_MEDIAN_2019 = None, WEEKLY_WWTP_MEDIAN_2020 = None): 
+def GRAPH_GUI(Weekly_Mean = None, Daily_Mean = None): 
     """ 
     A simple GUI to make plotting easier and interactive 
     """
     ## VARS
     Months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
-    Year = ('2018', '2019', '2020')
     Interval = ('Daily', 'Weekly')
     Plot = ('Individual', 'Bar',  'Histogram', 'Box', 'Spread')
-    Location = ('External', 'WWTP')
-    
+        
     NE_WATER_MONTHS = {0: 'JAN', 1: 'FEB', 2: 'MAR', 3: 'APR', 4: 'MAY', 5: 'JUN', 6: 'JUL', 7: 'AUG', 8: 'SEP', 9: 'OCT', 10: 'NOV', 11: 'DEC'} #dict for accessing months
     location = plottype = interval = month = year = None #so scope doesnt screw me. Could use a global var, but this is less typing
 
 
     #determining the layout
     layout = [  [sg.Text('', size = (20, None)), sg.Text('Plotting Options ', size = (20, None))], 
-            [sg.Text('Pick a location', size = (12, None)), sg.Listbox(Location, size=(20, len(Location)), key='Location')],
-            [sg.Text('Pick a year', size = (12, None)), sg.Listbox(Year, size=(20, len(Year)), key='Year')],
             [sg.Text('Pick a Month', size = (12, None)), sg.Listbox(Months, size=(20, len(Months)), key='Month')],
             [sg.Text('Pick a Data \nOutput Format', size = (12, None)), sg.Listbox(Interval, size=(20, len(Interval)), key='Interval')],
             [sg.Text('Pick a Plot Type', size = (12, None)), sg.Listbox(Plot, size=(20, len(Plot)), key='Plot Type')],
@@ -93,18 +89,8 @@ def GRAPH_GUI(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 elif selectedInterval == ['Weekly']:
                     interval = 'Weekly'
             else: 
-                print('please select a interval type')
+                print('please select a interval type') #or different error
 
-            if values['Location']: #determine the location 
-                selectedLocation = values['Location']
-                #do location logic
-                if selectedLocation == ['External']: 
-                    location = 'External'
-                elif selectedLocation == ['WWTP']:
-                    location = 'WWTP'
-            else: 
-                print('please select a interval type')
-            
             if values['Plot Type']: #determine the Plot Type 
                 selectedPlot = values['Plot Type']
                 #do location logic
@@ -124,7 +110,7 @@ def GRAPH_GUI(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                     plottype = 'Heatmap'
 
             else: 
-                print('please select a plot type')
+                print('please select a plot type') #or different error
                     
             #do month logic
             if values['Month']:    # Determine the month selected
@@ -157,86 +143,24 @@ def GRAPH_GUI(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
             else: 
                 print('please select a month')
             
-            #do yearly logic
-            if values['Year']:  #determine the year
-                selectedYear = values['Year'] 
-                #do year logic
-                if selectedYear == ['2018']:
-                    year = 2018
-                elif selectedYear == ['2019']: 
-                    year = 2019
-                elif selectedYear == ['2020']:
-                    year = 2020
-            else: 
-                print('please select a year')
-
+            
             ## PLOTTING OCCURS HERE ##
-            if location == "External": 
-                try: 
-                    if interval == 'Daily' and year == 2018: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2018 DAILY MEAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(DAILY_EXTERNAL_MEAN_2018[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average
-                    
-                            ## 2019 DAILY ##
-                    elif interval == 'Daily' and year == 2019:
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2019 DAILY MEAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(DAILY_EXTERNAL_MEAN_2019[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average 
+            # if location == "External": 
+            try: 
+                if selectedInterval == ['Daily']: 
+                    plotTitle = str(NE_WATER_MONTHS[month]) + ' DAILY MEAN CONSUMPTION'
+                    Average_Plotter(Weekly_Mean[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average
+                
+                ## 2018 WEEKLY ##
+                elif selectedInterval == 'Weekly': 
+                    plotTitle = str(NE_WATER_MONTHS[month]) + ' WEEKLY MEAN CONSUMPTION'
+                    Average_Plotter(Weekly_Mean[month], TITLE = plotTitle , PLOTTYPE = plottype) #weekly average
 
-                            ## 2020 DAILY ##
-                    elif interval == 'Daily' and year == 2020: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2020 DAILY MEAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(DAILY_EXTERNAL_MEAN_2020[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average
-                        
-                            ## 2018 WEEKLY ##
-                    elif interval == 'Weekly' and year == 2018: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2018 WEEKLY MEDIAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(WEEKLY_EXTERNAL_MEDIAN_2018[month], TITLE = plotTitle , PLOTTYPE = plottype) #Weekly average
-
-                            ## 2019 WEEKLY ##    
-                    elif interval == 'Weekly' and year == 2019: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2019 WEEKLY MEDIAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(WEEKLY_EXTERNAL_MEDIAN_2019[month], TITLE = plotTitle , PLOTTYPE = plottype) #Weekly average
-
-                            ## 2020 WEEKLT ##
-                    elif interval == 'Weekly' and year == 2020: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2020 WEEKLY MEDIAN CONSUMPTION (EXTERNAL)'
-                        Average_Plotter(WEEKLY_EXTERNAL_MEDIAN_2020[month], TITLE = plotTitle , PLOTTYPE = plottype) #Weekly average
-                except IndexError: 
+            except IndexError: 
                     pass
 
         
-            elif location == 'WWTP': 
-                try: 
-                    if interval == 'Daily' and year == 2018: 
-                        print('ERROR: NO 2018 DATA AVAILABLE FOR WWTP')
-                    
-                            ## 2019 DAILY ##
-                    elif interval == 'Daily' and year == 2019:
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2019 DAILY MEAN CONSUMPTION (WWTP)'
-                        Average_Plotter(DAILY_WWTP_MEAN_2019[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average 
-
-                            ## 2020 DAILY ##
-                    elif interval == 'Daily' and year == 2020: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2020 DAILY MEAN CONSUMPTION'
-                        Average_Plotter(DAILY_WWTP_MEAN_2020[month], TITLE = plotTitle , PLOTTYPE = plottype) #daily average
-                        
-                            ## 2018 WEEKLY ##
-                    elif interval == 'Weekly' and year == 2018: 
-                        print('ERROR: NO 2018 DATA AVAILABLE FOR WWTP')
-
-                            ## 2019 WEEKLY ##    
-                    elif interval == 'Weekly' and year == 2019: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2019 WEEKLY MEDIAN CONSUMPTION (WWTP)'
-                        Average_Plotter(WEEKLY_WWTP_MEDIAN_2019[month], TITLE = plotTitle , PLOTTYPE = plottype) #Weekly average
-
-                            ## 2020 WEEKLT ##
-                    elif interval == 'Weekly' and year == 2020: 
-                        plotTitle = str(NE_WATER_MONTHS[month]) + ' 2020 WEEKLY MEDIAN CONSUMPTION (WWTP)'
-                        Average_Plotter(WEEKLY_WWTP_MEDIAN_2020[month], TITLE = plotTitle , PLOTTYPE = plottype) #Weekly average
-                except IndexError: 
-                    pass    
-
-
+           
         elif event == 'Exit': #ie, exit button is pushed so quit 
             window.close()
 

@@ -66,9 +66,13 @@ def DailyAverage(monthly_data):
     dailyAverage = [] # Average Day from the input
     columnName = 'Interval End' #name of column that contains Parsed DateTimeObject
     NumberofDataFrames = len(monthly_data)
-    for months in  range(0, NumberofDataFrames): # sets each DF to have the correct index
+    for months in  range(0, NumberofDataFrames): # sets each DF to have the correct index ## HERE BE PROBLEMS ##
         monthly_data[months] = monthly_data[months].set_index([columnName]) #set the index, as previous DF did not have have an index
         monthly_data[months].index = pd.to_datetime(monthly_data[months].index, unit='s') # some magic to make it not error out - 
+        try: 
+            monthly_data[months].drop(columns=['index'], inplace = True) #clean up the dataframe
+        except KeyError: 
+            pass
         dailyAverage.append(monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
         #     returns the mean of the hours over the month 
             # https://stackoverflow.com/a/30580906/13181119
@@ -114,6 +118,10 @@ def WeeklyAverage(monthly_data):
             #what the go is. This is the SO reference #https://stackoverflow.com/a/39223389/13181119
 
         median = sorted.groupby(['DAY', 'TIME']).median() #find the median grouping by DAY and TIME
+        try: 
+            median.drop(columns=['index'], inplace = True) #clean up the dataframe
+        except KeyError: 
+            pass
         WeeklyAverage.append(median) #append to a list of dataframes, and return this to the main function
     
     return WeeklyAverage
@@ -142,7 +150,16 @@ def Data_Consistency_Checker(Dataframe_to_check):
     
     return Dataframe_to_check
 
-   
+
+def CopyCat(dataframe_to_copy):
+    """ Function to return a copy of a dataframe passed in """
+    list_of_copied_dataframes = []
+    for x in  range(0, len(dataframe_to_copy)):
+        copied_dataframe = dataframe_to_copy[x].copy()
+        list_of_copied_dataframes.append(copied_dataframe)
+    
+    return list_of_copied_dataframes
+
 def ProgressBar(): 
     """Simple progress bar """
     ### PLACEHOLDER FOR UPDATE BAR ###
@@ -193,19 +210,26 @@ def main():
     ## STEP 1A: join the solar data to the dataframe (if necessary)
     if Solar_Exists: #combine Solar data to back of the interval load data if it exists
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
 
-    ## STEP 2: Check for consistency, and interpolate if requried
-    Checked_Interval_Data = Data_Consistency_Checker(Full_Interval_Data)
-
-    ## STEP 3: Calculate Weekly averages
-    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data)
-
-    ## STEP 4: Calculate Daily Averages
-    Daily_Interval_Data = DailyAverage(Checked_Interval_Data)
-        
     
+    ## STEP 2: Check for consistency, and interpolate if requried
+    Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
+        
+    ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
+    Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
+    
+    ## STEP 4: Calculate Weekly averages
+    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
+        
+    ## STEP 5: Calculate Daily Averages
+    print('\n\nNow passing checked 1 to the daily function')
+    print(Checked_Interval_Data_1[0].head(1))
+    Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
+        
+    GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
 
     
 
