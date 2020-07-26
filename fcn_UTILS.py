@@ -44,20 +44,31 @@ def xlsxReader(xls_file_path):
     
     return months
 
+def Extension_Checker(file_name_to_check):
+    """ used to check if the extension is a xls(x) or a csv, or returns an error if not"""
+    if file_name_to_check.endswith('.xls') or file_name_to_check.endswith('.xlsx'): #open via xls reader
+        try: 
+            read_file = xlsxReader(file_name_to_check)
+        except AttributeError: 
+            pass
+    elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
+        print('PLEASE ENSURE FILE IS A \'XLSX\' ONLY') #make this a bit better later
+    else: 
+        print('ERROR') #make this a bit better later
+    
+    return read_file
+
 def intervalResampler(input_df, chosen_interval = 30):
     """
-    function to change and interpolate to a given interval 
+    function to change and interpolate dataframe to a given interval 
     """
-    resampledDF = []
+    
     Index_Name = 'Interval End'
-    NumberofDataFrames = len(input_df)
-    for x in  range(0, NumberofDataFrames):
-        resampling_df = input_df[x] #each month
-        resampling_df.set_index(Index_Name, inplace = True) #set the datetime index 
-        resampling_df.resample('30T').interpolate(method = 'polynomial', order = 2, inplace = True) #interpolate the hourly interval data to 30 mins via linear interpolation   
-        resampling_df.reset_index(inplace = True)
-        resampledDF.append(resampling_df)
-
+    # resampling_df = input_df #each month
+    input_df.set_index(Index_Name, inplace = True) #set the datetime index 
+    resampledDF = input_df.resample('30T').interpolate(method = 'polynomial', order = 2) #interpolate the hourly interval data to 30 mins via linear interpolation   , inplace = True
+    resampledDF.reset_index(inplace = True)
+    
     return resampledDF
 
-    
+

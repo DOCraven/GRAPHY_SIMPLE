@@ -50,12 +50,11 @@ import os
 import matplotlib.pyplot as plt
 import datetime as dt
 from calendar import day_name
-# import PySimpleGUIWeb as sg
-
 import PySimpleGUI as sg
+
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler
+from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 
 ### FUNCTIONS ###
@@ -133,44 +132,69 @@ def MonthToDaySum(df):
             
     return sampled
 
+def Data_Consistency_Checker(Dataframe_to_check):
+    """Used to check if the dataframe is fully populated, and returns a interpolated dataframe is necessary"""
+    
+    ### STEP 1: Ensure all data is consistent (ie, exists)
+    ############ CHECK THAT I DO NOT NEED TO RETURN ANYTHING, AND IT CHANGES THE DATAFRAME IN PLACE ############
+    for x in  range(0, len(Dataframe_to_check)):
+        if Dataframe_to_check[x].isnull().any().any(): #returns TRUE if NaN exists in teh dataframe
+            Dataframe_to_check[x] = intervalResampler(Dataframe_to_check[x])
+    
+    return Dataframe_to_check
+
+def Data_Analyser(Interval_Data, Solar_Data = None): #assuming solar data is not added, using 'NONE' is bad juju, but fix it later
+    """ 
+    Holding Function to do all the data analysis functions 
+    """
+    ### STEP 1: Check for NaN in dataframe, and interpolate if necessary
+    
+    Checked_Interval_Data = Data_Consistency_Checker(Interval_Data)
+    print('Testing')
+    Checked_Interval_Data[0].to_csv('Should be interpolated.csv')
+    Checked_Interval_Data[1].to_csv('NOT be interpolated.csv')
+    ### STEP 2: concat solar data (if required)
+    if Solar_Data: 
+        Checked_Solar_Data = Data_Consistency_Checker(Solar_Data)
+        Full_Interval_Data = dataJoiner(Interval_Data, Checked_Solar_Data)
+
+    return #nothing
+
+
+
 def main():
     """ Main fcn"""
-    plt.close('all')
+    plt.close('all') #ensure all windows are closed
     
-    ## VARS ##
-    cwd = os.getcwd()
-    Input_Folder = cwd + '\\INPUT DATA\\'
-    if not os.path.exists(cwd + '\\OUTPUT DATA\\'):
-        os.mkdir(cwd + '\\OUTPUT DATA\\')
-    startMSG = ('\nNE WATER DATA ANALYSIS TOOL\n\nThis code takes about a minute to run\nPlease be patient\n\n\n')
-    print(startMSG)
-    
-   
-      
-    GENERATION_HOURS = CONSUMPTION_PROFILES = False #to choose things
-    layout = [  [sg.Text('', size = (20, None)), sg.Text('NE WATER LANDING PAGE ', size = (40, None))], 
-            [sg.Button('GENERATION HOURS'), sg.Button('AVERAGE CONSUMPTION PROFILES'), sg.Button('Exit')]] #Landing page, not made a function so I dont have to pass bulk values to it. Will fix shortly
+    ## Create the MAIN GUI LANDING PAGE ##
+    sg.theme('Light Blue 2')
 
-    window = sg.Window('NE WATER LANDING PAGE', layout) #determine the window layout
-    
-    while True: #persistent window
-        event, values = window.read() #read the GUI events
+    layout = [[sg.Text('NEW Landing Page')],
+            [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
+            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Submit(), sg.Cancel()]]
 
-        if event == 'GENERATION HOURS': #choose to plot hours between user defined points
-            GENERATION_HOURS = True
-        elif event == 'AVERAGE CONSUMPTION PROFILES': #choose to make 
-            CONSUMPTION_PROFILES = True
-        elif event == 'Exit': 
-            window.close() #close the window
-            break #break the persistent loop
-        ## CHOOSING WHAT TO PLOT ##
-        if GENERATION_HOURS: 
-            GUI_Solar(DAILY_EXTERNAL_MEAN_2018, DAILY_EXTERNAL_MEAN_2019, DAILY_EXTERNAL_MEAN_2020) #, DAILY_EXTERNAL_MEAN_2019, DAILY_EXTERNAL_MEAN_2020
-            GENERATION_HOURS = False
-        elif CONSUMPTION_PROFILES: 
-            GRAPH_GUI(DAILY_EXTERNAL_MEAN_2018, DAILY_EXTERNAL_MEAN_2019, DAILY_EXTERNAL_MEAN_2020, WEEKLY_EXTERNAL_MEDIAN_2018, WEEKLY_EXTERNAL_MEDIAN_2019, WEEKLY_EXTERNAL_MEDIAN_2020, DAILY_WWTP_MEAN_2019, DAILY_WWTP_MEAN_2020, WEEKLY_WWTP_MEDIAN_2019, WEEKLY_WWTP_MEDIAN_2020) #need to clean up everything I'm passing to this function
-            CONSUMPTION_PROFILES = False
-    
+    window = sg.Window('NEW Graphy (Simple)', layout)
+
+    event, values = window.read()
+    # window.close() #dont close teh window
+    print(f'You clicked {event}')
+    print(f'You chose filenames {values[0]} and {values[1]}')
+
+    ## STEP 1: read files, check extensions are valid, and import as dataframes
+    try: #read the inverval data
+        Interval_Data = Extension_Checker(values[0])
+    except UnboundLocalError: 
+        pass
+    try: #read the solar data
+        if values[1]: #only read if solar data is input
+            Solar_Data = Extension_Checker(values[1])
+    except UnboundLocalError: 
+        pass
+
+    Data_Analyser(Interval_Data = Interval_Data)
+
 
     return #nothing main
 
