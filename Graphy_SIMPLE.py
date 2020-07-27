@@ -44,13 +44,23 @@
 
 import pandas as pd
 import datetime as dt
-import cufflinks as cf
+# import cufflinks as cf
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import datetime as dt
 from calendar import day_name
 import PySimpleGUI as sg
+
+
+## DASH ##
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.express as px
+
+
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
@@ -65,17 +75,35 @@ def DailyAverage(monthly_data):
     """
     dailyAverage = [] # Average Day from the input
     columnName = 'Interval End' #name of column that contains Parsed DateTimeObject
+    
     NumberofDataFrames = len(monthly_data)
     for months in  range(0, NumberofDataFrames): # sets each DF to have the correct index ## HERE BE PROBLEMS ##
+        #recreate the vars
+        Index_30mins = pd.date_range("00:00", "23:30", freq="30min").time #create timeserires with 30 minute intervals. Goes from 00:00 to 23:30 (ie, 48 entries)
+        Time_DF = pd.DataFrame({'Interval End' : Index_30mins}) #convert the above timeseries (Time_DF) into a dataframe 
+
+        #do some averaging 
         monthly_data[months] = monthly_data[months].set_index([columnName]) #set the index, as previous DF did not have have an index
         monthly_data[months].index = pd.to_datetime(monthly_data[months].index, unit='s') # some magic to make it not error out - 
         try: 
             monthly_data[months].drop(columns=['index'], inplace = True) #clean up the dataframe
         except KeyError: 
             pass
-        dailyAverage.append(monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
+        averaged_bad_index =  (monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
         #     returns the mean of the hours over the month 
             # https://stackoverflow.com/a/30580906/13181119
+        ### FIXING THE INDEX for later plotting ### - not the best but #yolo 
+        try: #code errors out for some reason without this. Even though this will fail, it needs to "force" the dataframe to do something. It just works now
+            averaged_bad_index.reset_index(inplace = True) #removes the index, reverts it to a 0 1 2 3 etc
+        except ValueError: 
+            pass
+
+        averaged_bad_index.set_index('Interval End', inplace = True) #set the index to interval end (gets rid of the double up )
+        averaged_bad_index.reset_index(inplace = True) #removes the index, reverts it to a 0 1 2 3 etc
+        averaged_bad_index.drop(columns=['Interval End'], inplace = True) #drops the final 'Interval End' column 
+        
+        dailyAverage.append(Time_DF.join(averaged_bad_index)) #append the joined dataframe to the list of dataframes to return to main
+        dailyAverage[months].set_index('Interval End', inplace = True) #create the interval end as the index
     
     return dailyAverage
 
@@ -194,11 +222,43 @@ def main():
     Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
         
     ## STEP 5: Calculate Daily Averages
-    print('\n\nNow passing checked 1 to the daily function')
-    print(Checked_Interval_Data_1[0].head(1))
+  
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
-        
-    GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
+
+    ########################## DASHLY TEST #########################
+    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+    # assume you have a "long-form" data frame
+    # see https://plotly.com/python/px-arguments/ for more options
+    
+    names = Daily_Interval_Data[1].keys() #get column names 
+    
+    fig = px.line(Daily_Interval_Data[1],  x=Daily_Interval_Data[1].index.get_level_values(0), y= names,   title='Consumption1') #plot all the things
+    Daily_Interval_Data[1].to_csv('plotting.csv')
+    fig.show()
+
+    # app.layout = html.Div(children=[
+    #     html.H1(children='Test'),
+
+    #     html.Div(children='''
+    #         Dash: A web application framework for Python.
+    #     '''),
+
+    #     dcc.Graph(
+    #         id='example-graph',
+    #         figure=fig
+    #     )
+    # ])
+
+    # if __name__ == '__main__':
+    #     app.run_server(debug=False)
+
+    ########################## DASHLY TEST #########################
+
+    print('Hold')
+    # GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
 
     
 
