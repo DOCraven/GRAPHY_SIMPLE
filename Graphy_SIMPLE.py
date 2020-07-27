@@ -218,6 +218,8 @@ def main():
     ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
+    Test_DF = CopyCat(Checked_Interval_Data_0)
+
     ## STEP 4: Calculate Weekly averages
     Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
         
@@ -233,27 +235,13 @@ def main():
     # assume you have a "long-form" data frame
     # see https://plotly.com/python/px-arguments/ for more options
     
-    names = Daily_Interval_Data[1].keys() #get column names 
+    names = Weekly_Interval_Data[1].keys() #get column names 
     
-    fig = px.line(Daily_Interval_Data[1],  x=Daily_Interval_Data[1].index.get_level_values(0), y= names,   title='Consumption1') #plot all the things
-    Daily_Interval_Data[1].to_csv('plotting.csv')
+    fig = px.line(Weekly_Interval_Data[1],  x=Weekly_Interval_Data[1], y= names,   title='Consumption1') #plot all the things 
+    
     fig.show()
 
-    # app.layout = html.Div(children=[
-    #     html.H1(children='Test'),
 
-    #     html.Div(children='''
-    #         Dash: A web application framework for Python.
-    #     '''),
-
-    #     dcc.Graph(
-    #         id='example-graph',
-    #         figure=fig
-    #     )
-    # ])
-
-    # if __name__ == '__main__':
-    #     app.run_server(debug=False)
 
     ########################## DASHLY TEST #########################
 
