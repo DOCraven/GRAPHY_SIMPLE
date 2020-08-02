@@ -35,6 +35,8 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
     # weekly_total_consumption_figure = [] #empty list to populate with weekly consumption data
     # daily_total_consumption_figure = [] #empty list to populate with daily consumption data
 
+    spreadsheet_under_consideration = 'THIS IS A PLACEHOLDER.xlsx'
+
     Months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December') #list of the months to access things later
 
     #### STEP 1: Set up the figures #### 
@@ -77,6 +79,9 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
             html.Hr(),
             html.P(
                 "An online webapp to visualize historical load data", className="lead"
+            ),
+            html.P(
+                "File under Consideration: " + spreadsheet_under_consideration, className="filenm"
             ),
             dbc.Nav(
                 [
