@@ -76,6 +76,11 @@ def main():
     
     ### VARS ###
     Solar_Exists = False
+    weekly_dash_figure = [] #empty list to populate weekly figures to pass to dash
+    daily_dash_figure = [] #empty list to populate weekly figures to pass to dash
+    monthly_total_consumption_figure = [] #empty list to populate with monthly consumption data
+    weekly_total_consumption_figure = [] #empty list to populate with weekly consumption data
+    daily_total_consumption_figure = [] #empty list to populate with daily consumption data
     
     plt.close('all') #ensure all windows are closed
     
@@ -138,18 +143,19 @@ def main():
 
     ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
 
-    ########### COUPLE OF DASH TEST FILES #############
-    jan_Weekly = Weekly_Interval_Data[0]
-    jan_Daily = Daily_Interval_Data[0]
+    #### STEP 1: Set up the figures ####
+    for i in range(0, len(Weekly_Interval_Data)): #iterate through each month for weekly data
+        weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', asFigure = True) ) #create a list of figures
 
-    jan_weekly_fig = jan_Weekly.iplot(kind = 'line', asFigure = True)
-    jan_daily_fig = jan_Daily.iplot(kind = 'line', asFigure = True)
+    for i in range(0, len(Daily_Interval_Data)): #iterate through each month for daily data
+        daily_dash_figure.append(Daily_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', asFigure = True)) #create a list of figures) 
+    
+    for i in range(0, len(Monthly_sum)): #iterate through each month for daily data
+        monthly_total_consumption_figure.append(Weekly_Interval_Data[i].iplot(kind = 'bar', xTitle='NEW Site', yTitle='Total kWh Consumption', asFigure = True) ) #create a list of figures
 
-    feb_Weekly = Weekly_Interval_Data[1]
-    feb_Daily = Daily_Interval_Data[1]
+    
+    
 
-    feb_weekly_fig = feb_Weekly.iplot(kind = 'line', asFigure = True)
-    feb_daily_fig = feb_Daily.iplot(kind = 'line', asFigure = True)
     
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -182,103 +188,115 @@ def main():
         if tab == 'tab-1':
             return html.Div([
                 html.H3('Weekly'),
-                dcc.Graph(id='JAN WEEKLY',figure=jan_weekly_fig),
+                dcc.Graph(id='January Weekly Consumption',figure=weekly_dash_figure[0]),
 
                 html.H3('Daily'),
-                dcc.Graph(id='JAN DAILY',figure=jan_daily_fig),
+                dcc.Graph(id='January Daily Consumption',figure=daily_dash_figure[0]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-2':
             return html.Div([
-                dcc.Graph(id='FEB WEEKLY',figure=feb_weekly_fig),
+                html.H3('Weekly'),
+                dcc.Graph(id='February Weekly Consumption',figure=weekly_dash_figure[1]),
 
                 html.H3('Daily'),
-                dcc.Graph(id='FEB DAILY',figure=feb_daily_fig),
+                dcc.Graph(id='February Daily Consumption',figure=daily_dash_figure[1]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-3':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='March Weekly Consumption',figure=weekly_dash_figure[2]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='March Daily Consumption',figure=daily_dash_figure[2]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-4':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='April Weekly Consumption',figure=weekly_dash_figure[3]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='April Daily Consumption',figure=daily_dash_figure[3]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-5':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='May Weekly Consumption',figure=weekly_dash_figure[4]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='May Daily Consumption',figure=daily_dash_figure[4]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-6':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='June Weekly Consumption',figure=weekly_dash_figure[5]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='June Daily Consumption',figure=daily_dash_figure[5]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-7':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='July Weekly Consumption',figure=weekly_dash_figure[6]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='July Daily Consumption',figure=daily_dash_figure[6]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-8':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='August Weekly Consumption',figure=weekly_dash_figure[7]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='August Daily Consumption',figure=daily_dash_figure[7]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-9':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='September Weekly Consumption',figure=weekly_dash_figure[8]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='September Daily Consumption',figure=daily_dash_figure[8]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-10':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='October Weekly Consumption',figure=weekly_dash_figure[9]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='October Daily Consumption',figure=daily_dash_figure[9]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-11':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='November Weekly Consumption',figure=weekly_dash_figure[10]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='November Daily Consumption',figure=daily_dash_figure[10]),
                 html.H3('Total Summation')
             ])
         elif tab == 'tab-12':
             return html.Div([
                 html.H3('Weekly'),
+                dcc.Graph(id='December Weekly Consumption',figure=weekly_dash_figure[11]),
 
                 html.H3('Daily'),
-
+                dcc.Graph(id='December Daily Consumption',figure=daily_dash_figure[11]),
                 html.H3('Total Summation')
             ])
 
 
-    if __name__ == '__main__':
+    if __name__ == '__main__': ## actually run the dash app
+        print('Starting Dash Server')
         app.run_server(debug=True)
 
     ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
