@@ -56,9 +56,11 @@ import PySimpleGUI as sg
 ## DASH ##
 
 import dash
-import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
+import dash_core_components as dcc
+
+from dash.dependencies import Input, Output
+
 
 
 
@@ -66,121 +68,8 @@ import plotly.express as px
 from fcn_GUI import GRAPH_GUI, GUI_Solar
 from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
+from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 
-### FUNCTIONS ###
-def DailyAverage(monthly_data):
-    """
-    Takes a dataframe of monthly data, and returns an average (mean) day for that month.
-    30 days in, 1 day out  
-    """
-    dailyAverage = [] # Average Day from the input
-    columnName = 'Interval End' #name of column that contains Parsed DateTimeObject
-    
-    NumberofDataFrames = len(monthly_data)
-    for months in  range(0, NumberofDataFrames): # sets each DF to have the correct index ## HERE BE PROBLEMS ##
-        #recreate the vars
-        Index_30mins = pd.date_range("00:00", "23:30", freq="30min").time #create timeserires with 30 minute intervals. Goes from 00:00 to 23:30 (ie, 48 entries)
-        Time_DF = pd.DataFrame({'Interval End' : Index_30mins}) #convert the above timeseries (Time_DF) into a dataframe 
-
-        #do some averaging 
-        monthly_data[months] = monthly_data[months].set_index([columnName]) #set the index, as previous DF did not have have an index
-        monthly_data[months].index = pd.to_datetime(monthly_data[months].index, unit='s') # some magic to make it not error out - 
-        try: 
-            monthly_data[months].drop(columns=['index'], inplace = True) #clean up the dataframe
-        except KeyError: 
-            pass
-        averaged_bad_index =  (monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
-        #     returns the mean of the hours over the month 
-            # https://stackoverflow.com/a/30580906/13181119
-        ### FIXING THE INDEX for later plotting ### - not the best but #yolo 
-        try: #code errors out for some reason without this. Even though this will fail, it needs to "force" the dataframe to do something. It just works now
-            averaged_bad_index.reset_index(inplace = True) #removes the index, reverts it to a 0 1 2 3 etc
-        except ValueError: 
-            pass
-
-        averaged_bad_index.set_index('Interval End', inplace = True) #set the index to interval end (gets rid of the double up )
-        averaged_bad_index.reset_index(inplace = True) #removes the index, reverts it to a 0 1 2 3 etc
-        averaged_bad_index.drop(columns=['Interval End'], inplace = True) #drops the final 'Interval End' column 
-        
-        dailyAverage.append(Time_DF.join(averaged_bad_index)) #append the joined dataframe to the list of dataframes to return to main
-        dailyAverage[months].set_index('Interval End', inplace = True) #create the interval end as the index
-    
-    return dailyAverage
-
-def WeeklyAverage(monthly_data):
-    """
-    Takes a list of dataframes (12x) and returns the average for each week
-    30 days in, 7 day out
-    as a list of dataframes  
-    """
-    ## VARS
-    fullDateColumnName = 'Interval End' #name of column that contains Parsed DateTimeObject
-    WeeklyAverage = []
-    day_index = [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] #needed for sorting the dataframe into specific days
-    
-    # Convert monthly datatime into NAME OF DAY and TIME 
-    NumberofDataFrames = len(monthly_data)
-    
-    for months in  range(0, NumberofDataFrames): # iterate through the list of dataframes
-        monthly_data[months].reset_index(inplace = True) #remove index to stop it from erroring out with INDEX_ERROR
-        monthly_data[months]['TIME'] = monthly_data[months][fullDateColumnName].dt.time #splits time, throws it at the end  
-            
-        time_temp =  monthly_data[months]['TIME'] #creates new dataframe called TIME for each iteration through the for loop
-
-        monthly_data[months].drop(labels=['TIME'], axis=1,inplace = True) #drops the DATE and TIME from the end of the dataframe
-        monthly_data[months].insert(0, 'TIME', time_temp) #inserts TIME at the beginning of the dataframe
-            # https://stackoverflow.com/a/25122293/13181119
-        
-        monthly_data[months]['DAY'] = monthly_data[months][fullDateColumnName].dt.day_name() # get the DAY NAME from datetime object (ie, MONDAY, TUESDAY etc)
-            # https://stackoverflow.com/a/30222759/13181119
-
-        dayofweek_temp = monthly_data[months]['DAY'] #new dataframe of day names, to replace DATE with
-        
-        monthly_data[months].drop(labels=['DAY', fullDateColumnName], axis=1,inplace = True) #drops the DAY column from the end of the dataframe
-        monthly_data[months].insert(0, 'DAY', dayofweek_temp) #inserts DAY_OF_WEEK at the beginning of the dataframe
-        
-    ## DO SOME FANCY MATHS HERE ##
-    for months in  range(0, NumberofDataFrames): #iterate through each month
-        sorted = monthly_data[months] #temp dataframe to make sorting it easier 
-        sorted['DAY'] = pd.Categorical(sorted['DAY'], categories = day_index, ordered = True) #look, some magic happens here, not entirely sure 
-            #what the go is. This is the SO reference #https://stackoverflow.com/a/39223389/13181119
-
-        median = sorted.groupby(['DAY', 'TIME']).median() #find the median grouping by DAY and TIME
-        try: 
-            median.drop(columns=['index'], inplace = True) #clean up the dataframe
-        except KeyError: 
-            pass
-        WeeklyAverage.append(median) #append to a list of dataframes, and return this to the main function
-    
-    return WeeklyAverage
-
-def MonthToDaySum(df):
-    """
-    Sums up the entire DF for the month, returns a total energy consumption for each day of the month, as a % of the highest load in each site
-    """
-    sampled = [] #empty array
-    NumberofDataFrames = len(df)
-    
-    for months in  range(0, NumberofDataFrames): # iterate through the list of dataframes
-        SUMMED = df[months].resample("1D").sum() #sum each days demand 
-        SUMMED = df[months].apply(lambda x: x.div(x.max())) #magic lambda function from Sean, divdes X by the max of X, making it into percentages
-        sampled.append(SUMMED) #append to all 
-            
-    return sampled
-
-def ConsumptionSummer(df_to_sum): 
-    """ Function to sum the entire year, month, week and daily average data and return those numbers"""
-    
-    summed_consumption_data = []
-    ### STEP 1: Sum data frame down the columns 
-    for i in range(0, len(df_to_sum)): #iterate through each month (as given a list of dataframes)
-        summed_consumption_data.append(df_to_sum[i].sum())
-
-    return summed_consumption_data
-
-def 
-    
-    return #nothing 
 
 def main():
     """ Main fcn"""
@@ -247,17 +136,154 @@ def main():
     
     daily_sum = ConsumptionSummer(Daily_Interval_Data) #total average day in a month (x12 months)
 
-    ########## DASH TESTING HERE ############
+    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
+
+    ########### COUPLE OF DASH TEST FILES #############
+    jan_Weekly = Weekly_Interval_Data[0]
+    jan_Daily = Daily_Interval_Data[0]
+
+    jan_weekly_fig = jan_Weekly.iplot(kind = 'line', asFigure = True)
+    jan_daily_fig = jan_Daily.iplot(kind = 'line', asFigure = True)
+
+    feb_Weekly = Weekly_Interval_Data[1]
+    feb_Daily = Daily_Interval_Data[1]
+
+    feb_weekly_fig = feb_Weekly.iplot(kind = 'line', asFigure = True)
+    feb_daily_fig = feb_Daily.iplot(kind = 'line', asFigure = True)
     
+    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+    app.layout = html.Div([
+        ### SET THE TABS UP ###
+        dcc.Tabs(id='tabs-example', value='tab-1', children=[
+            dcc.Tab(label='January', value='tab-1'),
+            dcc.Tab(label='February', value='tab-2'),
+            dcc.Tab(label='March', value='tab-3'),
+            dcc.Tab(label='April', value='tab-4'),
+            dcc.Tab(label='May', value='tab-5'),
+            dcc.Tab(label='June', value='tab-6'),
+            dcc.Tab(label='July', value='tab-7'),
+            dcc.Tab(label='August', value='tab-8'),
+            dcc.Tab(label='September', value='tab-9'),
+            dcc.Tab(label='October', value='tab-10'),
+            dcc.Tab(label='November', value='tab-11'),
+            dcc.Tab(label='December', value='tab-12'),
+        ]),
+        html.Div(id='tabs-example-content')
+    ])
+
+    @app.callback(Output('tabs-example-content', 'children'),
+                [Input('tabs-example', 'value')])
+
+    ### DO STUFF WITH THE TABS ###
+    def render_content(tab):
+        if tab == 'tab-1':
+            return html.Div([
+                html.H3('Weekly'),
+                dcc.Graph(id='JAN WEEKLY',figure=jan_weekly_fig),
+
+                html.H3('Daily'),
+                dcc.Graph(id='JAN DAILY',figure=jan_daily_fig),
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-2':
+            return html.Div([
+                dcc.Graph(id='FEB WEEKLY',figure=feb_weekly_fig),
+
+                html.H3('Daily'),
+                dcc.Graph(id='FEB DAILY',figure=feb_daily_fig),
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-3':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-4':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-5':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-6':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-7':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-8':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-9':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-10':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-11':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
+        elif tab == 'tab-12':
+            return html.Div([
+                html.H3('Weekly'),
+
+                html.H3('Daily'),
+
+                html.H3('Total Summation')
+            ])
 
 
-    print('Holding')
+    if __name__ == '__main__':
+        app.run_server(debug=True)
 
-    ### PLOT THE DATA HERE
+    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
 
-
-
-    GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
+    # GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
 
 
    
