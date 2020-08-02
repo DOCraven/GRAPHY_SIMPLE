@@ -168,6 +168,20 @@ def MonthToDaySum(df):
             
     return sampled
 
+def ConsumptionSummer(df_to_sum): 
+    """ Function to sum the entire year, month, week and daily average data and return those numbers"""
+    
+    summed_consumption_data = []
+    ### STEP 1: Sum data frame down the columns 
+    for i in range(0, len(df_to_sum)): #iterate through each month (as given a list of dataframes)
+        summed_consumption_data.append(df_to_sum[i].sum())
+
+    return summed_consumption_data
+
+def 
+    
+    return #nothing 
+
 def main():
     """ Main fcn"""
     
@@ -218,8 +232,6 @@ def main():
     ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
-    Test_DF = CopyCat(Checked_Interval_Data_0)
-
     ## STEP 4: Calculate Weekly averages
     Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
         
@@ -227,45 +239,28 @@ def main():
   
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
-    ########################## DASHLY TEST #########################
-    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+    ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
 
-    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-    # assume you have a "long-form" data frame
-    # see https://plotly.com/python/px-arguments/ for more options
+    Monthly_sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
+   
+    weekly_sum = ConsumptionSummer(Weekly_Interval_Data) #total average week in a month (x12 months)
     
-    names = Weekly_Interval_Data[1].keys() #get column names 
-    
-    fig = px.line(Weekly_Interval_Data[1],  x=Weekly_Interval_Data[1], y= names,   title='Consumption1') #plot all the things 
-    
-    fig.show()
+    daily_sum = ConsumptionSummer(Daily_Interval_Data) #total average day in a month (x12 months)
 
-
-
-    ########################## DASHLY TEST #########################
-
-    print('Hold')
-    # GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
-
+    ########## DASH TESTING HERE ############
     
 
-    
-    ## STEP 3: PLOT IT NICELY 
-    # Plotting_GUI()
 
-    # layout = [[sg.Text('My one-shot window.')],      
-    #              [sg.InputText()],      
-    #              [sg.Submit(), sg.Cancel()]]      
+    print('Holding')
 
-    # window = sg.Window('Window Title', layout)    
+    ### PLOT THE DATA HERE
 
-    # event, values = window.read()    
-    # window.close()
 
-    # text_input = values[0]    
-    # sg.popup('You entered', text_input)
 
+    GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
+
+
+   
     return #nothing main
 
 
