@@ -56,9 +56,9 @@ import PySimpleGUI as sg
 ## DASH ##
 
 import dash
-import dash_html_components as html
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-
+import dash_html_components as html
 from dash.dependencies import Input, Output
 
 
@@ -145,161 +145,209 @@ def main():
 
     #### STEP 1: Set up the figures ####
     for i in range(0, len(Weekly_Interval_Data)): #iterate through each month for weekly data
-        weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', asFigure = True) ) #create a list of figures
+        weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Weekly Consumption', asFigure = True) ) #create a list of figures
 
     for i in range(0, len(Daily_Interval_Data)): #iterate through each month for daily data
-        daily_dash_figure.append(Daily_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', asFigure = True)) #create a list of figures) 
+        daily_dash_figure.append(Daily_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Daily Consumption',  asFigure = True)) #create a list of figures) 
     
     for i in range(0, len(Monthly_sum)): #iterate through each month for daily data
         monthly_total_consumption_figure.append(Weekly_Interval_Data[i].iplot(kind = 'bar', xTitle='NEW Site', yTitle='Total kWh Consumption', asFigure = True) ) #create a list of figures
 
-    
-    
+    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
 
-    
-    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+    app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+    # the style arguments for the sidebar. We use position:fixed and a fixed width
+    SIDEBAR_STYLE = {
+        "position": "fixed",
+        "top": 0,
+        "left": 0,
+        "bottom": 0,
+        "width": "16rem",
+        "padding": "2rem 1rem",
+        "background-color": "#f8f9fa",
+    }
 
-    app.layout = html.Div([
-        ### SET THE TABS UP ###
-        dcc.Tabs(id='tabs-example', value='tab-1', children=[
-            dcc.Tab(label='January', value='tab-1'),
-            dcc.Tab(label='February', value='tab-2'),
-            dcc.Tab(label='March', value='tab-3'),
-            dcc.Tab(label='April', value='tab-4'),
-            dcc.Tab(label='May', value='tab-5'),
-            dcc.Tab(label='June', value='tab-6'),
-            dcc.Tab(label='July', value='tab-7'),
-            dcc.Tab(label='August', value='tab-8'),
-            dcc.Tab(label='September', value='tab-9'),
-            dcc.Tab(label='October', value='tab-10'),
-            dcc.Tab(label='November', value='tab-11'),
-            dcc.Tab(label='December', value='tab-12'),
-        ]),
-        html.Div(id='tabs-example-content')
-    ])
+    # the styles for the main content position it to the right of the sidebar and
+    # add some padding.
+    CONTENT_STYLE = {
+        "margin-left": "18rem",
+        "margin-right": "2rem",
+        "padding": "2rem 1rem",
+    }
 
-    @app.callback(Output('tabs-example-content', 'children'),
-                [Input('tabs-example', 'value')])
+    sidebar = html.Div(
+        [
+            html.H2("NEW Graphy", className="display-4"),
+            html.Hr(),
+            html.P(
+                "An online webapp to visualize historical load data", className="lead"
+            ),
+            dbc.Nav(
+                [
+                    dbc.NavLink("January", href="/page-1", id="page-1-link"),
+                    dbc.NavLink("February", href="/page-2", id="page-2-link"),
+                    dbc.NavLink("March", href="/page-3", id="page-3-link"),
+                    dbc.NavLink("April", href="/page-4", id="page-4-link"),
+                    dbc.NavLink("May", href="/page-5", id="page-5-link"),
+                    dbc.NavLink("June", href="/page-6", id="page-6-link"),
+                    dbc.NavLink("July", href="/page-7", id="page-7-link"),
+                    dbc.NavLink("August", href="/page-8", id="page-8-link"),
+                    dbc.NavLink("September", href="/page-9", id="page-9-link"),
+                    dbc.NavLink("October", href="/page-10", id="page-10-link"),
+                    dbc.NavLink("November", href="/page-11", id="page-11-link"),
+                    dbc.NavLink("December", href="/page-12", id="page-12-link"),
+                    dbc.NavLink("About", href="/page-13", id="page-13-link"),
+                ],
+                vertical=True,
+                pills=True,
+            ),
+        ],
+        style=SIDEBAR_STYLE,
+    )
 
-    ### DO STUFF WITH THE TABS ###
-    def render_content(tab):
-        if tab == 'tab-1':
+    content = html.Div(id="page-content", style=CONTENT_STYLE)
+
+    app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+
+    # this callback uses the current pathname to set the active state of the
+    # corresponding nav link to true, allowing users to tell see page they are on
+    @app.callback(
+        [Output(f"page-{i}-link", "active") for i in range(1, 14)],
+        [Input("url", "pathname")],
+    )
+    def toggle_active_links(pathname):
+        if pathname == "/":
+            # Treat page 1 as the homepage / index
+            return True, False, False
+        return [pathname == f"/page-{i}" for i in range(1, 14)]
+
+
+    @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+    def render_page_content(pathname):
+        if pathname in ["/", "/page-1"]:
             return html.Div([
-                html.H3('Weekly'),
+                
                 dcc.Graph(id='January Weekly Consumption',figure=weekly_dash_figure[0]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='January Daily Consumption',figure=daily_dash_figure[0]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-2':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-2":
+             return html.Div([
+                
                 dcc.Graph(id='February Weekly Consumption',figure=weekly_dash_figure[1]),
-
-                html.H3('Daily'),
+                
                 dcc.Graph(id='February Daily Consumption',figure=daily_dash_figure[1]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-3':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-3":
+             return html.Div([
+                
                 dcc.Graph(id='March Weekly Consumption',figure=weekly_dash_figure[2]),
-
-                html.H3('Daily'),
+                
                 dcc.Graph(id='March Daily Consumption',figure=daily_dash_figure[2]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-4':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-4":
+             return html.Div([
+                
                 dcc.Graph(id='April Weekly Consumption',figure=weekly_dash_figure[3]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='April Daily Consumption',figure=daily_dash_figure[3]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-5':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-5":
+             return html.Div([
+                
                 dcc.Graph(id='May Weekly Consumption',figure=weekly_dash_figure[4]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='May Daily Consumption',figure=daily_dash_figure[4]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-6':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-6":
+             return html.Div([
+                
                 dcc.Graph(id='June Weekly Consumption',figure=weekly_dash_figure[5]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='June Daily Consumption',figure=daily_dash_figure[5]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-7':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-7":
+             return html.Div([
+                
                 dcc.Graph(id='July Weekly Consumption',figure=weekly_dash_figure[6]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='July Daily Consumption',figure=daily_dash_figure[6]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-8':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-8":
+             return html.Div([
+                
                 dcc.Graph(id='August Weekly Consumption',figure=weekly_dash_figure[7]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='August Daily Consumption',figure=daily_dash_figure[7]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-9':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-9":
+             return html.Div([
+                
                 dcc.Graph(id='September Weekly Consumption',figure=weekly_dash_figure[8]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='September Daily Consumption',figure=daily_dash_figure[8]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-10':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-10":
+             return html.Div([
+                
                 dcc.Graph(id='October Weekly Consumption',figure=weekly_dash_figure[9]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='October Daily Consumption',figure=daily_dash_figure[9]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-11':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-11":
+             return html.Div([
+                
                 dcc.Graph(id='November Weekly Consumption',figure=weekly_dash_figure[10]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='November Daily Consumption',figure=daily_dash_figure[10]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
-        elif tab == 'tab-12':
-            return html.Div([
-                html.H3('Weekly'),
+        elif pathname == "/page-12":
+             return html.Div([
+                
                 dcc.Graph(id='December Weekly Consumption',figure=weekly_dash_figure[11]),
 
-                html.H3('Daily'),
                 dcc.Graph(id='December Daily Consumption',figure=daily_dash_figure[11]),
-                html.H3('Total Summation')
+                html.H3('\nTotal Summation')
             ])
+        
+        
+        elif pathname == "/page-13":
+            return html.P("About will go here later!")
+        # If the user tries to reach a different page, return a 404 message
+        return dbc.Jumbotron(
+            [
+                html.H1("404: Not found", className="text-danger"),
+                html.Hr(),
+                html.P(f"The pathname {pathname} was not recognised..."),
+            ]
+        )
 
 
-    if __name__ == '__main__': ## actually run the dash app
+    if __name__ == "__main__":
         print('Starting Dash Server')
-        app.run_server(debug=True)
+        app.run_server(port=8888)
+        
 
-    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
+    
+    
+
+
+
+
+    
 
     # GRAPH_GUI(Weekly_Mean = Weekly_Interval_Data, Daily_Mean = Daily_Interval_Data)
 
