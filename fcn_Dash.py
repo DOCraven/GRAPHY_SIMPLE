@@ -2,12 +2,13 @@
 
 import pandas as pd
 import datetime as dt
-# import cufflinks as cf
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import datetime as dt
+import webbrowser
 from calendar import day_name
+
 
 
 
@@ -75,7 +76,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
 
     sidebar = html.Div(
         [
-            html.H2("NEW Graphy", className="display-4"),
+            html.H2("NEW Graphy", className="display-4"), 
             html.Hr(),
             html.P(
                 "An online webapp to visualize historical load data", className="lead"
@@ -126,7 +127,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
 
     @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
     def render_page_content(pathname):
-        if pathname in ["/", "/page-0"]:
+        if pathname in ["/", "/page-0"]: #JAN
             chosen_month = 0 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -138,7 +139,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-1":
+        elif pathname == "/page-1": #FEB
             chosen_month = 1 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -150,7 +151,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-2":
+        elif pathname == "/page-2": #MAR
             chosen_month = 2 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -162,7 +163,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-3":
+        elif pathname == "/page-3": #APR
             chosen_month = 3 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -174,7 +175,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-4":
+        elif pathname == "/page-4": #MAY
             chosen_month = 4 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -186,7 +187,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-5":
+        elif pathname == "/page-5": #JUN
             chosen_month = 5 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -198,7 +199,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-6":
+        elif pathname == "/page-6": #JUL
             chosen_month = 6 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -210,7 +211,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-7":
+        elif pathname == "/page-7": #AUG
             chosen_month = 7 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -222,7 +223,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-8":
+        elif pathname == "/page-8": #SEPT
             chosen_month = 8 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -234,7 +235,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-9":
+        elif pathname == "/page-9": #OCT
             chosen_month = 9 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -246,7 +247,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-10":
+        elif pathname == "/page-10": #NOV
             chosen_month = 10 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -258,7 +259,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        elif pathname == "/page-11":
+        elif pathname == "/page-11": #DEC
             chosen_month = 11 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
@@ -272,7 +273,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
             ])
         
         
-        elif pathname == "/page-12":
+        elif pathname == "/page-12": #ABOUT 
             return html.P("About will go here later!")
         # If the user tries to reach a different page, return a 404 message
         return dbc.Jumbotron(
@@ -283,9 +284,8 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
             ]
         )
 
-    
+    webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
-    app.run_server(port=8888)
-        
+    app.run_server(port=8888) #start the server. 
 
     return #nothing 
