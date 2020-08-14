@@ -51,7 +51,7 @@ def Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum):
     for i in range(0, len(Monthly_sum)): #iterate through each month for daily data
         monthly_total_consumption_figure.append(Monthly_sum[i].iplot(kind = 'bar', xTitle='NEW Site', yTitle='Total kWh Consumption', asFigure = True) ) #create a list of figures
 
-    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE #######################
+    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE ####################### #th
 
     app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
