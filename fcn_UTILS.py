@@ -19,8 +19,19 @@ def dataJoiner(Full_df, incomplete_df):
         # https://realpython.com/pandas-merge-join-and-concat/#pandas-merge-combining-data-on-common-columns-or-indices
         MergedDF.interpolate(method = 'polynomial', order = 2, inplace = True) #use linear interpolation to fill in the blank places
         try: 
-            MergedDF['Excess Solar Generation'] = MergedDF['Solar Generation (kW)'] - MergedDF['Wodonga WTP'] #calculate the total excess generation AFTER WWTP has used available generation
-            MergedDF['Excess Solar Generation'].clip(lower = 0, inplace = True) #replace all negative values with 0
+            #clean up the dataframe, removing any column that is unnamed
+            MergedDF.drop(MergedDF.columns[MergedDF.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True) 
+            #sum all rows and give a total consumption for each half hour interval (WWTP and EXTERNAL SITES)
+            MergedDF = pd.concat([MergedDF,pd.DataFrame(MergedDF.sum(axis=1),columns=['Total Consumption'])],axis=1) 
+            #remove total solar consumption from the total summed
+            MergedDF['Total Consumption'] = MergedDF['Total Consumption'] - MergedDF['Solar Generation (kW)']
+            #calculate the total excess generation AFTER WWTP has used available generation
+            MergedDF['Excess Solar Generation (WWTP)'] = MergedDF['Solar Generation (kW)'] - MergedDF['Wodonga WTP'] 
+            #calculate the total excess generation AFTER WWTP has used available generation
+            MergedDF['Excess Solar Generation (Total)'] = (MergedDF['Solar Generation (kW)'] - MergedDF['Total Consumption']) 
+            #replace all negative values with 0
+            MergedDF['Excess Solar Generation (WWTP)'].clip(lower = 0, inplace = True) 
+            MergedDF['Excess Solar Generation (Total)'].clip(lower = 0, inplace = True) 
         except KeyError: #if WWTP doesnt exist for some reason
             pass
         finalDF.append(MergedDF)

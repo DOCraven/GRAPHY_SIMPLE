@@ -87,7 +87,6 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
             ),
             dbc.Nav(
                 [
-                    dbc.NavLink("Upload Data", href="/page-13", id="page-13-link"),
                     dbc.NavLink("January", href="/page-0", id="page-0-link"),
                     dbc.NavLink("February", href="/page-1", id="page-1-link"),
                     dbc.NavLink("March", href="/page-2", id="page-2-link"),
@@ -117,58 +116,21 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     # this callback uses the current pathname to set the active state of the
     # corresponding nav link to true, allowing users to tell see page they are on
     @app.callback(
-        [Output(f"page-{i}-link", "active") for i in range(0, 14)],
+        [Output(f"page-{i}-link", "active") for i in range(0, 13)],
         [Input("url", "pathname")],
     )
     def toggle_active_links(pathname):
         if pathname == "/":
             # Treat page 1 as the homepage / index
             return True, False, False
-        return [pathname == f"/page-{i}" for i in range(0, 14)]
+        return [pathname == f"/page-{i}" for i in range(0, 13)]
 
 
     @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
     def render_page_content(pathname):
         
-        if pathname in ["/", "/page-13"]: #LOAD IN DATA 
-            # return html.P("A Page to upload interval data")
-            return html.Div([ ## UPLOAD THE DATA HERE
-                ## UPLOAD INTERVAL DATA
-                dcc.Upload([
-                    ## INTERVAL DATA
-                    'Interval Data: Drag and Drop or ',
-                    html.A('Select a File')
-                    
-                ], style={
-                    'width': '100%',
-                    'height': '60px',
-                    'lineHeight': '60px',
-                    'borderWidth': '1px',
-                    'borderStyle': 'dashed',
-                    'borderRadius': '5px',
-                    'textAlign': 'center'
-                }),
-
-                ## UPLOAD INTERVAL DATA
-                dcc.Upload([
-                    ## INTERVAL DATA
-                    'Solar Data: Drag and Drop or ',
-                    html.A('Select a File')
-                    
-                ], style={
-                    'width': '100%',
-                    'height': '60px',
-                    'lineHeight': '60px',
-                    'borderWidth': '1px',
-                    'borderStyle': 'dashed',
-                    'borderRadius': '5px',
-                    'textAlign': 'center'
-                })
-                
-            ])
-    
         #show the data
-        elif pathname  == "/page-0": #JAN
+        if pathname  in ["/", "/page-0"]: #JAN
             chosen_month = 0 #to choose different months in the list 
 
             return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
