@@ -72,7 +72,7 @@ from fcn_GUI import GRAPH_GUI, GUI_Solar
 from fcn_UTILS import dataJoiner, xlsxReader, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
-from fcn_Dash import Dash_App
+from dash_Graphs import Dash_App
 
 def main():
     """ Main fcn"""
@@ -136,14 +136,14 @@ def main():
 
     ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
 
-    Monthly_sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
+    Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
    
-    weekly_sum = ConsumptionSummer(Weekly_Interval_Data) #total average week in a month (x12 months)
+    weekly_Sum = ConsumptionSummer(Weekly_Interval_Data) #total average week in a month (x12 months)
     
-    daily_sum = ConsumptionSummer(Daily_Interval_Data) #total average day in a month (x12 months)
+    daily_Sum = ConsumptionSummer(Daily_Interval_Data) #total average day in a month (x12 months)
 
     
-    Dash_App(Weekly_Interval_Data, Daily_Interval_Data, Monthly_sum)
+    Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum)
     
     
 
