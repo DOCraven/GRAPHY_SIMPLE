@@ -102,7 +102,7 @@ def main():
     # ProgressBar() #placeholder for progress/update bar while the fcn Data_Analysis is occuring
 
     ## STEP 1: read files, check extensions are valid, and import as dataframes
-    try: #read the inverval load data
+    try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
         Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass

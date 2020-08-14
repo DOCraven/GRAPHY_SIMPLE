@@ -38,7 +38,7 @@ def dataJoiner(Full_df, incomplete_df):
     
     return finalDF
 
-def xlsxReader(xls_file_path): 
+def xlsxReader_Monthly(xls_file_path): 
     """reads a given file (xls_file_path) and returns a list of DataFrames split into months
     Access said dataframe via indexing
     ie, JAN = 0
@@ -59,7 +59,7 @@ def Extension_Checker(file_name_to_check):
     """ used to check if the extension is a xls(x) or a csv, or returns an error if not"""
     if file_name_to_check.endswith('.xls') or file_name_to_check.endswith('.xlsx'): #open via xls reader
         try: 
-            read_file = xlsxReader(file_name_to_check)
+            read_file = xlsxReader_Monthly(file_name_to_check)
         except AttributeError: 
             pass
     elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
