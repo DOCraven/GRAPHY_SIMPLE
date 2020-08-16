@@ -36,26 +36,9 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
 
 
     ########## VARS ###############
-    names = list(Daily_Interval_Data.columns) #get the names of the column 
+    names = list(Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
     
-    
-    # # for i in range(0, len(Weekly_Interval_Data)): #iterate through each month for weekly data
-    # #    weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Weekly Consumption', asFigure = True) ) #create a list of figures
-    
-    # chosen_month = 0
-
-
-    # spreadsheet_under_consideration = 'THIS IS A PLACEHOLDER.xlsx'
-
-    # Months = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December') #list of the months to access things later
-
-    #### STEP 1: Set up the figures #### 
-    # in order for dash to plot the graph, we need to pass the dataframe object to the `figure = [xxx]` argument 
-    
-
-
-
-    ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE ####################### #th
+    ####################### DASH GOES HERE ####################### 
     external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css'] #styling sheets
     
     app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
