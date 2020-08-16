@@ -99,7 +99,8 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
                     dbc.NavLink("October", href="/page-9", id="page-9-link"),
                     dbc.NavLink("November", href="/page-10", id="page-10-link"),
                     dbc.NavLink("December", href="/page-11", id="page-11-link"),
-                    dbc.NavLink("About", href="/page-12", id="page-12-link"),
+                    dbc.NavLink("Site Split", href="/page-12", id="page-12-link"),
+                    dbc.NavLink("About", href="/page-13", id="page-13-link"),
                 ],
                 vertical=True,
                 pills=True,
@@ -116,14 +117,14 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     # this callback uses the current pathname to set the active state of the
     # corresponding nav link to true, allowing users to tell see page they are on
     @app.callback(
-        [Output(f"page-{i}-link", "active") for i in range(0, 13)],
+        [Output(f"page-{i}-link", "active") for i in range(0, 14)],
         [Input("url", "pathname")],
     )
     def toggle_active_links(pathname):
         if pathname == "/":
             # Treat page 1 as the homepage / index
             return True, False, False
-        return [pathname == f"/page-{i}" for i in range(0, 13)]
+        return [pathname == f"/page-{i}" for i in range(0, 14)]
 
 
     @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -274,18 +275,14 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
                 html.H3('\nTotal Summation'), 
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
-        #sneaky about page
+        #sneaky site split page
         elif pathname == "/page-12": #ABOUT 
+            return html.P("Site Split - Plotting all sites by site split!")
+        #sneaky about page
+        elif pathname == "/page-13": #ABOUT 
             return html.P("About will go here later!")
         
-            # return dbc.Jumbotron(
-            # [
-            #     html.H1("404: Not found", className="text-danger"),
-            #     html.Hr(),
-            #     html.P(f"The pathname {pathname} was not recognised..."),
-            # ])
-        # If the user tries to reach a different page, return a 404 message
-        
+
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
