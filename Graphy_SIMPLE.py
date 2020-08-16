@@ -79,10 +79,6 @@ def main():
     
     ### VARS ###
     Solar_Exists = False
-    
-
-    
-    
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
@@ -94,12 +90,10 @@ def main():
             [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
             [sg.Submit(), sg.Cancel()]]
 
-    window = sg.Window('NEW Graphy (Simple)', layout_landing)
+    window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
 
     event, values = window.read()
     window.close()
-
-    # ProgressBar() #placeholder for progress/update bar while the fcn Data_Analysis is occuring
 
     ## STEP 1: read files, check extensions are valid, and import as dataframes
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
@@ -116,12 +110,10 @@ def main():
     ## STEP 1A: join the solar data to the dataframe (if necessary)
     if Solar_Exists: #combine Solar data to back of the interval load data if it exists
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
-
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
 
-    
-    ## STEP 2: Check for consistency, and interpolate if requried
+    ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
         
     ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
@@ -131,25 +123,14 @@ def main():
     Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
         
     ## STEP 5: Calculate Daily Averages
-  
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
     ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
-
     Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
    
-    weekly_Sum = ConsumptionSummer(Weekly_Interval_Data) #total average week in a month (x12 months)
-    
-    daily_Sum = ConsumptionSummer(Daily_Interval_Data) #total average day in a month (x12 months)
-
-    
+    ## CREATE THE DASH APP, AND SEND THE DATA TOWARDS IT ##
     Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum)
     
-    
-
-
-
-
     return #nothing main
 
 
