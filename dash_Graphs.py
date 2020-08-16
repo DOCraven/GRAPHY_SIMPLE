@@ -21,6 +21,32 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 
+def character_removal(string_to_filter): 
+    chars_to_remove = ['[', ']', '\'']
+    filtered_list = []
+    #determine if it is a list 
+    if isinstance(string_to_filter, list): #if it is a list 
+        for x in range(0, len(string_to_filter)): #iterate through lenghth of list
+            for char in chars_to_remove: #filter through characters to remove
+                string_to_filter[x] = string_to_filter[x].replace(char, '') #remove each character
+            filtered_list.append(string_to_filter[x]) #append each filtered word to a new
+        return filtered_list #return it 
+        
+    else: #not a list
+        for char in chars_to_remove: #filter through chars to remove
+            string_to_filter = string_to_filter.replace(char, '') #remove the char by replacing it with nothing
+    return string_to_filter #return it 
+
+def dataframe_chooser(Daily_Interval_Data, chosen_site): 
+    """function to dynamically slice and create a new dataframe from given dataframes"""
+    Months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] #list of the months to access things later
+    dynamically_created_dataframe = pd.concat([Daily_Interval_Data[0].loc[:, chosen_site], Daily_Interval_Data[1].loc[:, chosen_site],Daily_Interval_Data[2].loc[:, chosen_site],
+                            Daily_Interval_Data[3].loc[:, chosen_site],Daily_Interval_Data[4].loc[:, chosen_site],Daily_Interval_Data[5].loc[:, chosen_site],
+                            Daily_Interval_Data[6].loc[:, chosen_site],Daily_Interval_Data[7].loc[:, chosen_site],Daily_Interval_Data[8].loc[:, chosen_site],
+                            Daily_Interval_Data[9].loc[:, chosen_site],Daily_Interval_Data[10].loc[:, chosen_site],Daily_Interval_Data[11].loc[:, chosen_site]], axis = 1) # append all DF's into a single dataframe YES THIS IS JANNKY I WILL FIX IT LATER 
+    dynamically_created_dataframe.columns = Months #make the column names line up 
+
+    return dynamically_created_dataframe
 
 
 
@@ -35,7 +61,16 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     monthly_total_consumption_figure = [] #empty list to populate with monthly consumption data
     # weekly_total_consumption_figure = [] #empty list to populate with weekly consumption data
     # daily_total_consumption_figure = [] #empty list to populate with daily consumption data
+   
+    ### SCRATCH ####
+    test_df = Daily_Interval_Data[0] #split DF to a single one to make it easier to work with 
+    names = list(test_df.columns) #get the names of the column 
     
+    # for i in range(0, len(Weekly_Interval_Data)): #iterate through each month for weekly data
+    #    weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Weekly Consumption', asFigure = True) ) #create a list of figures
+    
+    chosen_month = 0
+
 
     spreadsheet_under_consideration = 'THIS IS A PLACEHOLDER.xlsx'
 
@@ -43,262 +78,40 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
 
     #### STEP 1: Set up the figures #### 
     # in order for dash to plot the graph, we need to pass the dataframe object to the `figure = [xxx]` argument 
-    for i in range(0, len(Weekly_Interval_Data)): #iterate through each month for weekly data
-        weekly_dash_figure.append(Weekly_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Weekly Consumption', asFigure = True) ) #create a list of figures
-
-    for i in range(0, len(Daily_Interval_Data)): #iterate through each month for daily data
-        daily_dash_figure.append(Daily_Interval_Data[i].iplot(kind = 'line', xTitle='Time', yTitle='kWh Consumption', title = 'Daily Consumption',  asFigure = True)) #create a list of figures) 
     
-    for i in range(0, len(Monthly_Sum)): #iterate through each month for daily data
-        monthly_total_consumption_figure.append(Monthly_Sum[i].iplot(kind = 'bar', xTitle='NEW Site', yTitle='Total kWh Consumption', asFigure = True) ) #create a list of figures
+
+
 
     ####################### DASH GOES HERE - NEED TO WORK OUT HOW TO MAKE THIS A FUNCTION IN ANOTHER PY FILE ####################### #th
+    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+    
+    app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-    app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-    # the style arguments for the sidebar. We use position:fixed and a fixed width
-    SIDEBAR_STYLE = {
-        "position": "fixed",
-        "top": 0,
-        "left": 0,
-        "bottom": 0,
-        "width": "16rem",
-        "padding": "2rem 1rem",
-        "background-color": "#f8f9fa",
-    }
-
-    # the styles for the main content position it to the right of the sidebar and
-    # add some padding.
-    CONTENT_STYLE = {
-        "margin-left": "18rem",
-        "margin-right": "2rem",
-        "padding": "2rem 1rem",
-    }
-
-    sidebar = html.Div(
-        [
-            html.H2("NEW Graphy", className="display-4"), 
-            html.Hr(),
-            html.P(
-                "An online webapp to visualize historical load data", className="lead"
-            ),
-            html.P(
-                "File under Consideration: " + spreadsheet_under_consideration, className="filenm"
-            ),
-            dbc.Nav(
-                [
-                    dbc.NavLink("January", href="/page-0", id="page-0-link"),
-                    dbc.NavLink("February", href="/page-1", id="page-1-link"),
-                    dbc.NavLink("March", href="/page-2", id="page-2-link"),
-                    dbc.NavLink("April", href="/page-3", id="page-3-link"),
-                    dbc.NavLink("May", href="/page-4", id="page-4-link"),
-                    dbc.NavLink("June", href="/page-5", id="page-5-link"),
-                    dbc.NavLink("July", href="/page-6", id="page-6-link"),
-                    dbc.NavLink("August", href="/page-7", id="page-7-link"),
-                    dbc.NavLink("September", href="/page-8", id="page-8-link"),
-                    dbc.NavLink("October", href="/page-9", id="page-9-link"),
-                    dbc.NavLink("November", href="/page-10", id="page-10-link"),
-                    dbc.NavLink("December", href="/page-11", id="page-11-link"),
-                    dbc.NavLink("Site Split", href="/page-12", id="page-12-link"),
-                    dbc.NavLink("About", href="/page-13", id="page-13-link"),
-                ],
-                vertical=True,
-                pills=True,
-            ),
-        ],
-        style=SIDEBAR_STYLE,
-    )
-
-    content = html.Div(id="page-content", style=CONTENT_STYLE)
-
-    app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+    app.layout = html.Div([
+        html.P('Some words go here'),
+        dcc.Dropdown(id = 'Drop_Down_menu',
+            options=[{'label':name, 'value':name} for name in names],
+            value = names[0],
+            multi=False #do not allow multiple 
+            ), 
+        dcc.Graph(id='graph-with-slider')
+    ])
 
 
-    # this callback uses the current pathname to set the active state of the
-    # corresponding nav link to true, allowing users to tell see page they are on
     @app.callback(
-        [Output(f"page-{i}-link", "active") for i in range(0, 14)],
-        [Input("url", "pathname")],
-    )
-    def toggle_active_links(pathname):
-        if pathname == "/":
-            # Treat page 1 as the homepage / index
-            return True, False, False
-        return [pathname == f"/page-{i}" for i in range(0, 14)]
+        Output('graph-with-slider', 'figure'),
+        [Input('Drop_Down_menu', 'value')])
+    def update_figure(selected_name):
+        #filter the names 
+        chosen_site = character_removal(selected_name) #this sanitises the chosen input 
 
-
-    @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
-    def render_page_content(pathname):
+        ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+        dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
         
-        #show the data
-        if pathname  in ["/", "/page-0"]: #JAN
-            chosen_month = 0 #to choose different months in the list 
+        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Site', yTitle='Consumption (kWh)', title = 'Consumption', asFigure = True) #create a list of figures 
 
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-1": #FEB
-            chosen_month = 1 #to choose different months in the list 
+        return fig
 
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-2": #MAR
-            chosen_month = 2 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-3": #APR
-            chosen_month = 3 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-4": #MAY
-            chosen_month = 4 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-5": #JUN
-            chosen_month = 5 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-6": #JUL
-            chosen_month = 6 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-7": #AUG
-            chosen_month = 7 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-8": #SEPT
-            chosen_month = 8 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-9": #OCT
-            chosen_month = 9 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-10": #NOV
-            chosen_month = 10 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        elif pathname == "/page-11": #DEC
-            chosen_month = 11 #to choose different months in the list 
-
-            return html.Div([ ## ALL COMPONENTS OF THE PAGE NEED TO BE INSIDE THIS
-                ## PLOT THE WEEKLY CONSUMPTION
-                dcc.Graph(id= Months[chosen_month] + 'Weekly Consumption' ,figure=weekly_dash_figure[chosen_month]),
-                ## PLOT THE DAILY CONSUMPTION
-                dcc.Graph(id=Months[chosen_month] + 'Daily Consumption' ,figure=daily_dash_figure[chosen_month]),
-                ## PLOT THE TOTAL CONSUMPTION
-                html.H3('\nTotal Summation'), 
-                dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
-            ])
-        #sneaky site split page
-        elif pathname == "/page-12": #Site Split 
-            html.Div([
-                dcc.Dropdown(
-                    id='demo-dropdown',
-                    options=[
-                        {'label': 'New York City', 'value': 'NYC'},
-                        {'label': 'Montreal', 'value': 'MTL'},
-                        {'label': 'San Francisco', 'value': 'SF'}
-                    ],
-                    value='NYC'
-                ),
-            html.Div(id='dd-output-container'), 
-            html.P('This is a test')
-            ])
-        #sneaky about page
-        elif pathname == "/page-13": #ABOUT 
-            return html.P("About will go here later!")
-        
-    @app.callback(
-        dash.dependencies.Output('dd-output-container', 'children'),
-        [dash.dependencies.Input('demo-dropdown', 'value')])
-    def update_output(value):
-        return 'You have selected "{}"'.format(value)
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
