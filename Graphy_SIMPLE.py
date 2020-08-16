@@ -72,7 +72,7 @@ from fcn_GUI import GRAPH_GUI, GUI_Solar
 from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
-from dash_Graphs import Dash_App
+from app import Dash_App #app.py
 
 def main():
     """ Main fcn"""

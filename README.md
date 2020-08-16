@@ -65,3 +65,5 @@ Last Updated: 17AUG20
 
 A `requirements.txt` fill will accompany this repo. 
 
+`pip install requirements.txt` will install all dependencies required for this program
+
