@@ -114,6 +114,6 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
 
-    app.run_server(port=8888) #start the server. 
+    app.run_server(port=8888, debug = dev_tools_silence_routes_logging=) #start the server. 
 
     return #nothing 
