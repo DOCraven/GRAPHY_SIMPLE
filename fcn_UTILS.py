@@ -1,5 +1,5 @@
 import pandas as pd
-
+import ctypes
 # import datetime as dt
 # import numpy as np
 # import datetime as dt
@@ -101,15 +101,33 @@ def CopyCat(dataframe_to_copy):
     
     return list_of_copied_dataframes
 
-# def ProgressBar(): 
-#     """Simple progress bar """
-#     ### PLACEHOLDER FOR UPDATE BAR ###
-#     layout = [[sg.Text('Please be Patient')],      
-#                     [sg.Text('This window will close when the analysis is complete')]]      
+def character_removal(string_to_filter): 
+    chars_to_remove = ['[', ']', '\'']
+    filtered_list = []
+    #determine if it is a list 
+    if isinstance(string_to_filter, list): #if it is a list 
+        for x in range(0, len(string_to_filter)): #iterate through lenghth of list
+            for char in chars_to_remove: #filter through characters to remove
+                string_to_filter[x] = string_to_filter[x].replace(char, '') #remove each character
+            filtered_list.append(string_to_filter[x]) #append each filtered word to a new
+        return filtered_list #return it 
+        
+    else: #not a list
+        for char in chars_to_remove: #filter through chars to remove
+            string_to_filter = string_to_filter.replace(char, '') #remove the char by replacing it with nothing
+    return string_to_filter #return it 
 
-#     window = sg.Window('Progress', layout)    
+def dataframe_chooser(Daily_Interval_Data, chosen_site): 
+    """function to dynamically slice columns and create a new dataframe from a list of dataframes"""
+    Months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] #list of the months to access things later
+    dynamically_created_dataframe = pd.concat([Daily_Interval_Data[0].loc[:, chosen_site], Daily_Interval_Data[1].loc[:, chosen_site],Daily_Interval_Data[2].loc[:, chosen_site],
+                            Daily_Interval_Data[3].loc[:, chosen_site],Daily_Interval_Data[4].loc[:, chosen_site],Daily_Interval_Data[5].loc[:, chosen_site],
+                            Daily_Interval_Data[6].loc[:, chosen_site],Daily_Interval_Data[7].loc[:, chosen_site],Daily_Interval_Data[8].loc[:, chosen_site],
+                            Daily_Interval_Data[9].loc[:, chosen_site],Daily_Interval_Data[10].loc[:, chosen_site],Daily_Interval_Data[11].loc[:, chosen_site]], axis = 1) # append all DF's into a single dataframe YES THIS IS JANNKY I WILL FIX IT LATER 
+    dynamically_created_dataframe.columns = Months #make the column names line up 
 
-#     event, values = window.read()    
-#     return #nothing
+    return dynamically_created_dataframe
 
-
+def Mbox(title, text, style):
+    """ERROR BOX FUNCTION POP UP WINDOW"""
+    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
