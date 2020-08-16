@@ -11,7 +11,7 @@ from calendar import day_name
 import ctypes  # An included library with Python install.
 import time
 
-
+## USER DEFINED FUNCTIONS ##
 from fcn_UTILS import character_removal, dataframe_chooser, Mbox
 
 ## DASH ##
@@ -21,14 +21,6 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-
-from functools import lru_cache
-...
-@lru_cache(maxsize=32)
-def get_config_file(*args):
-    ...
-
-
 
 
 def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum): 
