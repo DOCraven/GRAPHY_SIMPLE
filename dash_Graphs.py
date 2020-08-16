@@ -276,13 +276,29 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
                 dcc.Graph(id= Months[chosen_month] + 'Total Monthly Consumption' , figure=monthly_total_consumption_figure[chosen_month]),
             ])
         #sneaky site split page
-        elif pathname == "/page-12": #ABOUT 
-            return html.P("Site Split - Plotting all sites by site split!")
+        elif pathname == "/page-12": #Site Split 
+            html.Div([
+                dcc.Dropdown(
+                    id='demo-dropdown',
+                    options=[
+                        {'label': 'New York City', 'value': 'NYC'},
+                        {'label': 'Montreal', 'value': 'MTL'},
+                        {'label': 'San Francisco', 'value': 'SF'}
+                    ],
+                    value='NYC'
+                ),
+            html.Div(id='dd-output-container'), 
+            html.P('This is a test')
+            ])
         #sneaky about page
         elif pathname == "/page-13": #ABOUT 
             return html.P("About will go here later!")
         
-
+    @app.callback(
+        dash.dependencies.Output('dd-output-container', 'children'),
+        [dash.dependencies.Input('demo-dropdown', 'value')])
+    def update_output(value):
+        return 'You have selected "{}"'.format(value)
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
