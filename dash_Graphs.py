@@ -9,6 +9,7 @@ import datetime as dt
 import webbrowser
 from calendar import day_name
 import ctypes  # An included library with Python install.
+import time
 
 
 from fcn_UTILS import character_removal, dataframe_chooser, Mbox
@@ -89,7 +90,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
         ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
         dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
         try: 
-            fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Site', yTitle='Consumption (kWh)', title = 'Consumption', asFigure = True) #create a list of figures
+            fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Site', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) #create a list of figures
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180
             Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
 
@@ -102,9 +103,10 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
         chosen_site = character_removal(selected_name) #this sanitises the chosen input, which is gleaned from Dash Selection
 
         ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+        time.sleep(0.25) #mitigate an error that is not fixed in Dash and Cufflinks
         dataframe_to_plot = dataframe_chooser(Weekly_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
         try: 
-            fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Site', yTitle='Consumption (kWh)', title = 'Consumption', asFigure = True) #create a list of figures
+            fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Site', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) #create a list of figures
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180
             Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
 
@@ -114,6 +116,6 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server')
 
-    app.run_server(port=8888, debug = dev_tools_silence_routes_logging=) #start the server. 
+    app.run_server(port=8888) #start the server. 
 
     return #nothing 
