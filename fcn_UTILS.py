@@ -1,5 +1,5 @@
 import pandas as pd
-
+import ctypes
 # import datetime as dt
 # import numpy as np
 # import datetime as dt
@@ -19,15 +19,26 @@ def dataJoiner(Full_df, incomplete_df):
         # https://realpython.com/pandas-merge-join-and-concat/#pandas-merge-combining-data-on-common-columns-or-indices
         MergedDF.interpolate(method = 'polynomial', order = 2, inplace = True) #use linear interpolation to fill in the blank places
         try: 
-            MergedDF['Excess Solar Generation'] = MergedDF['Solar Generation (kW)'] - MergedDF['Wodonga WTP'] #calculate the total excess generation AFTER WWTP has used available generation
-            MergedDF['Excess Solar Generation'].clip(lower = 0, inplace = True) #replace all negative values with 0
+            #clean up the dataframe, removing any column that is unnamed
+            MergedDF.drop(MergedDF.columns[MergedDF.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True) 
+            #sum all rows and give a total consumption for each half hour interval (WWTP and EXTERNAL SITES)
+            MergedDF = pd.concat([MergedDF,pd.DataFrame(MergedDF.sum(axis=1),columns=['Total Consumption'])],axis=1) 
+            #remove total solar consumption from the total summed
+            MergedDF['Total Consumption'] = MergedDF['Total Consumption'] - MergedDF['Solar Generation (kW)']
+            #calculate the total excess generation AFTER WWTP has used available generation
+            MergedDF['Excess Solar Generation (WWTP)'] = MergedDF['Solar Generation (kW)'] - MergedDF['Wodonga WTP'] 
+            #calculate the total excess generation AFTER WWTP has used available generation
+            MergedDF['Excess Solar Generation (Total)'] = (MergedDF['Solar Generation (kW)'] - MergedDF['Total Consumption']) 
+            #replace all negative values with 0
+            MergedDF['Excess Solar Generation (WWTP)'].clip(lower = 0, inplace = True) 
+            MergedDF['Excess Solar Generation (Total)'].clip(lower = 0, inplace = True) 
         except KeyError: #if WWTP doesnt exist for some reason
             pass
         finalDF.append(MergedDF)
     
     return finalDF
 
-def xlsxReader(xls_file_path): 
+def xlsxReader_Monthly(xls_file_path): 
     """reads a given file (xls_file_path) and returns a list of DataFrames split into months
     Access said dataframe via indexing
     ie, JAN = 0
@@ -48,7 +59,7 @@ def Extension_Checker(file_name_to_check):
     """ used to check if the extension is a xls(x) or a csv, or returns an error if not"""
     if file_name_to_check.endswith('.xls') or file_name_to_check.endswith('.xlsx'): #open via xls reader
         try: 
-            read_file = xlsxReader(file_name_to_check)
+            read_file = xlsxReader_Monthly(file_name_to_check)
         except AttributeError: 
             pass
     elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
@@ -90,15 +101,36 @@ def CopyCat(dataframe_to_copy):
     
     return list_of_copied_dataframes
 
-# def ProgressBar(): 
-#     """Simple progress bar """
-#     ### PLACEHOLDER FOR UPDATE BAR ###
-#     layout = [[sg.Text('Please be Patient')],      
-#                     [sg.Text('This window will close when the analysis is complete')]]      
+def character_removal(string_to_filter): 
+    """Sanitises input characters to essentially select a substring between two \' characters"""
+    chars_to_remove = ['[', ']', '\''] #list of characters we dont want
+    filtered_list = []
+    #determine if it is a list 
+    if isinstance(string_to_filter, list): #if it is a list 
+        for x in range(0, len(string_to_filter)): #iterate through each string
+            for char in chars_to_remove: #filter through characters to remove
+                string_to_filter[x] = string_to_filter[x].replace(char, '') #remove each character by replacing it with a '' value
+            filtered_list.append(string_to_filter[x]) #append each filtered word to a new list
+        return filtered_list #and return said list
+        
+    else: #not a list
+        for char in chars_to_remove: #filter through chars to remove
+            string_to_filter = string_to_filter.replace(char, '') #remove each character by replacing it with a '' value
+    return string_to_filter #return it 
 
-#     window = sg.Window('Progress', layout)    
+def dataframe_chooser(Daily_Interval_Data, chosen_site): 
+    """function to dynamically slice columns and create a new dataframe from a given list of dataframes"""
+    #list of the months to recreate the dataframe headers
+    Months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] 
+    dynamically_created_dataframe = pd.concat([ # append all DF's into a single dataframe YES THIS IS JANNKY I WILL FIX IT LATER 
+                            Daily_Interval_Data[0].loc[:, chosen_site], Daily_Interval_Data[1].loc[:, chosen_site],Daily_Interval_Data[2].loc[:, chosen_site],
+                            Daily_Interval_Data[3].loc[:, chosen_site], Daily_Interval_Data[4].loc[:, chosen_site],Daily_Interval_Data[5].loc[:, chosen_site],
+                            Daily_Interval_Data[6].loc[:, chosen_site], Daily_Interval_Data[7].loc[:, chosen_site],Daily_Interval_Data[8].loc[:, chosen_site],
+                            Daily_Interval_Data[9].loc[:, chosen_site], Daily_Interval_Data[10].loc[:, chosen_site],Daily_Interval_Data[11].loc[:, chosen_site]], axis = 1) 
+    dynamically_created_dataframe.columns = Months #insert month name as the respective header
+    return dynamically_created_dataframe
 
-#     event, values = window.read()    
-#     return #nothing
-
+def Mbox(title, text, style):
+    """ERROR BOX FUNCTION POP UP WINDOW"""
+    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 

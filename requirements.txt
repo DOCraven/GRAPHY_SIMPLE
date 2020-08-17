@@ -1,0 +1,12 @@
+dash_bootstrap_components==0.10.3
+dash_html_components==1.0.3
+numpy==1.19.1
+dash_core_components==1.10.1
+matplotlib==3.3.0
+XlsxWriter==1.2.9
+cufflinks==0.17.3
+pandas==1.0.5
+dash==1.13.3
+~lotly==4.6.0
+plotly==4.9.0
+PySimpleGUI==4.28.0

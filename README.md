@@ -3,17 +3,14 @@
 ## NORTH EAST WATER
 
 ## Context
-A program to assist in analysing NEW's industrial energy consumption. Takes `xls` files of interval data, and returns a number of different average load profiles. 
-This is a Fork to redo the GUI into a simpler version
-
-The idea is that you open any yearly interval data `xls` or `csv` and it generates a bunch of data for you. 
-
+A program to assist in analysing NEW's industrial energy consumption. Takes two  `xls` files of interval data and solar forecast data, and returns a number of different average load profiles. 
 
 ## Scope
 
 Contains a GUI program that will:
 
 - Code to manipulate data into DataFrames.
+- Code to create some time series average
 - Code to plot the data nicely.
 
 This program includes NE Water data from External Sites and within WWTP. 
@@ -21,28 +18,21 @@ This program includes NE Water data from External Sites and within WWTP.
 
 ## VERSION 
 
-Version 0.9 
-Last Updated: 26JUL20
+Version 1.0 
+
+Last Updated: 17AUG20
 
 
 ## OVERVIEW
-This program will generate a landing page to direct the user to two seperate GUI's. 
+1. This program will generate a GUI to load interval data, and displays the results via `DASH` in the default webbrowser. 
 
-1.  The first GUI will generate a percentage of consumption between two user defined hours. This can be viewed as a graph OR saved as a `xlsx` file with multiple sheets for multiple months. The expected output is a percentage (ie, 0-100%)
-    - The output `xlsx` file can be found in `/OUTPUT DATA`
-    - Outputs are as follows 
-      -  Daily mean per month
-      -  Weekly Median per month
-      -  Solar generation available for external loads (ie, solar generation LESS WWTP LOAD) - This data is somewhat incomplete.
-1.  The second GUI will plot daily and weekly average load profiles for WWTP and external NE Water loads. Various options exist for assisting in the analysis. Currently there is no option to export as a `xlsx` file. The expected output is a graph. 
+1.  Using `DASH`, the daily and weekly average load profiles for WWTP and external NE Water loads are plotted. The user can select a specific site for anaylsis. 
 
-1.  There are ancillary functions to assist with other data manipulation. These are presented as external to the main `graphy.py` file, and require user input. Theses are as follows. 
-    *  `plotty.py` will plot an `xlsx` or `csv` file and plot the existing data to match the format of the main `Graphy.py`. This is useful for data external to `Graphy.py`. This is presented as is, and will require user input, and it will break regularly.  
 
 ## How to use
 
 1. Clone the `master` branch. 
-  1.   `git clone https://github.com/DOCraven/Graphy.git`.
+  1.   `git clone https://github.com/DOCraven/GRAPHY_SIMPLE`.
 1. Install Dependencies (if required - `PIP INSTALL [library]`).
 1. In Visual Studio Code, open the folder that `Graphy.py` is located in via `CTRL + K + O`.
 1. Ensure the `xls` file is in the root folder (ie, same as `Graphy.py`).
@@ -73,29 +63,7 @@ This program will generate a landing page to direct the user to two seperate GUI
 
 ## Dependencies
 
-There are accompanying files required in order for this program to work. These files must be in the root directory. 
--  `GUI_fcn,py`
--  `UTILS_fcn.py`
--  `fcn_Solar_Calculator.py`
+A `requirements.txt` fill will accompany this repo. 
 
-There are multiple `xlsx` files in the `/INPUT DATA` folder required for this program to work properly. 
--  `2018_NE_WATER_EXTERNAL_LOAD.xlsx`
--  `2019_NE_WATER_EXTERNAL_LOAD.xlsx`
--  `2020_NE_WATER_EXTERNAL_LOAD.xlsx`
--  `SOLAR_2018_DUMMY.xlsx`
--  `SOLAR_2019_DUMMY.xlsx`
--  `SOLAR_2020_DUMMY.xlsx`
--  `WWTP_2019_DATA.xlsx`
--  `WWTP_2020_DATA.xlsx`
+`pip install requirements.txt` will install all dependencies required for this program
 
-
-Use `PIP INSTALL [LIBRARY]` to install each dependency. 
-
--  Python 3.8.x
--  Pandas
--  Cufflinks
--  Plotly 
--  matplotlib
--  PySimpleGUI
--  Numpy
--  xlsxwriter
