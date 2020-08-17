@@ -45,10 +45,10 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
 
     ########## VARS ###############
     names = list(Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
-    print('creating the solar figure')
-    solar_figure = dash_solar_plotter(Daily_Interval_Data)
-    print('solar figure tesitng in console')
-    solar_figure.show() #TESTING
+    
+    if Solar_Exists: #only make this if the solar data has been uploaded
+        solar_figure = dash_solar_plotter(Daily_Interval_Data) #make fancy figure 
+
     ####################### DASH GOES HERE ####################### 
     app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -81,8 +81,9 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
             dbc.Nav(
                 [
                     dbc.NavLink("Site Graphs", href="/page-1", id="page-1-link"),
-                    dbc.NavLink("Excess Solar Hours", href="/page-2", id="page-2-link"),
-                    dbc.NavLink("About", href="/page-3", id="page-3-link"),
+                    dbc.NavLink("Load Shifting Site Graphs", href="/page-2", id="page-2-link"),
+                    dbc.NavLink("Excess Solar Hours", href="/page-3", id="page-3-link"),
+                    dbc.NavLink("About", href="/page-99", id="page-99-link"),
                 ],
                 vertical=True,
                 pills=True,
@@ -102,19 +103,19 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
     #### CALLBACKS ####
     ## CALLBACK FOR CHANGING TABS ##
     @app.callback(
-        [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+        [Output(f"page-{i}-link", "active") for i in range(1, 5)],
         [Input("url", "pathname")],
     )
     def toggle_active_links(pathname):
         if pathname == "/":
             # Treat page 1 as the homepage / index
             return True, False, False
-        return [pathname == f"/page-{i}" for i in range(1, 4)]
+        return [pathname == f"/page-{i}" for i in range(1, 5)]
 
-    ### CALLBACK FOR TAB - ACTUAL LAYOUT GOES HERE ###
+    ### CALLBACK FOR TAB - ACTUAL LAYOUT IN TABS GOES HERE ###
     @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
     def render_page_content(pathname):
-        if pathname in ["/", "/page-1"]:
+        if pathname in ["/", "/page-1"]: #solar graphs
             return html.Div([
                 html.P('Historical Energy Load Anaylsis Tool'), #quick graph
                 dcc.Dropdown(id = 'Drop_Down_menu', #make selection menu
@@ -126,7 +127,20 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                 dcc.Graph(id='weekly_graph'), #display weekly graph
 
             ])
-        elif pathname == "/page-2":
+
+        elif pathname == "/page-2": #load shifting 
+            return html.Div([
+                dcc.Slider(
+                    id='my-slider',
+                    min=0,
+                    max=50,
+                    step=1,
+                    value=0,
+                ),
+                html.Div(id='slider-output-container')
+                ])
+
+        elif pathname == "/page-3": #Solar Total Graphing
             if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
                 return html.Div([
                     html.P("Solar Data Uploaded"),
@@ -135,7 +149,9 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                 ]) 
             else: 
                 return html.P("No Solar Data Uploaded")
-        elif pathname == "/page-3":
+
+
+        elif pathname == "/page-99": #readme
             return html.Div([ #README goes here - manually copied from github `README.MD`
                 dcc.Markdown('''
                     # RMIT CAPSTONE PROJECT 
@@ -251,22 +267,13 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
             Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
 
         return fig
-
-    ### CALLBACK FOR SOLAR GRAPH
-    # @app.callback( 
-    #     Output('solar_summed_graph', 'figure'), 
-    #     [Input('Drop_Down_menu', 'value')])
-    # def update_solar_graph(selected_name):
-    #     #filter the names 
-    #     chosen_site = 'Excess Solar Generation (Total)' #only plot the excess solar
-    #     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
-    #     dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
-    #     try: #create the figure to send to dash to plot
-    #         fig = dataframe_to_plot.iplot(kind = 'bar', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
-    #     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-    #         Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
-
-    #     return fig
+    
+    ### CALLBACK FOR SLIDER ###
+    @app.callback(
+    dash.dependencies.Output('slider-output-container', 'children'),
+    [dash.dependencies.Input('my-slider', 'value')])
+    def update_output(value):
+        return 'You have selected "{}"'.format(value)
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server') #print to console, to for debugging/dev
