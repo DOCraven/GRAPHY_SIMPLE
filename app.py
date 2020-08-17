@@ -12,7 +12,7 @@ import ctypes  # An included library with Python install.
 import time
 
 ## USER DEFINED FUNCTIONS ##
-from fcn_UTILS import character_removal, dataframe_chooser, Mbox
+from fcn_UTILS import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
 
 ## DASH ##
 
@@ -22,20 +22,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-def dash_solar_plotter(df_to_plot): 
-    """sum and plot the total solar consumption for each month"""
-    ### VARS 
-    chosen_site = 'Excess Solar Generation (Total)', #only plot the excess solar
-    ### STEP 1 - Load the DF
-    dataframe_to_plot = dataframe_chooser(df_to_plot, chosen_site), #dynamically create dataframes to plot 12x months on top of each other for the selected site 
-    ## STEP 2 - SUM the dataframe 
-    summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
-    try: #create the figure to send to dash to plot
-        figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
-    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
-    
-    return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+
 
 
 
