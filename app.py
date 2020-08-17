@@ -22,14 +22,33 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+def dash_solar_plotter(df_to_plot): 
+    """sum and plot the total solar consumption for each month"""
+    ### VARS 
+    chosen_site = 'Excess Solar Generation (Total)', #only plot the excess solar
+    ### STEP 1 - Load the DF
+    dataframe_to_plot = dataframe_chooser(df_to_plot, chosen_site), #dynamically create dataframes to plot 12x months on top of each other for the selected site 
+    ## STEP 2 - SUM the dataframe 
+    summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
+    try: #create the figure to send to dash to plot
+        figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
+    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+    
+    return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
 
-def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum): 
+
+
+def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exists = False): 
     """ file to create the nice sidebar dash app thingo"""
 
 
     ########## VARS ###############
     names = list(Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
-    
+    print('creating the solar figure')
+    solar_figure = dash_solar_plotter(Daily_Interval_Data)
+    print('solar figure tesitng in console')
+    solar_figure.show() #TESTING
     ####################### DASH GOES HERE ####################### 
     app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -81,6 +100,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
     # corresponding nav link to true, allowing users to tell see page they are on
 
     #### CALLBACKS ####
+    ## CALLBACK FOR CHANGING TABS ##
     @app.callback(
         [Output(f"page-{i}-link", "active") for i in range(1, 4)],
         [Input("url", "pathname")],
@@ -107,9 +127,88 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
 
             ])
         elif pathname == "/page-2":
-            return html.P("Excess Solar Generation hours")
+            if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
+                return html.Div([
+                    html.P("Solar Data Uploaded"),
+                    dcc.Graph(id='Daily Excess Summmed Solar', figure = solar_figure), #display sum of all solar graph
+
+                ]) 
+            else: 
+                return html.P("No Solar Data Uploaded")
         elif pathname == "/page-3":
-            return html.P("README.MD goes here")
+            return html.Div([ #README goes here - manually copied from github `README.MD`
+                dcc.Markdown('''
+                    # RMIT CAPSTONE PROJECT 
+                    ## NORTH EAST WATER
+
+                    ## Context
+                    A program to assist in analysing NEW's industrial energy consumption. Takes two  `xls` files of interval data and solar forecast data, and returns a number of different average load profiles. 
+
+                    ## Scope
+
+                    Contains a GUI program that will:
+
+                    - Code to manipulate data into DataFrames.
+                    - Code to create some time series average
+                    - Code to plot the data nicely.
+
+                    This program includes NE Water data from External Sites and within WWTP. 
+
+
+                    ## VERSION 
+
+                    Version 1.0 
+
+                    Last Updated: 17AUG20
+
+
+                    ## OVERVIEW
+                    1. This program will generate a GUI to load interval data, and displays the results via `DASH` in the default webbrowser. 
+
+                    1.  Using `DASH`, the daily and weekly average load profiles for WWTP and external NE Water loads are plotted. The user can select a specific site for anaylsis. 
+
+
+                    ## How to use
+
+                    1. Clone the `master` branch. 
+                    1.   `git clone https://github.com/DOCraven/GRAPHY_SIMPLE`.
+                    1. Install Dependencies (if required - `PIP INSTALL [library]`).
+                    1. In Visual Studio Code, open the folder that `Graphy.py` is located in via `CTRL + K + O`.
+                    1. Ensure the `xls` file is in the root folder (ie, same as `Graphy.py`).
+                    1. Run `Graphy.py`. 
+                    -  either within your IDE (in VS CODE, green triangle in Upper RH corner).
+                    -  or via the terminal using  `python graphy.py`.
+                    1. Use the included GUI landing page to select the various options.
+
+
+                    ## Contributing 
+                    1.  Clone the master branch via `git clone https://github.com/DOCraven/Graphy.git`.
+                    1.  Create a new branch either via `git branch [branch-name]` or via the inbuilt GitLens extension (bottom LH corner).
+                    1.  Contribute code.
+                    1.  commit code as necessary via `git commit -m "Message"` or via GitLens Extension.
+                    1.  Push code to new branch via `git push origin [your branch]` or via GitLens Extension (bottom LH Corner).
+                    1.  Request code review (if necessary).
+                    1.  Merge with master when approved.
+
+                    ## Known Issues
+
+
+                    - This repo does not place nice with Anaconda. Please use this with a vanilla Python 3.8.x installation.
+                    - There is minimal error checking involved. 
+                    - `WWTP` data is lacking, and thus plotting it will not yield as many results and `EXTERNAL` data. 
+                    - No solar data appended to `WWTP` plotting. 
+                    - Solar data is currently placeholder data, and not site specific data. 
+
+
+                    ## Dependencies
+
+                    A `requirements.txt` fill will accompany this repo. 
+
+                    `pip install requirements.txt` will install all dependencies required for this program
+
+
+                ''') 
+            ])
         # If the user tries to reach a different page, return a 404 message
         return dbc.Jumbotron(
             [
@@ -153,6 +252,21 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum):
 
         return fig
 
+    ### CALLBACK FOR SOLAR GRAPH
+    # @app.callback( 
+    #     Output('solar_summed_graph', 'figure'), 
+    #     [Input('Drop_Down_menu', 'value')])
+    # def update_solar_graph(selected_name):
+    #     #filter the names 
+    #     chosen_site = 'Excess Solar Generation (Total)' #only plot the excess solar
+    #     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+    #     dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+    #     try: #create the figure to send to dash to plot
+    #         fig = dataframe_to_plot.iplot(kind = 'bar', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
+    #     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+    #         Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+
+    #     return fig
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     print('Starting Dash Server') #print to console, to for debugging/dev

@@ -78,7 +78,7 @@ def main():
     """ Main fcn"""
     
     ### VARS ###
-    Solar_Exists = False
+    Solar_Imported = False
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
@@ -102,13 +102,13 @@ def main():
         pass
     try: #read the solar data
         if values[1]: #only read if solar data is input
-            Solar_Exists = True #for data handling later on. 
+            Solar_Imported = True #for data handling later on. 
             Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass
     
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if Solar_Exists: #combine Solar data to back of the interval load data if it exists
+    if Solar_Imported: #combine Solar data to back of the interval load data if it exists
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
@@ -129,7 +129,7 @@ def main():
     Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
    
     ## CREATE THE DASH APP, AND SEND THE DATA TOWARDS IT ##
-    Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum)
+    Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum, Solar_Exists = Solar_Imported)
     
     return #nothing main
 

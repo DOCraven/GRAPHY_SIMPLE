@@ -133,3 +133,4 @@ def dataframe_chooser(Daily_Interval_Data, chosen_site):
 def Mbox(title, text, style):
     """ERROR BOX FUNCTION POP UP WINDOW"""
     return ctypes.windll.user32.MessageBoxW(0, text, title, style)
+
