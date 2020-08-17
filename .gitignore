@@ -46,3 +46,8 @@ Thumbs.db
 # Files to Ignore #
 ###################
 TEST*.py
+
+__pycache__/dash_Graphs.cpython-38.pyc
+__pycache__/fcn_Averages.cpython-38.pyc
+__pycache__/fcn_UTILS.cpython-38.pyc
+__pycache__/noit a test.cpython-38.pyc
