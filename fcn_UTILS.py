@@ -155,28 +155,40 @@ def load_shifter(dataframe_to_shift, value_to_shift):
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
     value_to_shift_percentage = value_to_shift/100 
     
+    #for loop goes here
     ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
+    single_df_site = dataframe_to_shift[0].loc[:, ['Wodonga WTP', 'Excess Solar Generation (Total)']] 
+    #for testing, will throw the entire thing into the standard for loop later. 
+    # assume it will be a 2 column dataframe     
 
+    # single_df_site['AVAILABLE'] = single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)'] #adds a column of TRUE vs FALSE for availability 
+    no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)'])
+    #populate new dataframe only where consumption < PV availability 
     
-    ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
+    
 
+    ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
+    no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage #multiple to get smaller number (ie, number to add to original dataframe)
     
     ### STEP 4 - sum total SHIFTED HOURS
-
+    summed = no_solar_hours_consumption_scaled.sum() #total kWh to shift
     
     ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
-
+    total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN)
+    individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN
     
     ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
+    shifted_dataframe_solar_hours = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
+    #identify which hours are available for adding in extra solar (ie, the inverse of no_solar_hours_consumption)
+    shifted_dataframe_solar_hours +=individual_30_minute_block_scaled #add the evenly split shifted generation 
 
-    
     ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
-
-
-
-
-
-    return shifted_dataframe
+    shifted_dataframe_no_solar_hours = no_solar_hours_consumption - no_solar_hours_consumption_scaled #dataframe of shifted NO SOLAR HOURS consumption
+    
+    shifted_dataframe_no_solar_hours.update(shifted_dataframe_solar_hours) #join the two dataframes as one
+    
+      
+    return shifted_dataframe_no_solar_hours
 
 
 

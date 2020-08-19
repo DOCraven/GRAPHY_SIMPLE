@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from app import Dash_App #app.py that I created 
@@ -82,18 +82,21 @@ def main():
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
-    sg.theme('Light Blue 2')
+    # sg.theme('Light Blue 2')
 
-    layout_landing = [[sg.Text('NEW Landing Page')],
-            [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
-            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-            [sg.Submit(), sg.Cancel()]]
+    # layout_landing = [[sg.Text('NEW Landing Page')],
+    #         [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
+    #         [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+    #         [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+    #         [sg.Submit(), sg.Cancel()]]
 
-    window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+    # window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
 
-    event, values = window.read()
-    window.close()
+    # event, values = window.read()
+    # window.close()
+
+    ### AUTOMATICALLY load the data so I dont have to 
+    values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
 
     ## STEP 1: read files, check extensions are valid, and import as dataframes
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
@@ -120,18 +123,32 @@ def main():
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
     ## STEP 4: Calculate Weekly averages
-    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
+    # Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
         
     ## STEP 5: Calculate Daily Averages
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
 
     ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
-    Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
+    # Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
    
     ## CREATE THE DASH APP, AND SEND THE DATA TOWARDS IT ##
-    Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum, Solar_Exists = Solar_Imported)
+    # Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum, Solar_Exists = Solar_Imported)
     
+
+    ####### TESTIING - BUILDING THE LOAD SHIFTING GRAPH ##########
+
+
+    dataframe_to_shift = Daily_Interval_Data
+    value_to_shift = 10
+
+    foo = load_shifter(dataframe_to_shift, value_to_shift)
+
+
+
+
+
+
     return #nothing main
 
 
