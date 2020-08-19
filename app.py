@@ -132,7 +132,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                         value = names[0],#initial default selection upon loading 
                         multi=False #do not allow multiple selections 
                         ), 
-                    # html.Div(id='shifted_daily_graph'), #for testing - #"displaying" the drop down menu via callback - MUST MATCH ID
+                    
                     html.P(''), #blank row 
                     html.P('Select a % to load shift by'), 
                     dcc.Slider( #load shifting slider thingo 
@@ -142,6 +142,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                         step=1,
                         value=0,
                     ),
+                    html.Div(id='slider-output-container'), #display slider output
                     dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
                     ])
             else: 
@@ -271,15 +272,20 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
             fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
             Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
-
+        
         return fig
     
     ### CALLBACK FOR SLIDER ###
     ############# GRAPH UPDATES ON THIS SLIDER ACTION ##################
     @app.callback(
-        dash.dependencies.Output('shifting_slider_display', 'figure'), 
-        [dash.dependencies.Input('shifting_slider', 'value'), #read the slider input 
-        dash.dependencies.Input('memory_output', 'data')]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
+        [
+            dash.dependencies.Output('shifting_slider_display', 'figure'), #output graph
+            dash.dependencies.Output('slider-output-container', 'children') #output selected value
+            ], 
+        [
+            dash.dependencies.Input('shifting_slider', 'value'), #read the slider input 
+            dash.dependencies.Input('memory_output', 'data')
+            ]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
     def update_output(value, data): #slider is value, dropdown menue is data
         ## VARS
         chosen_site = data #to narrow down the dataframe using previously existing data
@@ -301,9 +307,11 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
 
         ### STEP 5 - create a figure via cufflinks to ploit 
         plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
-        fig = shifted_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
+        figure = shifted_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
         
-        return fig
+        message = 'You have load shifted {}'.format(value) + '%'
+
+        return figure, message
 
      ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###
     @app.callback(Output('memory_output', 'data'),
