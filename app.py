@@ -122,29 +122,30 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
             ])
 
         elif pathname == "/page-2": #load shifting 
-            return html.Div([
-                dcc.Store(id='memory_output'), #storing the selected site here
-                html.P('Select a site to investigate'), 
-                dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
-                    id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
-                    options=[{'label':name, 'value':name} for name in names], #dynamically populating the list 
-                    value = names[0],#initial default selection upon loading 
-                    multi=False #do not allow multiple selections 
-                    ), 
-                html.Div(id='shifted_daily_graph'), #for testing - #"displaying" the drop down menu via callback - MUST MATCH ID
-                html.P(''), #blank row 
-                html.P('Select a % to load shift by'), 
-                dcc.Slider( #load shifting slider thingo 
-                    id='shifting_slider', #unique identifier for DASH Callbacks
-                    min=0,
-                    max=50,
-                    step=1,
-                    value=0,
-                ),
-                html.Div(id='shifting_slider_display'), #"displaying" the slider output via the callback - MUST MATCH ID
-                # html.Div(id='memory_output'), #"displaying" the slider output via the callback - MUST MATCH ID
-                # dcc.Graph(id='shifted_daily_graph'), #"displaying" the drop down menu via callback - MUST MATCH ID
-                ])
+            if Solar_Exists: 
+                return html.Div([
+                    dcc.Store(id='memory_output'), #storing the selected site here
+                    html.P('Select a site to investigate'), 
+                    dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
+                        id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
+                        options=[{'label':name, 'value':name} for name in names], #dynamically populating the list 
+                        value = names[0],#initial default selection upon loading 
+                        multi=False #do not allow multiple selections 
+                        ), 
+                    # html.Div(id='shifted_daily_graph'), #for testing - #"displaying" the drop down menu via callback - MUST MATCH ID
+                    html.P(''), #blank row 
+                    html.P('Select a % to load shift by'), 
+                    dcc.Slider( #load shifting slider thingo 
+                        id='shifting_slider', #unique identifier for DASH Callbacks
+                        min=0,
+                        max=50,
+                        step=1,
+                        value=0,
+                    ),
+                    dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
+                    ])
+            else: 
+                return html.P("No Solar Data Uploaded")
 
         elif pathname == "/page-3": #Solar Total Graphing
             if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
@@ -274,14 +275,27 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
         return fig
     
     ### CALLBACK FOR SLIDER ###
+    ############# GRAPH UPDATES ON THIS SLIDER ACTION ##################
     @app.callback(
-        dash.dependencies.Output('shifting_slider_display', 'children'), 
+        dash.dependencies.Output('shifting_slider_display', 'figure'), 
         [dash.dependencies.Input('shifting_slider', 'value'), #read the slider input 
-        dash.dependencies.Input('memory_output', 'data')]) #AND READ THE STORED VALUE AT 'memory_output'
+        dash.dependencies.Input('memory_output', 'data')]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
     def update_output(value, data): #slider is value, dropdown menue is data
+        ## VARS
         chosen_site = data #to narrow down the dataframe using previously existing data
+        load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
 
-        return 'Slider Value is "{}"'.format(value)
+        ### STEP 1 - narrow down dataframe to chosen site 
+        dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+        
+        ### STEP 2 - load shift by chosen value 
+        shifted_dataframe = load_shifter(dataframe_to_shift = dataframe_to_plot, value_to_shift = load_shift_number) #remember giving a list of dataframes
+        
+        ### STEP 3 - create a figure via cufflinks to ploit 
+        plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
+        fig = shifted_dataframe.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
+        
+        return fig
 
      ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###
     @app.callback(Output('memory_output', 'data'),

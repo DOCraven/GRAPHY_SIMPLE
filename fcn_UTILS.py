@@ -148,3 +148,38 @@ def dash_solar_plotter(df_to_plot):
         Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
     
     return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+
+def load_shifter(dataframe_to_shift, value_to_shift):
+    """dynamically load shifts dataframe in solar hours by given value to shift"""
+
+    ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
+    value_to_shift_percentage = value_to_shift/100 
+    
+    ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
+
+    
+    ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
+
+    
+    ### STEP 4 - sum total SHIFTED HOURS
+
+    
+    ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
+
+    
+    ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
+
+    
+    ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
+
+
+
+
+
+    return shifted_dataframe
+
+
+
+
+
+
