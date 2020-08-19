@@ -125,6 +125,7 @@ def main():
     ## STEP 5: Calculate Daily Averages
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
+
     ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
     Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
    
