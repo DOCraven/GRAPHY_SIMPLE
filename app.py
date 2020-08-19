@@ -12,7 +12,7 @@ import ctypes  # An included library with Python install.
 import time
 
 ## USER DEFINED FUNCTIONS ##
-from fcn_UTILS import character_removal, dataframe_chooser, Mbox, dash_solar_plotter, load_shifter, solar_extractor_adder
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, dash_solar_plotter, character_removal
 
 ## DASH ##
 
@@ -286,20 +286,22 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
         load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
 
         ### STEP 1 - narrow down dataframe to chosen site 
-        dataframe_to_plot_raw = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+        site_to_plot_raw = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
         #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
-        dataframe_to_plot = dataframe_list_generator(dataframe_to_plot_raw)
-
-
-        ### STEP 2 - slap Excess solar onto the back of the dataframe_to_plot  - TODO still
-        site_and_solar = solar_extractor_adder(single_site = dataframe_to_plot, all_sites = Daily_Interval_Data)
         
-        ### STEP 3 - load shift by chosen value 
-        shifted_dataframe = load_shifter(dataframe_to_shift = site_and_solar, value_to_shift = load_shift_number) #remember giving a list of dataframes
+        ### STEP 2 - Convert the dataframe for a list of dataframes 
+        site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
+
+        ### STEP 3 - extract solar from the original dataframe, and add it to each list 
+        site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
         
-        ### STEP 4 - create a figure via cufflinks to ploit 
+        ### STEP 4 - do the load shift calculations, and return a single dataframe of each month 
+        shifted_site = load_shifter(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - IE, I PLOT THIS 
+        
+
+        ### STEP 5 - create a figure via cufflinks to ploit 
         plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
-        fig = shifted_dataframe.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
+        fig = shifted_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
         
         return fig
 
