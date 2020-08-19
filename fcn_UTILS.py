@@ -152,46 +152,88 @@ def dash_solar_plotter(df_to_plot):
 def load_shifter(dataframe_to_shift, value_to_shift):
     """dynamically load shifts dataframe in solar hours by given value to shift"""
 
+    #### VARS ####
+    shifted_site_consumption = []
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
     value_to_shift_percentage = value_to_shift/100 
     
-    #for loop goes here
-    ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
-    single_df_site = dataframe_to_shift[0].loc[:, ['Wodonga WTP', 'Excess Solar Generation (Total)']] 
-    #for testing, will throw the entire thing into the standard for loop later. 
-    # assume it will be a 2 column dataframe     
+    for month in range(0, len(dataframe_to_shift)):
+        #for loop goes here
+        ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
+        # single_df_site = dataframe_to_shift[month].loc[:, ['Wodonga WTP', 'Excess Solar Generation (Total)']] 
+        
+        #for testing, will throw the entire thing into the standard for loop later. 
+        # assume it will be a 2 column dataframe     
+        single_df_site = dataframe_to_shift[month]
+        # single_df_site['AVAILABLE'] = single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)'] #adds a column of TRUE vs FALSE for availability 
+        no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)'])
+        #populate new dataframe only where consumption < PV availability 
+        
+        
 
-    # single_df_site['AVAILABLE'] = single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)'] #adds a column of TRUE vs FALSE for availability 
-    no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)'])
-    #populate new dataframe only where consumption < PV availability 
-    
-    
+        ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
+        no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage #multiple to get smaller number (ie, number to add to original dataframe)
+        
+        ### STEP 4 - sum total SHIFTED HOURS
+        summed = no_solar_hours_consumption_scaled.sum() #total kWh to shift
+        
+        ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
+        total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN)
+        individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN
+        
+        ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
+        shifted_dataframe_solar_hours = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
+        #identify which hours are available for adding in extra solar (ie, the inverse of no_solar_hours_consumption)
+        shifted_dataframe_solar_hours +=individual_30_minute_block_scaled #add the evenly split shifted generation 
 
-    ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
-    no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage #multiple to get smaller number (ie, number to add to original dataframe)
-    
-    ### STEP 4 - sum total SHIFTED HOURS
-    summed = no_solar_hours_consumption_scaled.sum() #total kWh to shift
-    
-    ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
-    total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN)
-    individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN
-    
-    ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
-    shifted_dataframe_solar_hours = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
-    #identify which hours are available for adding in extra solar (ie, the inverse of no_solar_hours_consumption)
-    shifted_dataframe_solar_hours +=individual_30_minute_block_scaled #add the evenly split shifted generation 
-
-    ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
-    shifted_dataframe_no_solar_hours = no_solar_hours_consumption - no_solar_hours_consumption_scaled #dataframe of shifted NO SOLAR HOURS consumption
-    
-    shifted_dataframe_no_solar_hours.update(shifted_dataframe_solar_hours) #join the two dataframes as one
+        ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
+        shifted_dataframe_no_solar_hours = no_solar_hours_consumption - no_solar_hours_consumption_scaled #dataframe of shifted NO SOLAR HOURS consumption
+        
+        shifted_dataframe_no_solar_hours.update(shifted_dataframe_solar_hours) #join the two dataframes as one
+        shifted_site_consumption.append(shifted_dataframe_no_solar_hours)
     
       
-    return shifted_dataframe_no_solar_hours
+    return shifted_site_consumption
 
+def solar_extractor_adder(single_site, all_sites):
+    """
+    appends the solar generation to the chosen single site to plot and returns as a list of dataframes
+    """
+    ### VARS ###
+    solar_added_dataframe = []
+    column_to_extract = 'Excess Solar Generation (Total)'
 
+    for month in range(0, len(all_sites)): #iterate through all sites 
+        solar_generation = all_sites[month].loc[:, column_to_extract] #extract the solar generation and store as a column to add to the other dataframe
 
+        solar_added_dataframe.append(pd.concat([single_site[month],  all_sites[month].loc[:, column_to_extract]], axis = 1)) #concat solar to the chosen individual month
+    
+    single_site_dataframe = dataframe_compactor(dataframes_to_compact = solar_added_dataframe)
+
+    return single_site_dataframe
+
+def dataframe_list_generator(non_list_dataframe): 
+    """converts a single 12x? dataframe into a list containing 12 1x? dataframes"""
+    dataframe_headers = list(non_list_dataframe.columns) #get the names of the column, assuming every name is the same across each dataframe in the list
+    listed_dataframes = []
+    
+    for name in range(0, len(dataframe_headers)): #iterate through each column 
+        listed_dataframes.append(non_list_dataframe.loc[:, dataframe_headers[name]]) #isolate and append the column to its own dataframe in a list
+    
+    return listed_dataframes
+
+def dataframe_compactor(dataframes_to_compact): 
+    """takes in a list of len N of dataframes, and returns a single dataframe with N columns"""
+    index_names = list(dataframes_to_compact[0].index) #rip index from first dataframe  
+    compacted_dataframe = pd.DataFrame(index = index_names)
+    column_to_drop = 'Excess Solar Generation (Total)'
+    
+    for month in range(0, len(dataframes_to_compact)): #iterate through each 
+        dataframes_to_compact[month].drop(columns = column_to_drop, inplace = True) #remove the solar generarion for the respective month
+        
+    compacted_dataframe = pd.concat(dataframes_to_compact, axis = 1) #merge all of them into a single dataframe 
+
+    return compacted_dataframe
 
 
 

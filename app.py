@@ -12,7 +12,7 @@ import ctypes  # An included library with Python install.
 import time
 
 ## USER DEFINED FUNCTIONS ##
-from fcn_UTILS import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_UTILS import character_removal, dataframe_chooser, Mbox, dash_solar_plotter, load_shifter, solar_extractor_adder
 
 ## DASH ##
 
@@ -286,12 +286,18 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
         load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
 
         ### STEP 1 - narrow down dataframe to chosen site 
-        dataframe_to_plot = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+        dataframe_to_plot_raw = dataframe_chooser(Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+        #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
+        dataframe_to_plot = dataframe_list_generator(dataframe_to_plot_raw)
+
+
+        ### STEP 2 - slap Excess solar onto the back of the dataframe_to_plot  - TODO still
+        site_and_solar = solar_extractor_adder(single_site = dataframe_to_plot, all_sites = Daily_Interval_Data)
         
-        ### STEP 2 - load shift by chosen value 
-        shifted_dataframe = load_shifter(dataframe_to_shift = dataframe_to_plot, value_to_shift = load_shift_number) #remember giving a list of dataframes
+        ### STEP 3 - load shift by chosen value 
+        shifted_dataframe = load_shifter(dataframe_to_shift = site_and_solar, value_to_shift = load_shift_number) #remember giving a list of dataframes
         
-        ### STEP 3 - create a figure via cufflinks to ploit 
+        ### STEP 4 - create a figure via cufflinks to ploit 
         plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
         fig = shifted_dataframe.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
         
