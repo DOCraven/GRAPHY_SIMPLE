@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from app import Dash_App #app.py that I created 
@@ -137,12 +137,17 @@ def main():
     
 
     ####### TESTIING - BUILDING THE LOAD SHIFTING GRAPH ##########
-
-
-    dataframe_to_shift = Daily_Interval_Data
+    chosen_site = 'Wodonga WTP' 
     value_to_shift = 10
+    
+    test_df = dataframe_chooser(Daily_Interval_Data, chosen_site) #returns a single dataframe of 12 columns for each month
 
-    foo = load_shifter(dataframe_to_shift, value_to_shift)
+    
+    listed_dataframes = dataframe_list_generator(non_list_dataframe = test_df) #converts the above into a list of 1x month per list entry 
+    
+
+    dataframe_to_shift = solar_extractor_adder(single_site = listed_dataframes, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
+    shifted_site = load_shifter(dataframe_to_shift, value_to_shift) #returns a list of shifted sites - IE, I PLOT THIS 
 
 
 

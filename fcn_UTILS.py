@@ -191,9 +191,12 @@ def load_shifter(dataframe_to_shift, value_to_shift):
         
         shifted_dataframe_no_solar_hours.update(shifted_dataframe_solar_hours) #join the two dataframes as one
         shifted_site_consumption.append(shifted_dataframe_no_solar_hours)
+
+    #convert list of dataframe to single dataframe 
+    single_site_dataframe = dataframe_compactor(dataframes_to_compact = shifted_site_consumption) #converts the list of dataframes to a single dataframe 
     
       
-    return shifted_site_consumption
+    return single_site_dataframe
 
 def solar_extractor_adder(single_site, all_sites):
     """
@@ -208,9 +211,7 @@ def solar_extractor_adder(single_site, all_sites):
 
         solar_added_dataframe.append(pd.concat([single_site[month],  all_sites[month].loc[:, column_to_extract]], axis = 1)) #concat solar to the chosen individual month
     
-    single_site_dataframe = dataframe_compactor(dataframes_to_compact = solar_added_dataframe)
-
-    return single_site_dataframe
+    return solar_added_dataframe
 
 def dataframe_list_generator(non_list_dataframe): 
     """converts a single 12x? dataframe into a list containing 12 1x? dataframes"""
