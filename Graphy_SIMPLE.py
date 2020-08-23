@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, Mbox
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter_average, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, Mbox, load_shifter_scratch
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from app import Dash_App #app.py that I created 
@@ -82,29 +82,32 @@ def main():
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
-    # sg.theme('Light Blue 2')
+    sg.theme('Light Blue 2')
 
-    # layout_landing = [[sg.Text('NEW Landing Page')],
-    #         [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
-    #         [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-    #         [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-    #         [sg.Submit(), sg.Cancel()]]
+    layout_landing = [[sg.Text('NEW Landing Page')],
+            [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
+            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Submit(), sg.Cancel()]]
 
-    # window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+    window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
 
-    # event, values = window.read()
-    # window.close()
+    event, values = window.read()
+    window.close()
 
-    ### AUTOMATICALLY load the data so I dont have to 
-    values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
+    ### AUTOMATICALLY load the data so I dont have to - FOR DEVELOPMENT ONLY 
+    # values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
 
-    if event == 'Cancel': 
-        exit() #close the app
+    try: #so I dont have to comment this out when automatically loading test data 
+        if event == 'Cancel': 
+            exit() #close the app
+    except NameError: 
+        pass 
     
 
     #ensure someone has uploaded a file 
     if not values[0]: #nothing uploaded
-        Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1)
+        Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1) #spit out an error box 
         exit() #close the app
     
     ## STEP 1: Read the file 
@@ -120,14 +123,14 @@ def main():
         pass
     
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if Solar_Imported: #combine Solar data to back of the interval load data if it exists
+    if Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
 
     ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
-        
+
     ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
@@ -145,23 +148,12 @@ def main():
     Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum, Solar_Exists = Solar_Imported)
     
 
-    ####### TESTIING - BUILDING THE LOAD SHIFTING GRAPH ##########
-    chosen_site = 'Halls Road MYRTLEFORD - kWh Consumption' 
-    value_to_shift = 10
+    # ##### scratch - export load shifting stuff to csv - just a placeholder to get it into the DASH APP 
+    # value_to_shift = 10 #%
+    # site_to_shift = 'Wodonga WTP'
     
-    test_df = dataframe_chooser(Weekly_Interval_Data, chosen_site) #returns a single dataframe of 12xN from a list of dataframes 
+    # load_shifter_scratch(dataframe_to_shift = Checked_Interval_Data_0, value_to_shift = value_to_shift, site_to_shift= site_to_shift) #function to dynamically shift and save the datafraeme 
 
-    
-    listed_dataframes = dataframe_list_generator(non_list_dataframe = test_df) #converts the above into a list of 1xN month per list entry 
-    
-
-    dataframe_to_shift = solar_extractor_adder(single_site = test_df, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list), returns a list
-    dataframe_to_shift.to_csv('unshifted.csv')
-    
-    shifted_site = load_shifter(dataframe_to_shift, value_to_shift) #returns a list of shifted sites - IE, I PLOT THIS 
-
-    shifted_site.to_csv('Halls Shifted.csv')
-   
 
 
 
