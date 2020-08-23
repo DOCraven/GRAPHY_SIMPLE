@@ -12,7 +12,7 @@ import ctypes  # An included library with Python install.
 import time
 
 ## USER DEFINED FUNCTIONS ##
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, dash_solar_plotter, character_removal
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter_average, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, dash_solar_plotter, character_removal, load_shifter_long_list
 
 ## DASH ##
 
@@ -72,6 +72,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                     dbc.NavLink("Site Graphs", href="/page-1", id="page-1-link"),
                     dbc.NavLink("Load Shifting Site Graphs", href="/page-2", id="page-2-link"),
                     dbc.NavLink("Excess Solar Hours", href="/page-3", id="page-3-link"),
+                    dbc.NavLink("Export Load Shift Data", href="/page-4", id="page-4-link"),
                     dbc.NavLink("About", href="/page-99", id="page-99-link"),
                 ],
                 vertical=True,
@@ -157,6 +158,17 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                 ]) 
             else: 
                 return html.P("No Solar Data Uploaded")
+
+        
+        elif pathname == "/page-4": #Load Shift Export Tool 
+            if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
+                dcc.Dropdown(id = 'Drop_Down_menu_export', #make selection menu
+                    options=[{'label':name, 'value':name} for name in names],
+                    value = names[0],#initial default selection upon loading 
+                    multi=False #do not allow multiple selections 
+                    ), 
+            else: 
+                return html.P("No Solar Data Uploaded, unable to export.")
 
 
         elif pathname == "/page-99": #readme
@@ -302,7 +314,7 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
         site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
         
         ### STEP 4 - do the load shift calculations, and return a single dataframe of each month 
-        shifted_site = load_shifter(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - IE, I PLOT THIS 
+        shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - IE, I PLOT THIS 
         
 
         ### STEP 5 - create a figure via cufflinks to ploit 
@@ -319,6 +331,14 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
     def filter_sites(value):
         return value #just return the value and store it in the location called "memory_output"
             
+    ### CALLBACK FOR DROP DOWN MENU FOR EXPORTER ####
+    @app.callback( 
+        Output('daily_graph', 'figure'), 
+        [Input('Drop_Down_menu_export', 'value')])
+    def update_daily_graph(value):
+        #filter the names 
+        return value
+
 
 
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
