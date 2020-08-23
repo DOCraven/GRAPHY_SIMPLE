@@ -119,7 +119,10 @@ def character_removal(string_to_filter):
     return string_to_filter #return it 
 
 def dataframe_chooser(Daily_Interval_Data, chosen_site): 
-    """function to dynamically slice columns and create a new dataframe from a given list of dataframes"""
+    """
+    function to dynamically slice columns and return a single dataframe from a given list of dataframes. 
+    It returns every month for the chosen site. 
+    """
     #list of the months to recreate the dataframe headers
     Months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] 
     dynamically_created_dataframe = pd.concat([ # append all DF's into a single dataframe YES THIS IS JANNKY I WILL FIX IT LATER 
@@ -150,7 +153,7 @@ def dash_solar_plotter(df_to_plot):
     return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
 
 def load_shifter(dataframe_to_shift, value_to_shift):
-    """dynamically load shifts dataframe in solar hours by given value to shift"""
+    """dynamically load shifts a list of dataframes in solar hours by given value to shift"""
 
     #### VARS ####
     shifted_site_consumption = []
@@ -214,7 +217,7 @@ def solar_extractor_adder(single_site, all_sites):
     return solar_added_dataframe
 
 def dataframe_list_generator(non_list_dataframe): 
-    """converts a single 12x? dataframe into a list containing 12 1x? dataframes"""
+    """converts a single 12xN dataframe into a list containing 12 1xN dataframes by appending each indexed dataframe to the first one"""
     dataframe_headers = list(non_list_dataframe.columns) #get the names of the column, assuming every name is the same across each dataframe in the list
     listed_dataframes = []
     

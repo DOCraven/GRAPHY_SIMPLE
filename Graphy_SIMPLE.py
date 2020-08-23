@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, Mbox
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from app import Dash_App #app.py that I created 
@@ -82,23 +82,32 @@ def main():
     plt.close('all') #ensure all windows are closed
     
     ## Create the MAIN GUI LANDING PAGE ##
-    sg.theme('Light Blue 2')
+    # sg.theme('Light Blue 2')
 
-    layout_landing = [[sg.Text('NEW Landing Page')],
-            [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
-            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-            [sg.Submit(), sg.Cancel()]]
+    # layout_landing = [[sg.Text('NEW Landing Page')],
+    #         [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
+    #         [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+    #         [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+    #         [sg.Submit(), sg.Cancel()]]
 
-    window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+    # window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
 
-    event, values = window.read()
-    window.close()
+    # event, values = window.read()
+    # window.close()
 
     ### AUTOMATICALLY load the data so I dont have to 
-    # values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
+    values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
 
-    ## STEP 1: read files, check extensions are valid, and import as dataframes
+    if event == 'Cancel': 
+        exit() #close the app
+    
+
+    #ensure someone has uploaded a file 
+    if not values[0]: #nothing uploaded
+        Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1)
+        exit() #close the app
+    
+    ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
         Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
     except UnboundLocalError: 
@@ -123,7 +132,7 @@ def main():
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
     ## STEP 4: Calculate Weekly averages
-    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
+    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
         
     ## STEP 5: Calculate Daily Averages
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
@@ -137,19 +146,22 @@ def main():
     
 
     ####### TESTIING - BUILDING THE LOAD SHIFTING GRAPH ##########
-    # chosen_site = 'Wodonga WTP' 
-    # value_to_shift = 10
+    chosen_site = 'Halls Road MYRTLEFORD - kWh Consumption' 
+    value_to_shift = 10
     
-    # # test_df = dataframe_chooser(Daily_Interval_Data, chosen_site) #returns a single dataframe of 12 columns for each month
+    test_df = dataframe_chooser(Weekly_Interval_Data, chosen_site) #returns a single dataframe of 12xN from a list of dataframes 
 
     
-    # # listed_dataframes = dataframe_list_generator(non_list_dataframe = test_df) #converts the above into a list of 1x month per list entry 
+    listed_dataframes = dataframe_list_generator(non_list_dataframe = test_df) #converts the above into a list of 1xN month per list entry 
     
 
-    # # dataframe_to_shift = solar_extractor_adder(single_site = listed_dataframes, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
-    # # shifted_site = load_shifter(dataframe_to_shift, value_to_shift) #returns a list of shifted sites - IE, I PLOT THIS 
+    dataframe_to_shift = solar_extractor_adder(single_site = test_df, all_sites = Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list), returns a list
+    dataframe_to_shift.to_csv('unshifted.csv')
+    
+    shifted_site = load_shifter(dataframe_to_shift, value_to_shift) #returns a list of shifted sites - IE, I PLOT THIS 
 
-
+    shifted_site.to_csv('Halls Shifted.csv')
+   
 
 
 
