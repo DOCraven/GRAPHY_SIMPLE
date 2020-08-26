@@ -160,15 +160,15 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
                 return html.P("No Solar Data Uploaded")
 
         
-        elif pathname == "/page-4": #Load Shift Export Tool 
-            if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
-                dcc.Dropdown(id = 'Drop_Down_menu_export', #make selection menu
-                    options=[{'label':name, 'value':name} for name in names],
-                    value = names[0],#initial default selection upon loading 
-                    multi=False #do not allow multiple selections 
-                    ), 
-            else: 
-                return html.P("No Solar Data Uploaded, unable to export.")
+        # elif pathname == "/page-4": #Load Shift Export Tool 
+        #     if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
+        #         dcc.Dropdown(id = 'Drop_Down_menu_export', #make selection menu
+        #             options=[{'label':name, 'value':name} for name in names],
+        #             value = names[0],#initial default selection upon loading 
+        #             multi=False #do not allow multiple selections 
+        #             ), 
+        #     else: 
+        #         return html.P("No Solar Data Uploaded, unable to export.")
 
 
         elif pathname == "/page-99": #readme
@@ -332,12 +332,12 @@ def Dash_App(Daily_Interval_Data, Weekly_Interval_Data, Monthly_Sum, Solar_Exist
         return value #just return the value and store it in the location called "memory_output"
             
     ### CALLBACK FOR DROP DOWN MENU FOR EXPORTER ####
-    @app.callback( 
-        Output('daily_graph', 'figure'), 
-        [Input('Drop_Down_menu_export', 'value')])
-    def update_daily_graph(value):
-        #filter the names 
-        return value
+    # @app.callback( 
+    #     Output('daily_graph', 'figure'), 
+    #     [Input('Drop_Down_menu_export', 'value')])
+    # def update_daily_graph(value):
+    #     #filter the names 
+    #     return value
 
 
 
