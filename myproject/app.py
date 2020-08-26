@@ -15,7 +15,9 @@ import webbrowser
 from calendar import day_name
 import ctypes 
 import time
+import base64
 import PySimpleGUI as sg
+import cufflinks as cf
 #USER CREATED FUNCTIONS 
 from fcn_UTILS import dataJoiner, xlsxReader_Monthly, Extension_Checker, intervalResampler, Data_Consistency_Checker, CopyCat, character_removal, dataframe_chooser, Mbox, dash_solar_plotter, load_shifter_average, solar_extractor_adder, dataframe_list_generator, dataframe_compactor, load_shifter_scratch, load_shifter_long_list
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
@@ -102,6 +104,8 @@ print('succesfully loaded and did the backend stuff')
 ########## VARS SPECIFICALLY FOR DASH  ###############
 names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
 chosen_site = '' #to make this VAR global
+image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 
 if Solar_Exists: #only make this if the solar data has been uploaded
@@ -116,7 +120,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([ ### MINIMAL LAYOU###
-    dcc.Tabs(id='tabs-example', value='tab-1', children=[
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO 
+    dcc.Tabs(id='tabs-example', value='tab-1', children=[ #DISPLAY TABS
         dcc.Tab(label='Load Data', value='tab-1'),
         dcc.Tab(label='Site Graphs', value='tab-2'),
         dcc.Tab(label='Load Shifting', value='tab-3'),
@@ -157,7 +162,7 @@ def render_content(tab):
         if Solar_Exists: 
             return html.Div([
                 dcc.Store(id='memory_output'), #storing the selected site here
-                html.P('Select a site to investigate'), 
+                html.H3('Select a site to investigate'), 
                 dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
                     id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
                     options=[{'label':name, 'value':name} for name in names], #dynamically populating the list 
@@ -166,7 +171,7 @@ def render_content(tab):
                     ), 
                 
                 html.P(''), #blank row 
-                html.P('Select a % to load shift by'), 
+                html.H3('Select a % to load shift by'), 
                 dcc.Slider( #load shifting slider thingo 
                     id='shifting_slider', #unique identifier for DASH Callbacks
                     min=0,
@@ -178,17 +183,17 @@ def render_content(tab):
                 dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
                 ])
         else: 
-            return html.P("No Solar Data Uploaded")
+            return html.H3("No Solar Data Uploaded")
         
     elif tab == 'tab-4': #EXCESS SOLAR DATA 
         if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
             return html.Div([
-                html.P("Solar Data Uploaded"),
+                html.H3("Solar Data Uploaded"),
                 dcc.Graph(id='Daily Excess Summmed Solar', figure = solar_figure), #display sum of all solar graph
 
             ]) 
         else: 
-            return html.P("No Solar Data Uploaded")
+            return html.H3("No Solar Data Uploaded")
 
     elif tab == 'tab-5': #EXPORT THE DATA TO A CSV - PLACEHOLDER - TO BE BUILT
             return html.Div([

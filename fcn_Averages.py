@@ -9,6 +9,7 @@ import datetime as dt
 from calendar import day_name
 import PySimpleGUI as sg
 #IMPORT USER DEFINED GLOBAL VARIABLES 
+import cufflinks as cf
 import config
 
 
