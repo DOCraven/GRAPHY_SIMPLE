@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import datetime as dt
 from calendar import day_name
 import PySimpleGUI as sg
+#IMPORT USER DEFINED GLOBAL VARIABLES 
+import config
+
 
 ### FUNCTIONS ###
 def DailyAverage(monthly_data):

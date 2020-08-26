@@ -1,6 +1,7 @@
 #a collection of functions to assist with calculating load during solar hours
 
-
+#IMPORT USER DEFINED GLOBAL VARIABLES 
+import config
 
 import pandas as pd
 

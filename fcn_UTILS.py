@@ -4,6 +4,8 @@ import ctypes
 # import numpy as np
 # import datetime as dt
 # from calendar import day_name
+#IMPORT USER DEFINED GLOBAL VARIABLES 
+import config
 
 def dataJoiner(Full_df, incomplete_df):
     """
