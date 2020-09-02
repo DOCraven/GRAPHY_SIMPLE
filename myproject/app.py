@@ -102,93 +102,87 @@ print('succesfully loaded and did the backend stuff')
 
 ######## CREATING LOAD SHIFTING ################# TEMP #############
 
-    #### VARS ####
+#     #### VARS ####
 
 
-chosen_site = 'Faithful Street WANGARATTA - kWh Consumption'
-month = 0
+# chosen_site = 'Faithful Street WANGARATTA - kWh Consumption'
+# month = 0
 
 
-### STEP 1 - narrow down dataframe to chosen site 
-site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
-#the above returns a 12x? dataframe. need to convert it to a list of dataframes 
+# ### STEP 1 - narrow down dataframe to chosen site 
+# site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+# #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
 
-### STEP 2 - Convert the dataframe for a list of dataframes 
-site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
+# ### STEP 2 - Convert the dataframe for a list of dataframes 
+# site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
 
-# ### STEP 3 - extract solar from the original dataframe, and add it to each list 
-site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
+# # ### STEP 3 - extract solar from the original dataframe, and add it to each list 
+# site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
 
-dataframe_to_shift = site_to_plot_solar_added
-### FUNCTION STARTS HERE 
+# dataframe_to_shift = site_to_plot_solar_added
+# ### FUNCTION STARTS HERE 
 
-shifted_site_consumption = [] 
-inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
-### TESTING PURPOSES
-value_to_shift = 50 # FOR TESTING 
-### TESTING PURPOSES
+# shifted_site_consumption = [] 
+# inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
+# ### TESTING PURPOSES
+# value_to_shift = 50 # FOR TESTING 
+# ### TESTING PURPOSES
 
-### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
-value_to_shift_percentage = value_to_shift/100 
+# ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
+# value_to_shift_percentage = value_to_shift/100 
 
-#isolate Dataframe to work on
-single_df_site = dataframe_to_shift[month]
+# #isolate Dataframe to work on
+# single_df_site = dataframe_to_shift[month]
 
-#create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
-no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #change name it OUTSIDE
+# #create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
+# no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #change name it OUTSIDE
 
-#create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS
-solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) #change name to INSIDE
+# #create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS
+# solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) #change name to INSIDE
 
-# sum the total excess solar hours 
-solar_summed = solar_hours_consumption.sum() #total (summed) SOLAR GENERATION to shift
+# # sum the total excess solar hours 
+# solar_summed = solar_hours_consumption.sum() #total (summed) SOLAR GENERATION to shift
 
-# determine solar ratio by dividing half hourly solar generation by total solar generation 
-solar_hours_consumption_ratio = solar_hours_consumption/solar_summed #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
+# # determine solar ratio by dividing half hourly solar generation by total solar generation 
+# solar_hours_consumption_ratio = solar_hours_consumption/solar_summed #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
 
-## shift NON EXCESS SOLAR hours by value_to_shift_percentage,           value is negative, as we want to TAKE AWAY these hours
-no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter #multiple to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
+# ## shift NON EXCESS SOLAR hours by value_to_shift_percentage,           value is negative, as we want to TAKE AWAY these hours
+# no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter #multiple to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
 
-### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
-summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
-summed_positive = summed*inverter #to give a positive number for dividing 
+# ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
+# summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
+# summed_positive = summed*inverter #to give a positive number for dividing 
 
-#create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
-scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
+# #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
+# scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
 
-#adding the scaled shifted consumption to the original solar hours 
-shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 
+# #adding the scaled shifted consumption to the original solar hours 
+# shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 
 
-#take away the shifted load from the original 
-shifted_outside_solar_hours = no_solar_hours_consumption + no_solar_hours_consumption_scaled
+# #take away the shifted load from the original 
+# shifted_outside_solar_hours = no_solar_hours_consumption + no_solar_hours_consumption_scaled
 
-#combine the two dataframe 
-shifted_inside_solar_hours.update(shifted_outside_solar_hours)
-
-
-
-
-### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
-shifted_solar_hours_summed = solar_hours_consumption_ratio*summed #this is what we need to ADD to INSIDE SOLAR HOURS
-
-
-## add the INSIDE SOLAR SHIFTED HOURS to the original INSIDE SOLAR hours
-FINAL_INSIDE_SOLAR_HOURS = shifted_solar_hours_summed+shifted_dataframe_solar_hours
-
-shifted_dataframe_no_solar_hours.update(FINAL_INSIDE_SOLAR_HOURS) #join the two dataframes as one
-
-shifted_site_consumption.append(shifted_dataframe_no_solar_hours) #for punching through each month - disregard for dev
+# #combine the two dataframe 
+# shifted_inside_solar_hours.update(shifted_outside_solar_hours)
 
 
 
 
+# ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
+# shifted_solar_hours_summed = solar_hours_consumption_ratio*summed #this is what we need to ADD to INSIDE SOLAR HOURS
+
+
+# ## add the INSIDE SOLAR SHIFTED HOURS to the original INSIDE SOLAR hours
+# FINAL_INSIDE_SOLAR_HOURS = shifted_solar_hours_summed+shifted_dataframe_solar_hours
+
+# shifted_dataframe_no_solar_hours.update(FINAL_INSIDE_SOLAR_HOURS) #join the two dataframes as one
+
+# shifted_site_consumption.append(shifted_dataframe_no_solar_hours) #for punching through each month - disregard for dev
 
 
 
-
-
-#convert list of dataframe to single dataframe 
-single_site_dataframe = dataframe_compactor(dataframes_to_compact = shifted_site_consumption) #converts the list of dataframes to a single dataframe 
+# #convert list of dataframe to single dataframe 
+# single_site_dataframe = dataframe_compactor(dataframes_to_compact = shifted_site_consumption) #converts the list of dataframes to a single dataframe 
 
 
 
@@ -285,6 +279,8 @@ def render_content(tab):
                 ),
                 html.Div(id='slider-output-container'), #display slider output
                 dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
+                html.P('Excess Solar'), #blank row 
+                dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = solar_figure_line), #display sum of all solar graph as a summed box per month
                 ])
         else: 
             return html.H3("No Solar Data Uploaded")
