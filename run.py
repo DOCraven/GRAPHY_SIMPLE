@@ -110,14 +110,6 @@ def update_output(value, data): #slider is value, dropdown menue is data
 def filter_sites(value):
     return value #just return the value and store it in the location called "memory_output"
         
-### CALLBACK FOR DROP DOWN MENU FOR EXPORTER ####
-# @app.callback( 
-#     Output('daily_graph', 'figure'), 
-#     [Input('Drop_Down_menu_export', 'value')])
-# def update_daily_graph(value):
-#     #filter the names 
-#     return value
-
 
 if __name__ == '__main__':
     app.run_server()

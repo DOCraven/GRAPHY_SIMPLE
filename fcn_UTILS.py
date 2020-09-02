@@ -140,20 +140,28 @@ def Mbox(title, text, style):
     """ERROR BOX FUNCTION POP UP WINDOW"""
     return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
-def dash_solar_plotter(df_to_plot): 
+def dash_solar_plotter(df_to_plot, plot_type): 
     """sum and plot the total solar consumption for each month"""
     ### VARS 
     chosen_site = 'Excess Solar Generation (Total)', #only plot the excess solar
     ### STEP 1 - Load the DF
     dataframe_to_plot = dataframe_chooser(df_to_plot, chosen_site), #dynamically create dataframes to plot 12x months on top of each other for the selected site 
-    ## STEP 2 - SUM the dataframe 
-    summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
-    try: #create the figure to send to dash to plot
-        figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
-    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
-    
-    return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+    if plot_type == 'bar':
+        ## STEP 2 - SUM the dataframe 
+        summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
+        try: #create the figure to send to dash to plot
+            figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
+        except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+        
+        return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+    elif plot_type == 'line': #plot a line for each month
+        try: #create the figure to send to dash to plot
+            fig = dataframe_to_plot[0].iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site[0], asFigure = True) 
+        except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+
+        return fig
 
 def load_shifter_average(dataframe_to_shift, value_to_shift):
     """
@@ -162,33 +170,50 @@ def load_shifter_average(dataframe_to_shift, value_to_shift):
 
     #### VARS ####
     shifted_site_consumption = []
+    
+    ### TESTING PURPOSES
+    value_to_shift = 50 # FOR TESTING 
+    ### TESTING PURPOSES
+    
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
-    value_to_shift_percentage = value_to_shift/100 
+    value_to_shift_percentage = value_to_shift/100 #t
     
     for month in range(0, len(dataframe_to_shift)):
-        #for loop goes here
-        ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
-        # single_df_site = dataframe_to_shift[month].loc[:, ['Wodonga WTP', 'Excess Solar Generation (Total)']] 
-        
-        #for testing, will throw the entire thing into the standard for loop later. 
-        # assume it will be a 2 column dataframe     
+        #isolate Dataframe to work on
         single_df_site = dataframe_to_shift[month]
-        # single_df_site['AVAILABLE'] = single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)'] #adds a column of TRUE vs FALSE for availability 
-        no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #HERE BE ERRORS #######
-        #populate new dataframe only where consumption < PV availability 
-        
-        
 
-        ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
+        #populate new dataframe only where consumption > PV availability 
+        no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) 
+        
+        #populate new dataframe only where consumption < PV availability 
+        solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
+        
+        # sum the total excess solar hours 
+        solar_summed = solar_hours_consumption.sum() #total kWh to shift
+
+        # determine solar ration by dividing half hourly solar by total solar 
+        solar_hours_consumption_ratio = solar_hours_consumption/solar_summed
+
+
+
+
+        ## shift NON EXCESS SOLAR hours by value_to_shift_percentage
         no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage #multiple to get smaller number (ie, number to add to original dataframe)
         
         ### STEP 4 - sum total SHIFTED HOURS
         summed = no_solar_hours_consumption_scaled.sum() #total kWh to shift
         
         ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
-        total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN)
-        individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN
+
+
+
+        total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN) - DONT THINK I NEED THIS ANY MORE 
+        individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN - #DONT NEED THIS EITHER
         
+        ### LOGIC CHANGES HERE ###
+        #create a dataframe with the scaled value 
+
+
         ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
         shifted_dataframe_solar_hours = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
         #identify which hours are available for adding in extra solar (ie, the inverse of no_solar_hours_consumption)
