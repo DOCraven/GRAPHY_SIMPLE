@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 
 #external explicit function files
 from fcn_GUI import GRAPH_GUI, GUI_Solar
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat
+from fcn_UTILS import dataJoiner, xlsxReader_Monthly, intervalResampler, Extension_Checker, Data_Consistency_Checker, CopyCat, load_shifter_average, dataframe_chooser, solar_extractor_adder, dataframe_list_generator, Mbox, load_shifter_scratch
 from fcn_Solar_Calculator import DaySummation, SolarSlicer 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from app import Dash_App #app.py that I created 
@@ -85,7 +85,7 @@ def main():
     sg.theme('Light Blue 2')
 
     layout_landing = [[sg.Text('NEW Landing Page')],
-            [sg.Text('Please open your interval data (and if required, solar data) in either XLS or CSV format')],
+            [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
             [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
             [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
             [sg.Submit(), sg.Cancel()]]
@@ -95,7 +95,22 @@ def main():
     event, values = window.read()
     window.close()
 
-    ## STEP 1: read files, check extensions are valid, and import as dataframes
+    ### AUTOMATICALLY load the data so I dont have to - FOR DEVELOPMENT ONLY 
+    # values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
+
+    try: #so I dont have to comment this out when automatically loading test data 
+        if event == 'Cancel': 
+            exit() #close the app
+    except NameError: 
+        pass 
+    
+
+    #ensure someone has uploaded a file 
+    if not values[0]: #nothing uploaded
+        Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1) #spit out an error box 
+        exit() #close the app
+    
+    ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
         Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
     except UnboundLocalError: 
@@ -108,22 +123,23 @@ def main():
         pass
     
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if Solar_Imported: #combine Solar data to back of the interval load data if it exists
+    if Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
 
     ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
-        
+
     ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
     Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
     
     ## STEP 4: Calculate Weekly averages
-    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
+    Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
         
     ## STEP 5: Calculate Daily Averages
     Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
+
 
     ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
     Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
@@ -131,6 +147,17 @@ def main():
     ## CREATE THE DASH APP, AND SEND THE DATA TOWARDS IT ##
     Dash_App(Daily_Interval_Data = Daily_Interval_Data, Weekly_Interval_Data = Weekly_Interval_Data, Monthly_Sum = Monthly_Sum, Solar_Exists = Solar_Imported)
     
+
+    # ##### scratch - export load shifting stuff to csv - just a placeholder to get it into the DASH APP 
+    # value_to_shift = 10 #%
+    # site_to_shift = 'Wodonga WTP'
+    
+    # load_shifter_scratch(dataframe_to_shift = Checked_Interval_Data_0, value_to_shift = value_to_shift, site_to_shift= site_to_shift) #function to dynamically shift and save the datafraeme 
+
+
+
+
+
     return #nothing main
 
 
