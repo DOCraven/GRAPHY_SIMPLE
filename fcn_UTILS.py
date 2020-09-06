@@ -140,20 +140,28 @@ def Mbox(title, text, style):
     """ERROR BOX FUNCTION POP UP WINDOW"""
     return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
-def dash_solar_plotter(df_to_plot): 
+def dash_solar_plotter(df_to_plot, plot_type): 
     """sum and plot the total solar consumption for each month"""
     ### VARS 
     chosen_site = 'Excess Solar Generation (Total)', #only plot the excess solar
     ### STEP 1 - Load the DF
     dataframe_to_plot = dataframe_chooser(df_to_plot, chosen_site), #dynamically create dataframes to plot 12x months on top of each other for the selected site 
-    ## STEP 2 - SUM the dataframe 
-    summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
-    try: #create the figure to send to dash to plot
-        figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
-    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
-    
-    return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+    if plot_type == 'bar':
+        ## STEP 2 - SUM the dataframe 
+        summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
+        try: #create the figure to send to dash to plot
+            figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
+        except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+        
+        return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
+    elif plot_type == 'line': #plot a line for each month
+        try: #create the figure to send to dash to plot
+            fig = dataframe_to_plot[0].iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site[0], asFigure = True) 
+        except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+
+        return fig
 
 def load_shifter_average(dataframe_to_shift, value_to_shift):
     """
@@ -162,43 +170,55 @@ def load_shifter_average(dataframe_to_shift, value_to_shift):
 
     #### VARS ####
     shifted_site_consumption = []
+    inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
+    
+    ### TESTING PURPOSES
+    # value_to_shift = 50 # FOR TESTING 
+    ### TESTING PURPOSES
+    
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
-    value_to_shift_percentage = value_to_shift/100 
+    value_to_shift_percentage = value_to_shift/100 #t
     
     for month in range(0, len(dataframe_to_shift)):
-        #for loop goes here
-        ### STEP 2 - identify hours which have excess solar load (excess = load > 0) - 
-        # single_df_site = dataframe_to_shift[month].loc[:, ['Wodonga WTP', 'Excess Solar Generation (Total)']] 
-        
-        #for testing, will throw the entire thing into the standard for loop later. 
-        # assume it will be a 2 column dataframe     
+
+        #isolate single dataframe to work on 
         single_df_site = dataframe_to_shift[month]
-        # single_df_site['AVAILABLE'] = single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)'] #adds a column of TRUE vs FALSE for availability 
-        no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #HERE BE ERRORS #######
-        #populate new dataframe only where consumption < PV availability 
-        
+
+        #create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
+        no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #change name it OUTSIDE
+
+        #create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS
+        solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) #change name to INSIDE
+
+        # sum the total excess solar hours 
+        solar_summed = solar_hours_consumption.sum() #total (summed) SOLAR GENERATION to shift
+
+        # determine solar ratio by dividing half hourly solar generation by total solar generation 
+        solar_hours_consumption_ratio = solar_hours_consumption/solar_summed #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
+
+        ## shift NON EXCESS SOLAR hours by value_to_shift_percentage,           value is negative, as we want to TAKE AWAY these hours
+        no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter #multiple to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
+
+        ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
+        summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
+        summed_positive = summed*inverter #to give a positive number for dividing 
+
+        #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
+        scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
+
+        #adding the scaled shifted consumption to the original solar hours 
+        shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 
+
+        #take away the shifted load from the original 
+        shifted_outside_solar_hours = no_solar_hours_consumption + no_solar_hours_consumption_scaled
+
+        #combine the two dataframe 
+        shifted_inside_solar_hours.update(shifted_outside_solar_hours)
+
         
 
-        ### STEP 3 - shift NON EXCESS SOLAR hours by value_to_shift_percentage
-        no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage #multiple to get smaller number (ie, number to add to original dataframe)
-        
-        ### STEP 4 - sum total SHIFTED HOURS
-        summed = no_solar_hours_consumption_scaled.sum() #total kWh to shift
-        
-        ### STEP 5 - divide TOTAL SUMMED hours by total EXCESS SOLAR HOURS 
-        total_available_hours = no_solar_hours_consumption_scaled.isna().sum() #determine number of excess hours (as identified by being a NaN)
-        individual_30_minute_block_scaled = summed/total_available_hours #what to add to each NaN
-        
-        ### STEP 6 - evenly add DIVIDED SUMMED TOTAL HOURS to each EXCESS SOLAR HOUR
-        shifted_dataframe_solar_hours = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) 
-        #identify which hours are available for adding in extra solar (ie, the inverse of no_solar_hours_consumption)
-        shifted_dataframe_solar_hours +=individual_30_minute_block_scaled #add the evenly split shifted generation 
 
-        ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
-        shifted_dataframe_no_solar_hours = no_solar_hours_consumption - no_solar_hours_consumption_scaled #dataframe of shifted NO SOLAR HOURS consumption
-        
-        shifted_dataframe_no_solar_hours.update(shifted_dataframe_solar_hours) #join the two dataframes as one
-        shifted_site_consumption.append(shifted_dataframe_no_solar_hours)
+        shifted_site_consumption.append(shifted_inside_solar_hours)
 
     #convert list of dataframe to single dataframe 
     single_site_dataframe = dataframe_compactor(dataframes_to_compact = shifted_site_consumption) #converts the list of dataframes to a single dataframe 

@@ -100,6 +100,101 @@ config.Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average m
 #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
 print('succesfully loaded and did the backend stuff')
 
+######## CREATING LOAD SHIFTING ################# TEMP #############
+
+#     #### VARS ####
+
+
+# chosen_site = 'Faithful Street WANGARATTA - kWh Consumption'
+# month = 0
+
+
+# ### STEP 1 - narrow down dataframe to chosen site 
+# site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+# #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
+
+# ### STEP 2 - Convert the dataframe for a list of dataframes 
+# site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
+
+# # ### STEP 3 - extract solar from the original dataframe, and add it to each list 
+# site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
+
+# dataframe_to_shift = site_to_plot_solar_added
+# ### FUNCTION STARTS HERE 
+
+# shifted_site_consumption = [] 
+# inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
+# ### TESTING PURPOSES
+# value_to_shift = 50 # FOR TESTING 
+# ### TESTING PURPOSES
+
+# ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
+# value_to_shift_percentage = value_to_shift/100 
+
+# #isolate Dataframe to work on
+# single_df_site = dataframe_to_shift[month]
+
+# #create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
+# no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #change name it OUTSIDE
+
+# #create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS
+# solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) #change name to INSIDE
+
+# # sum the total excess solar hours 
+# solar_summed = solar_hours_consumption.sum() #total (summed) SOLAR GENERATION to shift
+
+# # determine solar ratio by dividing half hourly solar generation by total solar generation 
+# solar_hours_consumption_ratio = solar_hours_consumption/solar_summed #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
+
+# ## shift NON EXCESS SOLAR hours by value_to_shift_percentage,           value is negative, as we want to TAKE AWAY these hours
+# no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter #multiple to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
+
+# ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
+# summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
+# summed_positive = summed*inverter #to give a positive number for dividing 
+
+# #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
+# scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
+
+# #adding the scaled shifted consumption to the original solar hours 
+# shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 
+
+# #take away the shifted load from the original 
+# shifted_outside_solar_hours = no_solar_hours_consumption + no_solar_hours_consumption_scaled
+
+# #combine the two dataframe 
+# shifted_inside_solar_hours.update(shifted_outside_solar_hours)
+
+
+
+
+# ### STEP 7 - recreate new dataframe by subtracting SHIFTED HOURS and adding EXCESS SOLAR HOUR to each hour in the original dataframe  
+# shifted_solar_hours_summed = solar_hours_consumption_ratio*summed #this is what we need to ADD to INSIDE SOLAR HOURS
+
+
+# ## add the INSIDE SOLAR SHIFTED HOURS to the original INSIDE SOLAR hours
+# FINAL_INSIDE_SOLAR_HOURS = shifted_solar_hours_summed+shifted_dataframe_solar_hours
+
+# shifted_dataframe_no_solar_hours.update(FINAL_INSIDE_SOLAR_HOURS) #join the two dataframes as one
+
+# shifted_site_consumption.append(shifted_dataframe_no_solar_hours) #for punching through each month - disregard for dev
+
+
+
+# #convert list of dataframe to single dataframe 
+# single_site_dataframe = dataframe_compactor(dataframes_to_compact = shifted_site_consumption) #converts the list of dataframes to a single dataframe 
+
+
+
+
+
+
+
+
+
+
+
+
 
 ########## VARS SPECIFICALLY FOR DASH  ###############
 names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
@@ -109,7 +204,8 @@ encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 
 if Solar_Exists: #only make this if the solar data has been uploaded
-    solar_figure = dash_solar_plotter(config.Daily_Interval_Data) #make fancy figure 
+    solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
+    solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
 
 
@@ -119,7 +215,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-app.layout = html.Div([ ### MINIMAL LAYOU###
+app.layout = html.Div([ ### MINIMAL LAYOUT###
     html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO 
     dcc.Tabs(id='tabs-example', value='tab-1', children=[ #DISPLAY TABS
         dcc.Tab(label='Load Data', value='tab-1'),
@@ -147,6 +243,7 @@ def render_content(tab):
 
 
         ])
+    
     elif tab == 'tab-2': #FANCY INTERVAL GRAPHS
         return html.Div([
             html.H3('Historical Energy Load Anaylsis Tool'), #quick graph
@@ -158,6 +255,7 @@ def render_content(tab):
             dcc.Graph(id='daily_graph'), #display daily graph
             dcc.Graph(id='weekly_graph'), #display weekly graph
         ])
+    
     elif tab == 'tab-3': #LOAD SHIFTING SITE STUFF
         if Solar_Exists: 
             return html.Div([
@@ -181,6 +279,8 @@ def render_content(tab):
                 ),
                 html.Div(id='slider-output-container'), #display slider output
                 dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
+                html.P('Excess Solar'), #blank row 
+                dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = solar_figure_line), #display sum of all solar graph as a summed box per month
                 ])
         else: 
             return html.H3("No Solar Data Uploaded")
@@ -189,7 +289,8 @@ def render_content(tab):
         if Solar_Exists: ## ie, user uploaded a solar file, so plot the nice and pretty graphs
             return html.Div([
                 html.H3("Solar Data Uploaded"),
-                dcc.Graph(id='Daily Excess Summmed Solar', figure = solar_figure), #display sum of all solar graph
+                dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = solar_figure_line), #display all excess solar graph as a line graph per month
+                dcc.Graph(id='Daily Excess Summmed Solar - bar', figure = solar_figure_summed), #display sum of all solar graph as a summed box per month
 
             ]) 
         else: 
@@ -217,8 +318,9 @@ def render_content(tab):
                 
             ])
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+if __name__ == '__main__': ## run the server
+    webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
+    app.run_server(port=8888, debug=True)
 
 
 
