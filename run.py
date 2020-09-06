@@ -99,7 +99,7 @@ def update_output(value, data): #slider is value, dropdown menue is data
     plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
     figure = shifted_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
     
-    message = 'You have load shifted {}'.format(value) + '%'
+    message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
 
     return figure, message
 
