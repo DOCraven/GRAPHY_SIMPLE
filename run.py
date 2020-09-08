@@ -21,8 +21,11 @@ import time
 import PySimpleGUI as sg
 import cufflinks as cf
 #USER CREATED FUNCTIONS 
-from fcn_UTILS import dataJoiner, xlsxReader_Monthly, Extension_Checker, intervalResampler, Data_Consistency_Checker, CopyCat, character_removal, dataframe_chooser, Mbox, dash_solar_plotter, load_shifter_average, solar_extractor_adder, dataframe_list_generator, dataframe_compactor, load_shifter_scratch, load_shifter_long_list
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
+from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler
+from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
