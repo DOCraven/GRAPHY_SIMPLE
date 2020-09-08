@@ -50,7 +50,7 @@ event, values = window.read()
 window.close()
 
 ### AUTOMATICALLY load the data so I dont have to - FOR DEVELOPMENT ONLY 
-# values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR.xlsx']
+# values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR_60_MINUTES.xlsx']
 
 try: #so I dont have to comment this out when automatically loading test data 
     if event == 'Cancel': 
@@ -165,6 +165,7 @@ def render_content(tab):
         if Solar_Exists: 
             return html.Div([
                 dcc.Store(id='memory_output'), #storing the selected site here
+                dcc.Store(id='month_selection_output'), #storing the selected site here
                 html.H3('Select a site to investigate'), 
                 dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
                     id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
@@ -183,6 +184,28 @@ def render_content(tab):
                     value=0,
                 ),
                 html.Div(id='slider-output-container'), #display slider output
+                html.P(''), #blank row 
+                html.H3('Select a Month to Plot'), 
+                dcc.Dropdown(
+                    id='month_selection',
+                    options=[ #display options for dropdown value 
+                        {'label': 'January', 'value': 'January'},
+                        {'label': 'February', 'value': 'February'},
+                        {'label': 'March', 'value': 'March'},
+                        {'label': 'April', 'value': 'April'},
+                        {'label': 'May', 'value': 'May'},
+                        {'label': 'June', 'value': 'June'},
+                        {'label': 'July', 'value': 'July'},
+                        {'label': 'August', 'value': 'August'},
+                        {'label': 'September', 'value': 'September'},
+                        {'label': 'October', 'value': 'October'},
+                        {'label': 'November', 'value': 'November'},
+                        {'label': 'December', 'value': 'December'},
+                        ],
+                    value='January',
+                    multi=True
+                ),
+                
                 dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
                 html.P('Excess Solar'), #blank row 
                 dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = solar_figure_line), #display sum of all solar graph as a summed box per month
@@ -222,6 +245,11 @@ def render_content(tab):
 
                 
             ])
+
+
+### CALLBACK TESTING ###
+
+
 
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser

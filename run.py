@@ -77,13 +77,14 @@ def update_weekly_graph(selected_name):
         ], 
     [
         dash.dependencies.Input('shifting_slider', 'value'), #read the slider input 
-        dash.dependencies.Input('memory_output', 'data')
+        dash.dependencies.Input('memory_output', 'data'), #read the stored site 
+        dash.dependencies.Input('month_selection_output', 'children') #read the stored month 
         ]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
-def update_output(value, data): #slider is value, dropdown menue is data
+def update_output(value, data, children): #slider is value, dropdown menue is data, selected month is children 
     ## VARS
     chosen_site = data #to narrow down the dataframe using previously existing data
     load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
-
+    chosen_month = children #selected month
     ### STEP 1 - narrow down dataframe to chosen site 
     site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
     #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
@@ -99,8 +100,12 @@ def update_output(value, data): #slider is value, dropdown menue is data
     
 
     ### STEP 5 - create a figure via cufflinks to ploit 
-    plot_title = chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%'
-    figure = shifted_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #
+    plot_title = str(chosen_month) + ' - ' + chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%' #create title for graph depending on what is given to plot
+
+    ### STEP 6 - Filter selected month
+    month_filtered_site = shifted_site.loc[:, chosen_month] #return only selected months 
+
+    figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = plot_title, asFigure = True) #plot the figure 
     
     message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
 
@@ -113,6 +118,13 @@ def update_output(value, data): #slider is value, dropdown menue is data
 def filter_sites(value):
     return value #just return the value and store it in the location called "memory_output"
         
+######### CALLBACK FOR MONTH DROP DOWN BOX ######
+@app.callback(
+    dash.dependencies.Output('month_selection_output', 'children'),
+    [dash.dependencies.Input('month_selection', 'value')])
+def update_output(value):
+    return (value) #ie, what is selected via the drop down box 
+
 
 if __name__ == '__main__':
     app.run_server()
