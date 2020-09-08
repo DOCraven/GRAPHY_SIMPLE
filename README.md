@@ -3,6 +3,7 @@
 ## NORTH EAST WATER
 
 ## JOSE TEST
+# I modified this from my laptop
 
 ## Context
 A program to assist in analysing NEW's industrial energy consumption. Takes two  `xls` files of interval data and solar forecast data, and returns a number of different average load profiles. 
