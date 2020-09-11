@@ -114,13 +114,24 @@ def MonthToDaySum(df):
             
     return sampled
 
-def ConsumptionSummer(df_to_sum): 
+def ConsumptionSummer(df_to_sum, sum_interval): 
     """ Function to sum the entire year, month, week and daily average data and return those numbers"""
     
     summed_consumption_data = []
-    ### STEP 1: Sum data frame down the columns 
-    for i in range(0, len(df_to_sum)): #iterate through each month (as given a list of dataframes)
-        summed_consumption_data.append(df_to_sum[i].sum())
 
-    return summed_consumption_data
+    if sum_interval == 'MONTHLY': #sum each site and return a list of each month
+        ### STEP 1: Sum data frame down the columns 
+        for i in range(0, len(df_to_sum)): #iterate through each month (as given a list of dataframes)
+            summed_consumption_data.append(df_to_sum[i].sum())
 
+        return summed_consumption_data
+
+    elif sum_interval == 'YEARLY': #sum the total kWh consumption for the year, and return a single dataframe 
+        for i in range(0, len(df_to_sum)): #iterate through each month (as given a list of dataframes)
+            summed_consumption_data.append(df_to_sum[i].sum()) #create a list of dataframes with the total summation for each site 
+
+        for i in range(0, len(summed_consumption_data)): #iterate through each dataframe again
+            summed_consumption_data[0] += summed_consumption_data[i]
+            
+
+    return summed_consumption_data[0].sort_values(ascending=False) #only return the first index of the list, sorted from Highest to Lowest

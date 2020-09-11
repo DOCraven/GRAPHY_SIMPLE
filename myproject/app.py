@@ -96,9 +96,12 @@ config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0)
 ## STEP 5: Calculate Daily Averages
 config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
-## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily)
-config.Monthly_Sum = ConsumptionSummer(Checked_Interval_Data_1) #total average month (x12 months)
+## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
+config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
+config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)
 
+#create plotly plot figure
+yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
 #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
 print('succesfully loaded and did the backend stuff')
 
@@ -128,6 +131,7 @@ app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TA
         dcc.Tab(label='Load Shifting', value='tab-3'),
         dcc.Tab(label='Excess Solar', value='tab-4'),
         dcc.Tab(label='Export Load Shift Data', value='tab-5'),
+        dcc.Tab(label='Total Site Summation', value='tab-6'),
         dcc.Tab(label='About', value='tab-99'),
     ]),
     html.Div(id='tabs-example-content')
@@ -235,7 +239,19 @@ def render_content(tab):
 
             ])
 
-    elif tab == 'tab-6': #ABOUT - FILL IN WITH THE README WHEN I HAVE TIME
+    elif tab == 'tab-6': #YEARLY TOTALS PER SITE
+            return html.Div([
+                html.H3('Yearly Site Consumption'),
+                dcc.Graph(id='Total Yearly Site Consumption - bar', figure = yearly_summed_figure)
+
+
+
+
+
+
+            ])
+
+    elif tab == 'tab-99': #ABOUT - FILL IN WITH THE README WHEN I HAVE TIME
             return html.Div([
                 html.H3('About'),
 
