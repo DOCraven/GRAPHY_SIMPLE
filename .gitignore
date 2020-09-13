@@ -43,11 +43,11 @@ Thumbs.db
 /__pycache__
 /Daily Outputs
 
+
 # Files to Ignore #
 ###################
 TEST*.py
-
-__pycache__/dash_Graphs.cpython-38.pyc
-__pycache__/fcn_Averages.cpython-38.pyc
-__pycache__/fcn_UTILS.cpython-38.pyc
-__pycache__/noit a test.cpython-38.pyc
+venv
+*.pyc
+.DS_Store
+.env
