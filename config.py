@@ -6,3 +6,5 @@ Monthly_Sum = []
 Yearly_Sum = []
 names = []
 chosen_site = ''
+Solar_Imported = False
+Solar_Exists = False
