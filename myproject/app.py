@@ -35,22 +35,22 @@ from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA I
 Solar_Imported = False
 plt.close('all') #ensure all windows are closed
 
-# ## Create the MAIN GUI LANDING PAGE ##
-# sg.theme('Light Blue 2')
+## Create the MAIN GUI LANDING PAGE ##
+sg.theme('Light Blue 2')
 
-# layout_landing = [[sg.Text('NEW Landing Page')],
-#         [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
-#         [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-#         [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-#         [sg.Submit(), sg.Cancel()]]
+layout_landing = [[sg.Text('NEW Landing Page')],
+        [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
+        [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+        [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+        [sg.Submit(), sg.Cancel()]]
 
-# window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
 
-# event, values = window.read()
-# window.close()
+event, values = window.read()
+window.close()
 
 ### AUTOMATICALLY load the data so I dont have to - FOR DEVELOPMENT AND HEROKU DEPLOYMENT ONLY 
-values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\2019_NE_WATER_EXTERNAL_LOAD.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx']
+# values = ['C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\2019_NE_WATER_EXTERNAL_LOAD.xlsx', 'C:\\Scratch\\Python\\Simple_Graphy\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx']
 
 try: #so I dont have to comment this out when automatically loading test data 
     if event == 'Cancel': 
@@ -145,6 +145,7 @@ def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
             html.H3('LOAD DATA GOES HERE'),
+            html.Button('Submit', id='submit-val', n_clicks=0) #create the button to load the data
 
 
 
