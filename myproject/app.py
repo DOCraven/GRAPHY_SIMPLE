@@ -34,87 +34,8 @@ from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA I
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
-
-## Create the MAIN GUI LANDING PAGE ##
-# sg.theme('Light Blue 2')
-
-# layout_landing = [[sg.Text('NEW Landing Page')],
-#         [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
-#         [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-#         [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
-#         [sg.Submit(), sg.Cancel()]]
-
-# window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
-
-# event, values = window.read()
-# window.close()
-
-### AUTOMATICALLY load the data so I dont have to - FOR DEVELOPMENT AND HEROKU DEPLOYMENT ONLY 
-# values = ['C:\\Scratch\\Python\\GRAPHY_SIMPLE\\INPUT DATA\\test.xlsx', 'C:\\Scratch\\Python\\GRAPHY_SIMPLE\\INPUT DATA\\SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx']
-
-# try: #so I dont have to comment this out when automatically loading test data 
-#     if event == 'Cancel': 
-#         exit() #close the app
-# except NameError: 
-#     pass 
-
-
-# #ensure someone has uploaded a file 
-# if not values[0]: #nothing uploaded
-#     Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1) #spit out an error box 
-#     exit() #close the app
-
-# ## STEP 1: Read the file 
-# try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
-#     Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
-# except UnboundLocalError: 
-#     pass
-# try: #read the solar data
-#     if values[1]: #only read if solar data is input
-#         config.Solar_Imported = True #for data handling later on. 
-#         Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
-# except UnboundLocalError: 
-#     pass
-
-# ## STEP 1A: join the solar data to the dataframe (if necessary)
-# if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
-#     config.Solar_Exists = True
-#     Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
-# else: #does not combine the solar data to the back of the interval load data
-#     Full_Interval_Data = Interval_Data
-#     config.Solar_Exists = False
-
-# ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
-# Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
-
-# ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
-# Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
-
-# ## STEP 4: Calculate Weekly averages
-# config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
-    
-# ## STEP 5: Calculate Daily Averages
-# config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
-
-# ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
-# config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
-# config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)
-
-# #create plotly plot figure
-# yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
-# #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-# print('succesfully loaded and did the backend stuff')
-
-# ########## VARS SPECIFICALLY FOR DASH  ###############
-# config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
-# chosen_site = '' #to make this VAR global
 image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-
-# #create excess solar plots for DASH
-# if config.Solar_Exists: #only make this if the solar data has been uploaded
-#     config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
-#     config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
@@ -190,7 +111,7 @@ def render_content(tab):
                         min=0,
                         max=50,
                         step=1,
-                        value=0,
+                        value=0, #initial slider value - TODO: read dataframe holding that information in it 
                     ),
                     html.Div(id='slider-output-container'), #display slider output
                     html.P(''), #blank row 
