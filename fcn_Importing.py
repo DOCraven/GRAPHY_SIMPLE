@@ -2,8 +2,15 @@
 import pandas as pd
 import ctypes
 import cufflinks as cf
+#USER CREATED FUNCTIONS 
+from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
+from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
+
+
 
 
 def xlsxReader_Monthly(xls_file_path): 
@@ -60,5 +67,63 @@ def intervalResampler(input_df, chosen_interval = 30):
     
     return resampledDF
 
+def Data_Analyser(names_of_xlsx): 
+    """
+    function to hold all the data anaylsis functions 
+    """
 
+    values = names_of_xlsx
+## STEP 1: Read the file 
+    try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
+        Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+    except UnboundLocalError: 
+        pass
+    try: #read the solar data
+        if values[1]: #only read if solar data is input
+            config.Solar_Imported = True #for data handling later on. 
+            Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
+    except UnboundLocalError: 
+        pass
+
+    ## STEP 1A: join the solar data to the dataframe (if necessary)
+    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
+        config.Solar_Exists = True
+        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+    else: #does not combine the solar data to the back of the interval load data
+        Full_Interval_Data = Interval_Data
+        config.Solar_Exists = False
+
+    ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
+    Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
+
+    ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
+    Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
+
+    ## STEP 4: Calculate Weekly averages
+    config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
+        
+    ## STEP 5: Calculate Daily Averages
+    config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
+
+    ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
+    config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
+    config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)
+
+    #create plotly plot figure
+    config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
+    #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
+    print('succesfully loaded and did the backend stuff')
+
+    ########## VARS SPECIFICALLY FOR DASH  ###############
+    config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
+    config.chosen_site = '' #to make this VAR global
+    
+
+    #create excess solar plots for DASH
+    if config.Solar_Exists: #only make this if the solar data has been uploaded
+        config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
+        config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
+
+    return #nothing
+    
 
