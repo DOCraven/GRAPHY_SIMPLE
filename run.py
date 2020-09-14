@@ -125,6 +125,48 @@ def filter_sites(value):
 def update_output(value):
     return (value) #ie, what is selected via the drop down box 
 
+######### CALLBACK FOR LOADING BUTTON ##########
+@app.callback(
+    dash.dependencies.Output('container-button-basic', 'children'),
+    [dash.dependencies.Input('submit-val', 'n_clicks')],
+    [dash.dependencies.State('input-on-submit', 'value')]
+    )
+def update_output(n_clicks, value):
+    #open the load window on button click
+    sg.theme('Light Blue 2')
+
+    layout_landing = [[sg.Text('NEW Landing Page')], #layout
+            [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
+            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Submit(), sg.Cancel()]]
+
+    if n_clicks >= 1:  #open the LOADING window only after a click
+        window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+
+        event, values = window.read()
+        window.close()
+        config.Data_Uploaded = True
+        
+        try: #so I dont have to comment this out when automatically loading test data 
+            if event == 'Cancel': 
+                exit() #close the app
+        except NameError: 
+            pass 
+
+        #ensure someone has uploaded a file 
+        if not values[0]: #nothing uploaded
+            Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1) #spit out an error box 
+            exit() #close the app
+
+        Data_Analyser(values) #function to analyise all the data 
+
+        return 'Data loaded:  "{}" '.format(
+            values[0]
+        )
+
+
+
 
 if __name__ == '__main__':
     app.run_server()
