@@ -23,7 +23,7 @@ import cufflinks as cf
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
-from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler
+from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
@@ -124,6 +124,48 @@ def filter_sites(value):
     [dash.dependencies.Input('month_selection', 'value')])
 def update_output(value):
     return (value) #ie, what is selected via the drop down box 
+
+######### CALLBACK FOR LOADING BUTTON ##########
+@app.callback(
+    dash.dependencies.Output('container-button-basic', 'children'),
+    [dash.dependencies.Input('submit-val', 'n_clicks')],
+    [dash.dependencies.State('input-on-submit', 'value')]
+    )
+def update_output(n_clicks, value):
+    #open the load window on button click
+    sg.theme('Light Blue 2')
+
+    layout_landing = [[sg.Text('NEW Landing Page')], #layout
+            [sg.Text('Please open your interval data (and if required, solar data) in XLS format')],
+            [sg.Text('Interval Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Text('Solar Data', size=(10, 1)), sg.Input(), sg.FileBrowse()],
+            [sg.Submit(), sg.Cancel()]]
+
+    if n_clicks >= 1:  #open the LOADING window only after a click
+        window = sg.Window('NEW Graphy (Simple)', layout_landing) #open the window 
+
+        event, values = window.read()
+        window.close()
+        config.Data_Uploaded = True
+        
+        try: #so I dont have to comment this out when automatically loading test data 
+            if event == 'Cancel': 
+                exit() #close the app
+        except NameError: 
+            pass 
+
+        #ensure someone has uploaded a file 
+        if not values[0]: #nothing uploaded
+            Mbox('UPLOAD ERROR', 'Please upload a CSV or XLSX file', 1) #spit out an error box 
+            exit() #close the app
+
+        Data_Analyser(values) #function to analyise all the data 
+
+        return 'Data loaded:  "{}" '.format(
+            values[0]
+        )
+
+
 
 
 if __name__ == '__main__':
