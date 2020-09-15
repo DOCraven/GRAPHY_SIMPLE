@@ -69,8 +69,6 @@ def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
             html.H3('Load Interval and Solar Data'),
-
-            
             #upload data
             html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
             dcc.Upload(
@@ -89,7 +87,9 @@ def render_content(tab):
             # Allow multiple files to be uploaded
             multiple=True
             ),
-            html.Div(id='output-data-upload'),
+            html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
+
+
         ])
     
     elif tab == 'tab-2': #FANCY INTERVAL GRAPHS
@@ -216,8 +216,6 @@ def render_content(tab):
 
 ### CALLBACK TESTING ###
 
-
-    
 
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser

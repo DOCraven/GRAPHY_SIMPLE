@@ -97,12 +97,12 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
         pass
 
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
-        # config.Solar_Exists = True
+    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
+        config.Solar_Exists = True
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
-        # config.Solar_Exists = False
+        config.Solar_Exists = False
 
     ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
@@ -141,6 +141,18 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
 def parse_contents(contents, filename, date):
     ## VARS
     #create empty dataframes
+    config.parse_contents_run_number = config.parse_contents_run_number + 1 #to keep track of the number of times it is run 
+
+    if config.parse_contents_run_number > 1: #ie, solar has been added
+        #clear the dataframes 
+        config.Solar = config.Solar.iloc[0:0]
+        config.Consumption = config.Consumption.iloc[0:0]
+        config.parse_contents_run_number = 0 #reset the number 
+        config.Solar_Imported = False #for data anlyser to not make a mistake 
+        print('RESET ALL DATAFRAMES')
+
+
+
     config.Solar_Exists = False
     content_type, content_string = contents.split(',')
 
