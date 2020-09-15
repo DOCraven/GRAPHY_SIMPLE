@@ -90,19 +90,19 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     except UnboundLocalError: 
         pass
     try: #read the solar data
-        if solar_interval: #only read if solar data is input
+        if not solar_interval.empty: #only read if solar data is input
             config.Solar_Imported = True #for data handling later on. 
             Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
-    except UnboundLocalError: 
+    except AttributeError: 
         pass
 
     ## STEP 1A: join the solar data to the dataframe (if necessary)
     if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
-        config.Solar_Exists = True
+        # config.Solar_Exists = True
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
-        config.Solar_Exists = False
+        # config.Solar_Exists = False
 
     ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
@@ -135,9 +135,13 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
         config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
         config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
+    config.Data_Uploaded = True #allow other pages to open in the Dash App 
     return #nothing
     
 def parse_contents(contents, filename, date):
+    ## VARS
+    #create empty dataframes
+    config.Solar_Exists = False
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
@@ -170,11 +174,13 @@ def parse_contents(contents, filename, date):
 
         #convert to global list of dataframes, and do the averaging etc for backend work 
         Data_Analyser(config.Consumption, config.Solar) #pass consumption data AND solar data
-    
+        config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
+
     elif not config.Consumption.empty and config.Solar.empty: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
 
         #convert to global list of dataframes, and do the averaging etc for backend work 
         Data_Analyser(config.Consumption) #only pass the interval data
+        config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
 
 
     return html.Div([ #display the data in the dash app for verification

@@ -69,24 +69,27 @@ def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
             html.H3('Load Interval and Solar Data'),
+
+            
+            #upload data
             html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
             dcc.Upload(
-            html.Button('Upload Files'), 
-            id='upload-data',
-            style={ #make a nice box around it
-            'width': '100%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px'
-        },
-        # Allow multiple files to be uploaded
-        multiple=True
-        ),
-        html.Div(id='output-data-upload'),
+                html.Button('Upload Files'), 
+                id='upload-data',
+                style={ #make a nice box around it
+                'width': '100%',
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            },
+            # Allow multiple files to be uploaded
+            multiple=True
+            ),
+            html.Div(id='output-data-upload'),
         ])
     
     elif tab == 'tab-2': #FANCY INTERVAL GRAPHS
@@ -213,6 +216,8 @@ def render_content(tab):
 
 ### CALLBACK TESTING ###
 
+
+    
 
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser

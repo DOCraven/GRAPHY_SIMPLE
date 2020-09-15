@@ -130,6 +130,7 @@ def update_output(value):
 
 ######### CALLBACK FOR LOADING BUTTON ##########
 @app.callback(
+    
     dash.dependencies.Output('container-button-basic', 'children'),
     [dash.dependencies.Input('submit-val', 'n_clicks')],
     [dash.dependencies.State('input-on-submit', 'value')]
@@ -174,7 +175,12 @@ def update_output(n_clicks, value):
               [Input('upload-data', 'contents')],
               [State('upload-data', 'filename'),
                State('upload-data', 'last_modified')])
-def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works, 
+def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works,
+    
+    config.Solar = config.Solar.iloc[0:0] #empty dataframe for solar 
+    config.Consumption = config.Consumption.iloc[0:0] #empty dataframe for consumption  
+
+    print('cleared dataframes in callback (ie, button press') 
     if list_of_contents is not None:
         children = [
             parse_contents(c, n, d) for c, n, d in
