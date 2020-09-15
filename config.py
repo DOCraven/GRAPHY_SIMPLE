@@ -23,4 +23,5 @@ yearly_summed_figure = ''
 #importing stuff 
 Solar = pd.DataFrame() #empty dataframe for solar 
 Consumption = pd.DataFrame() #empty dataframe for consumption  
-parse_contents_run_number = 0
+reset_dataframes = False
+number_of_files_uploaded = 0

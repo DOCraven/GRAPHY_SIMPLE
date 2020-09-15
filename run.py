@@ -170,18 +170,15 @@ def update_output(n_clicks, value):
         )
 
 
-######### CALLBACK FOR DASH LOADING ##########
+######### CALLBACK FOR DASH IMPORTING/LOADING FILES ##########
 @app.callback(Output('output-data-upload', 'children'),
               [Input('upload-data', 'contents')],
               [State('upload-data', 'filename'),
                State('upload-data', 'last_modified')])
 def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works,
-    
-    # config.Solar = config.Solar.iloc[0:0] #empty dataframe for solar 
-    # config.Consumption = config.Consumption.iloc[0:0] #empty dataframe for consumption  
-
-    # print('cleared dataframes in callback (ie, button press') 
     if list_of_contents is not None:
+        config.number_of_files_uploaded = len(list_of_names) #determine the number of files uploaded
+        config.reset_dataframes = True #to stop this function being called again
         children = [
             parse_contents(c, n, d) for c, n, d in
             zip(list_of_contents, list_of_names, list_of_dates)]
