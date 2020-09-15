@@ -149,11 +149,11 @@ def parse_contents(contents, filename, date):
         config.Consumption = config.Consumption.iloc[0:0]
         config.parse_contents_run_number = 0 #reset the number 
         config.Solar_Imported = False #for data anlyser to not make a mistake 
+        config.Solar_Exists = False
         print('RESET ALL DATAFRAMES')
 
 
 
-    config.Solar_Exists = False
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
