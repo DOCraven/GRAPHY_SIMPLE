@@ -7,6 +7,8 @@ from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA I
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
+from dash.dependencies import Input, Output, State
+import dash_table
 #ANALYSIS ETC
 import pandas as pd
 import datetime as dt
@@ -20,10 +22,11 @@ import ctypes
 import time
 import PySimpleGUI as sg
 import cufflinks as cf
+import base64
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
-from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser
+from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
@@ -127,6 +130,7 @@ def update_output(value):
 
 ######### CALLBACK FOR LOADING BUTTON ##########
 @app.callback(
+    
     dash.dependencies.Output('container-button-basic', 'children'),
     [dash.dependencies.Input('submit-val', 'n_clicks')],
     [dash.dependencies.State('input-on-submit', 'value')]
@@ -166,6 +170,22 @@ def update_output(n_clicks, value):
         )
 
 
+######### CALLBACK FOR DASH LOADING ##########
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'contents')],
+              [State('upload-data', 'filename'),
+               State('upload-data', 'last_modified')])
+def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works,
+    
+    # config.Solar = config.Solar.iloc[0:0] #empty dataframe for solar 
+    # config.Consumption = config.Consumption.iloc[0:0] #empty dataframe for consumption  
+
+    # print('cleared dataframes in callback (ie, button press') 
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
 
 
 if __name__ == '__main__':

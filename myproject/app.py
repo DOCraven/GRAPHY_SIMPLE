@@ -2,13 +2,16 @@
 from .server import app, server
 #DASH
 import dash
+from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_table
 #ANALYSIS ETC
 import pandas as pd
 import datetime as dt
 import numpy as np
 import os
+import io
 import matplotlib.pyplot as plt
 import datetime as dt
 import webbrowser
@@ -21,7 +24,7 @@ import cufflinks as cf
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
-from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser
+from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
@@ -66,10 +69,29 @@ def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
             html.H3('Load Interval and Solar Data'),
-            html.Div(dcc.Input(id='input-on-submit', type='text')),
-            html.Button('Load Data', id='submit-val', n_clicks=0),
-            html.Div(id='container-button-basic',
-                children='Enter a value and press submit')
+            #upload data
+            html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
+            html.P('Please upload a maximum of 2 interval files'),
+            html.P('There is minimal error checking for number of data files uploaded. This may be added in future versions'),
+            html.P('Please be aware that the program takes a little while to do the analysis in the background. Currently there is no loading animation. This may change in future versions. Please be patient, this is a work in progress'),
+            dcc.Upload(
+                html.Button('Upload Files'), 
+                id='upload-data',
+                style={ #make a nice box around it
+                'width': '100%',
+                'height': '60px',
+                'lineHeight': '60px',
+                'borderWidth': '1px',
+                'borderStyle': 'dashed',
+                'borderRadius': '5px',
+                'textAlign': 'center',
+                'margin': '10px'
+            },
+            # Allow multiple files to be uploaded
+            multiple=True
+            ),
+            html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
+
 
         ])
     
@@ -175,6 +197,7 @@ def render_content(tab):
             return html.Div([
                 html.H3('Please upload interval and/or solar')
             ])
+    
     elif tab == 'tab-6': #YEARLY TOTALS PER SITE
             if config.Data_Uploaded: 
                 return html.Div([
@@ -196,6 +219,7 @@ def render_content(tab):
 
 ### CALLBACK TESTING ###
 
+
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     app.run_server(port=8888, debug=True)
@@ -204,5 +228,5 @@ if __name__ == '__main__': ## run the server
 
 
 
-
+  
 

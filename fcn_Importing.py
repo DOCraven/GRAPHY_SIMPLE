@@ -2,6 +2,15 @@
 import pandas as pd
 import ctypes
 import cufflinks as cf
+import base64
+import datetime as dt 
+import io
+#DASH DEPENDANCIES 
+import dash
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+import dash_html_components as html
+import dash_table
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
@@ -13,7 +22,7 @@ import config
 
 
 
-def xlsxReader_Monthly(xls_file_path): 
+def xlsxReader_Monthly(dataframe_to_split): 
     """reads a given file (xls_file_path) and returns a list of DataFrames split into months
     Access said dataframe via indexing
     ie, JAN = 0
@@ -22,9 +31,9 @@ def xlsxReader_Monthly(xls_file_path):
         DEC = 11
     """
     ### STEP 1 -  read the data without index files
-    data = pd.read_excel(xls_file_path, parse_dates = True, index_col = None) #reads entire df and parses dates without creating an index
+    # data = pd.read_excel(xls_file_path, parse_dates = True, index_col = None) #reads entire df and parses dates without creating an index
     
-    months = [g for n, g in data.groupby(pd.Grouper(key='Interval End',freq='M'))] #splits it into months
+    months = [g for n, g in dataframe_to_split.groupby(pd.Grouper(key='Interval End',freq='M'))] #splits it into months
         # is a list, so just access each list as an index (ie, JAN = 0, FEB = 1)
         # https://stackoverflow.com/a/49491178/13181119
     
@@ -67,26 +76,28 @@ def intervalResampler(input_df, chosen_interval = 30):
     
     return resampledDF
 
-def Data_Analyser(names_of_xlsx): 
+def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal none because solar is not always passed to this function 
     """
     function to hold all the data anaylsis functions 
     """
-
-    values = names_of_xlsx
+    ## VARS ##
+    # Interval_Data = [] #empty list for scope 
+    # values = [consumption_interval, solar_interval] #dont need
 ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
-        Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+        # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+        Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
     except UnboundLocalError: 
         pass
     try: #read the solar data
-        if values[1]: #only read if solar data is input
+        if not solar_interval.empty: #only read if solar data is input
             config.Solar_Imported = True #for data handling later on. 
-            Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
-    except UnboundLocalError: 
+            Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
+    except AttributeError: 
         pass
 
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER
+    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
         config.Solar_Exists = True
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
@@ -124,6 +135,73 @@ def Data_Analyser(names_of_xlsx):
         config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
         config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
+    config.Data_Uploaded = True #allow other pages to open in the Dash App 
     return #nothing
     
+def parse_contents(contents, filename, date):
+    ## VARS
+    #create empty dataframes
+    config.parse_contents_run_number = config.parse_contents_run_number + 1 #to keep track of the number of times it is run 
 
+    if config.parse_contents_run_number > 1: #ie, solar has been added
+        #clear the dataframes 
+        config.Solar = config.Solar.iloc[0:0]
+        config.Consumption = config.Consumption.iloc[0:0]
+        config.parse_contents_run_number = 0 #reset the number 
+        config.Solar_Imported = False #for data anlyser to not make a mistake 
+        config.Solar_Exists = False
+        print('RESET ALL DATAFRAMES')
+
+
+
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    #Pass each interval data to the respective CONSUMPTION or SOLAR dataframe
+    # global config.Solar #make solar global 
+    # global config.Consumption #make consumption global 
+    if "SOLAR" in str(filename.upper()): #look for solar in the filename
+        config.Solar = df #assume it is solar 
+        print('reading solar input')
+    else: 
+        config.Consumption = df #else assume it is the Consumption data
+        print('reading consumption input')
+    ## Do the magic analysis here
+
+    if not config.Consumption.empty and not config.Solar.empty: #ie, 2 files uploaded, pass both to the analysier function 
+
+        #convert to global list of dataframes, and do the averaging etc for backend work 
+        Data_Analyser(config.Consumption, config.Solar) #pass consumption data AND solar data
+        config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
+
+    elif not config.Consumption.empty and config.Solar.empty: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
+
+        #convert to global list of dataframes, and do the averaging etc for backend work 
+        Data_Analyser(config.Consumption) #only pass the interval data
+        config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
+
+
+    return html.Div([ #display the data in the dash app for verification
+        html.H5(filename),
+        html.H6(dt.datetime.fromtimestamp(date)),
+
+        dash_table.DataTable( #display the data in a table in the webbrowser
+            data=df.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in df.columns]
+        ),
+        html.Hr(),  # horizontal line
+    ])
