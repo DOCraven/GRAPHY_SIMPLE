@@ -2,6 +2,15 @@
 import pandas as pd
 import ctypes
 import cufflinks as cf
+import base64
+import datetime as dt 
+import io
+#DASH DEPENDANCIES 
+import dash
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+import dash_html_components as html
+import dash_table
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
@@ -126,4 +135,42 @@ def Data_Analyser(names_of_xlsx):
 
     return #nothing
     
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
 
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            print('reading xlsx from function file')
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    ## testing logic here
+    
+    #determine what dataframe is what? Ie load and solar data
+    global Solar #make solar global 
+    global Consumption #make consumption global 
+    if "SOLAR" in str(filename.upper()): #look for solar in the filename
+        Solar = df #assume it is solar 
+    else: 
+        Consumption = df #else assume it is the Consumption data
+
+    return html.Div([ #display the data in the dash app for verification
+        html.H5(filename),
+        html.H6(dt.datetime.fromtimestamp(date)),
+
+        dash_table.DataTable( #display the data in a table in the webbrowser
+            data=df.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in df.columns]
+        ),
+        html.Hr(),  # horizontal line
+    ])

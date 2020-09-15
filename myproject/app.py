@@ -2,13 +2,16 @@
 from .server import app, server
 #DASH
 import dash
+from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_table
 #ANALYSIS ETC
 import pandas as pd
 import datetime as dt
 import numpy as np
 import os
+import io
 import matplotlib.pyplot as plt
 import datetime as dt
 import webbrowser
@@ -21,7 +24,7 @@ import cufflinks as cf
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
-from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser
+from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
@@ -66,11 +69,24 @@ def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
             html.H3('Load Interval and Solar Data'),
-            html.Div(dcc.Input(id='input-on-submit', type='text')),
-            html.Button('Load Data', id='submit-val', n_clicks=0),
-            html.Div(id='container-button-basic',
-                children='Enter a value and press submit')
-
+            html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
+            dcc.Upload(
+            html.Button('Upload Files'), 
+            id='upload-data',
+            style={ #make a nice box around it
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+        ),
+        html.Div(id='output-data-upload'),
         ])
     
     elif tab == 'tab-2': #FANCY INTERVAL GRAPHS
@@ -175,6 +191,7 @@ def render_content(tab):
             return html.Div([
                 html.H3('Please upload interval and/or solar')
             ])
+    
     elif tab == 'tab-6': #YEARLY TOTALS PER SITE
             if config.Data_Uploaded: 
                 return html.Div([
@@ -195,6 +212,62 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
+# def parse_contents(contents, filename, date):
+#     content_type, content_string = contents.split(',')
+
+#     decoded = base64.b64decode(content_string)
+#     try:
+#         if 'csv' in filename:
+#             # Assume that the user uploaded a CSV file
+#             df = pd.read_csv(
+#                 io.StringIO(decoded.decode('utf-8')))
+#         elif 'xls' in filename:
+#             # Assume that the user uploaded an excel file
+#             print('reading xlsx')
+#             df = pd.read_excel(io.BytesIO(decoded))
+#     except Exception as e:
+#         print(e)
+#         return html.Div([
+#             'There was an error processing this file.'
+#         ])
+
+#     ## testing logic here
+    
+#     #determine what dataframe is what? Ie load and solar data
+#     global Solar #make solar global 
+#     global Consumption #make consumption global 
+#     if "SOLAR" in str(filename.upper()): #look for solar in the filename
+#         Solar = df #assume it is solar 
+#     else: 
+#         Consumption = df #else assume it is the Consumption data
+
+#     return html.Div([ #display the data in the dash app for verification
+#         html.H5(filename),
+#         html.H6(dt.datetime.fromtimestamp(date)),
+
+#         dash_table.DataTable( #display the data in a table in the webbrowser
+#             data=df.to_dict('records'),
+#             columns=[{'name': i, 'id': i} for i in df.columns]
+#         ),
+#         html.Hr(),  # horizontal line
+#     ])
+
+
+# @app.callback(Output('output-data-upload', 'children'),
+#               [Input('upload-data', 'contents')],
+#               [State('upload-data', 'filename'),
+#                State('upload-data', 'last_modified')])
+# def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works, 
+#     if list_of_contents is not None:
+#         children = [
+#             parse_contents(c, n, d) for c, n, d in
+#             zip(list_of_contents, list_of_names, list_of_dates)]
+#         return children
+
+
+
+
+
 
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
