@@ -71,6 +71,9 @@ def render_content(tab):
             html.H3('Load Interval and Solar Data'),
             #upload data
             html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
+            html.P('Please upload a maximum of 2 interval files'),
+            html.P('There is minimal error checking for number of data files uploaded. This may be added in future versions'),
+            html.P('Please be aware that the program takes a little while to do the analysis in the background. Currently there is no loading animation. This may change in future versions. Please be patient, this is a work in progress'),
             dcc.Upload(
                 html.Button('Upload Files'), 
                 id='upload-data',
@@ -225,5 +228,5 @@ if __name__ == '__main__': ## run the server
 
 
 
-
+  
 
