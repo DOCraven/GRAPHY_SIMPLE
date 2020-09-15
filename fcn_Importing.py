@@ -22,7 +22,7 @@ import config
 
 
 
-def xlsxReader_Monthly(xls_file_path): 
+def xlsxReader_Monthly(dataframe_to_split): 
     """reads a given file (xls_file_path) and returns a list of DataFrames split into months
     Access said dataframe via indexing
     ie, JAN = 0
@@ -31,9 +31,9 @@ def xlsxReader_Monthly(xls_file_path):
         DEC = 11
     """
     ### STEP 1 -  read the data without index files
-    data = pd.read_excel(xls_file_path, parse_dates = True, index_col = None) #reads entire df and parses dates without creating an index
+    # data = pd.read_excel(xls_file_path, parse_dates = True, index_col = None) #reads entire df and parses dates without creating an index
     
-    months = [g for n, g in data.groupby(pd.Grouper(key='Interval End',freq='M'))] #splits it into months
+    months = [g for n, g in dataframe_to_split.groupby(pd.Grouper(key='Interval End',freq='M'))] #splits it into months
         # is a list, so just access each list as an index (ie, JAN = 0, FEB = 1)
         # https://stackoverflow.com/a/49491178/13181119
     
@@ -76,21 +76,23 @@ def intervalResampler(input_df, chosen_interval = 30):
     
     return resampledDF
 
-def Data_Analyser(names_of_xlsx): 
+def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal none because solar is not always passed to this function 
     """
     function to hold all the data anaylsis functions 
     """
-
-    values = names_of_xlsx
+    ## VARS ##
+    # Interval_Data = [] #empty list for scope 
+    # values = [consumption_interval, solar_interval] #dont need
 ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
-        Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+        # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+        Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
     except UnboundLocalError: 
         pass
     try: #read the solar data
-        if values[1]: #only read if solar data is input
+        if solar_interval: #only read if solar data is input
             config.Solar_Imported = True #for data handling later on. 
-            Solar_Data = Extension_Checker(values[1]) #check to see if Solar_data input is valid (ie, xlsx only)
+            Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
     except UnboundLocalError: 
         pass
 
@@ -146,7 +148,6 @@ def parse_contents(contents, filename, date):
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            print('reading xlsx from function file')
             df = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
         print(e)
@@ -154,15 +155,27 @@ def parse_contents(contents, filename, date):
             'There was an error processing this file.'
         ])
 
-    ## testing logic here
-    
-    #determine what dataframe is what? Ie load and solar data
-    global Solar #make solar global 
-    global Consumption #make consumption global 
+    #Pass each interval data to the respective CONSUMPTION or SOLAR dataframe
+    # global config.Solar #make solar global 
+    # global config.Consumption #make consumption global 
     if "SOLAR" in str(filename.upper()): #look for solar in the filename
-        Solar = df #assume it is solar 
+        config.Solar = df #assume it is solar 
+        print('reading solar input')
     else: 
-        Consumption = df #else assume it is the Consumption data
+        config.Consumption = df #else assume it is the Consumption data
+        print('reading consumption input')
+    ## Do the magic analysis here
+
+    if not config.Consumption.empty and not config.Solar.empty: #ie, 2 files uploaded, pass both to the analysier function 
+
+        #convert to global list of dataframes, and do the averaging etc for backend work 
+        Data_Analyser(config.Consumption, config.Solar) #pass consumption data AND solar data
+    
+    elif not config.Consumption.empty and config.Solar.empty: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
+
+        #convert to global list of dataframes, and do the averaging etc for backend work 
+        Data_Analyser(config.Consumption) #only pass the interval data
+
 
     return html.Div([ #display the data in the dash app for verification
         html.H5(filename),
