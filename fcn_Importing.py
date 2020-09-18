@@ -81,7 +81,7 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     function to hold all the data anaylsis functions 
     """
  
-## STEP 1: Read the file 
+    ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
         # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
         Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
