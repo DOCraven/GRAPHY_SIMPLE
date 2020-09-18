@@ -38,6 +38,11 @@ import config
 # master branch is the deployed branch
 # code
 #
+# PROCFILE NOTES
+#   web: gunicorn app:server
+#
+#   app refers to app.py
+#   server refers to the variable server INSIDE app.py
 #
 # #make sure local dir has the most recent version of the master
 #   git pull 
