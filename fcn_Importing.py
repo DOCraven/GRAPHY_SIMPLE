@@ -47,9 +47,9 @@ def Extension_Checker(file_name_to_check):
         except AttributeError: 
             pass
     elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
-        print('PLEASE ENSURE FILE IS A \'XLSX\' ONLY') #make this a bit better later
+        # print('PLEASE ENSURE FILE IS A \'XLSX\' ONLY') #make this a bit better later
     else: 
-        print('ERROR') #make this a bit better later
+        # print('ERROR') #make this a bit better later
     
     return read_file
 
@@ -81,7 +81,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
     function to hold all the data anaylsis functions 
     """
     # try: 
-    print('\ntrying price analysis\n')
+    # print('\ntrying price analysis\n')
     if execute_price_analysis:
         if not Price_file.empty: #only execute this block if the price file is NOT empty OR 
             #read the price data and analyise it 
@@ -108,7 +108,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
 
             config.Pricing_names = list(config.Daily_Pricing_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
             #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-            print('Successfully loaded and analysed pricing data')
+            # print('Successfully loaded and analysed pricing data')
             
 
     else: #do the normal data analysis 
@@ -153,7 +153,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         #create plotly plot figure
         config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
         #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-        print('Successfully loaded and analysed interval data')
+        # print('Successfully loaded and analysed interval data')
 
         ########## VARS SPECIFICALLY FOR DASH  ###############
         config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
@@ -194,7 +194,7 @@ def parse_contents(contents, filename, date):
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
-        print(e)
+        # print(e)
         return html.Div([
             'There was an error processing this file.'
         ])
@@ -202,10 +202,10 @@ def parse_contents(contents, filename, date):
     #Pass each interval data to the respective CONSUMPTION or SOLAR dataframe
     if "SOLAR" in str(filename.upper()): #look for solar in the filename
         config.Solar = df #assume it is solar 
-        print('Solar Data Read')
+        # print('Solar Data Read')
     else: 
         config.Consumption = df #else assume it is the Consumption data
-        print('Consumption Data Read')
+        # print('Consumption Data Read')
     ## Do the magic analysis here
     if not config.Consumption.empty and not config.Solar.empty and config.number_of_files_uploaded == 2: #ie, 2 files uploaded, pass both to the analysier function 
         #convert to global list of dataframes, and do the averaging etc for backend work 

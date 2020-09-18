@@ -412,7 +412,7 @@ def render_page_content(pathname):
 
 
 # webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
-# print('Starting Dash Server') #print to console, to for debugging/dev
+print('Starting Dash Server') #print to console, to for debugging/dev
 
 # app.run_server(port=8888) #start the server. 
 

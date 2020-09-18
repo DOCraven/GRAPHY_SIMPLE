@@ -46,7 +46,7 @@ def Average_Plotter(df = None, TITLE = 'DAILY MEAN', X_LABEL = 'Time', Y_LABEL =
     elif PLOTTYPE == 'Subplot': 
         Plot_Kind = 'subplot'
     else:
-        print('Incorrect Plot Type')
+        # print('Incorrect Plot Type')
 
     if not individual: 
         fig = df.iplot(asFigure=True, xTitle=X_LABEL, yTitle=Y_LABEL, title=TITLE, kind = Plot_Kind, theme='white')
@@ -110,7 +110,7 @@ def GRAPH_GUI(Weekly_Mean = None, Daily_Mean = None):
                     plottype = 'Heatmap'
 
             else: 
-                print('please select a plot type') #or different error
+                # print('please select a plot type') #or different error
                     
             #do month logic
             if values['Month']:    # Determine the month selected
@@ -141,7 +141,7 @@ def GRAPH_GUI(Weekly_Mean = None, Daily_Mean = None):
                 elif selectedMonth == ['December']:
                     month = 11
             else: 
-                print('please select a month')
+                # print('please select a month')
             
             
             ## PLOTTING OCCURS HERE ##
@@ -209,7 +209,7 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 selected_Start = values['Start_Time'] #this is a list, so you must index is accordingly
                 Start_Post = Start_Time.index(selected_Start[0])
             else: 
-                print('please select a Start Time')
+                # print('please select a Start Time')
 
                 #do yearly logic
             if values['Year']:  #determine the year
@@ -222,7 +222,7 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 elif selectedYear == ['2020']:
                     year = 2020
             else: 
-                print('please select a year')
+                # print('please select a year')
             
 
             if values['Finish_Time']: #find the finish post
@@ -230,9 +230,9 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 Finish_Post = Start_Time.index(selected_finish[0])
                 ## error check ##
                 if Finish_Post < Start_Post: 
-                    print("ERROR: Please select a finishing time AFTER the starting time")
+                    # print("ERROR: Please select a finishing time AFTER the starting time")
             else: 
-                print('please select a Finish Time')
+                # print('please select a Finish Time')
         
         
         ### LOGIC HAPPENS HERE ###
@@ -245,7 +245,7 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 selected_Start = values['Start_Time'] #this is a list, so you must index is accordingly
                 Start_Post = Start_Time.index(selected_Start[0])
             else: 
-                print('please select a Start Time')
+                # print('please select a Start Time')
 
                 #do yearly logic
             if values['Year']:  #determine the year
@@ -258,7 +258,7 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 elif selectedYear == ['2020']:
                     year = 2020
             else: 
-                print('please select a year')
+                # print('please select a year')
             
 
             if values['Finish_Time']: #find the finish post
@@ -266,9 +266,9 @@ def GUI_Solar(DAILY_EXTERNAL_MEAN_2018 = None, DAILY_EXTERNAL_MEAN_2019 = None, 
                 Finish_Post = Start_Time.index(selected_finish[0])
                 ## error check ##
                 if Finish_Post < Start_Post: 
-                    print("ERROR: Please select a finishing time AFTER the starting time")
+                    # print("ERROR: Please select a finishing time AFTER the starting time")
             else: 
-                print("Error")
+                # print("Error")
 
         if event == 'Exit':
             window.close()
