@@ -33,7 +33,8 @@ from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA I
 
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
 # to go into function 
-Price_filename = str(os.getcwd()) + '\assets\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019)
+# Price_filename = str(os.getcwd()) + '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019)
+Price_filename = '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019) (relative path for Heroku) 
 VIC1_Price_Data_Raw = pd.read_excel(Price_filename) #read teh file , header=None
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages
 
@@ -42,7 +43,8 @@ Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #cr
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
-image_filename = str(os.getcwd()) + '\assets\NEW_LOGO.jpg' # replace with your own image
+# image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
+image_filename = '\\assets\\NEW_LOGO.jpg' #(relative path for Heroku)
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
