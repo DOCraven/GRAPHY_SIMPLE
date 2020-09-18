@@ -1,14 +1,19 @@
 import pandas as pd 
 
 ## file to define global variables ##
-
-
 Weekly_Interval_Data = []
 Daily_Interval_Data = []
 Monthly_Sum = []
 Yearly_Sum = []
 names = []
 chosen_site = ''
+
+#pricing data
+Daily_Pricing_Data = []
+Weekly_Pricing_Data = []
+
+
+
 Solar_Imported = False
 Solar_Exists = False
 
