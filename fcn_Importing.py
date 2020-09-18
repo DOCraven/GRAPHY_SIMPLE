@@ -121,7 +121,7 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     #create plotly plot figure
     config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
     #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-    print('succesfully loaded and did the backend stuff')
+    print('Successfully loaded and analysed data in the backend')
 
     ########## VARS SPECIFICALLY FOR DASH  ###############
     config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
@@ -138,18 +138,6 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     
 def parse_contents(contents, filename, date):
     ## VARS
-    #create empty dataframes
-    # config.parse_contents_run_number = config.parse_contents_run_number + 1 #to keep track of the number of times it is run 
-
-    # if config.parse_contents_run_number > 1: #ie, solar has been added
-    #     #clear the dataframes 
-    #     config.Solar = config.Solar.iloc[0:0]
-    #     config.Consumption = config.Consumption.iloc[0:0]
-    #     config.parse_contents_run_number = 0 #reset the number 
-    #     config.Solar_Imported = False #for data anlyser to not make a mistake 
-    #     config.Solar_Exists = False
-    #     print('RESET ALL DATAFRAMES')
-
 
     if config.number_of_files_uploaded == 1: #only consumption data uploaded
         config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
@@ -161,11 +149,6 @@ def parse_contents(contents, filename, date):
         config.Solar = config.Solar.iloc[0:0] #clear the dataframe
         config.Solar_Exists = True
         config.reset_dataframes = False #to stop this function being called again
-
-    print('Solar')
-    print(config.Solar.head(5))
-    print('\nConsumption')
-    print(config.Consumption.head(5))
 
     content_type, content_string = contents.split(',')
 
