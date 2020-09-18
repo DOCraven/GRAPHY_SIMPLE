@@ -76,64 +76,91 @@ def intervalResampler(input_df, chosen_interval = 30):
     
     return resampledDF
 
-def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal none because solar is not always passed to this function 
+def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file = None): #solar can equal none because solar is not always passed to this function 
     """
     function to hold all the data anaylsis functions 
     """
- 
-    ## STEP 1: Read the file 
-    try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
-        # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
-        Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
-    except UnboundLocalError: 
-        pass
-    try: #read the solar data
-        if not solar_interval.empty: #only read if solar data is input
-            config.Solar_Imported = True #for data handling later on. 
-            Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
-    except AttributeError: 
-        pass
-
-    ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
-        # config.Solar_Exists = True
-        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
-    else: #does not combine the solar data to the back of the interval load data
-        Full_Interval_Data = Interval_Data
-        # config.Solar_Exists = False
-
-    ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
-    Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
-
-    ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
-    Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
-
-    ## STEP 4: Calculate Weekly averages
-    config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
+    if not Price_file.empty: 
+        #read the price data and analyise it 
+        try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
+            # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+            Pricing_Data = xlsxReader_Monthly(Price_file) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
+        except UnboundLocalError: 
+            pass
         
-    ## STEP 5: Calculate Daily Averages
-    config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
+        Full_Pricing_Data = Pricing_Data
+            # config.Solar_Exists = False
 
-    ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
-    config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
-    config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)
+        ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
+        Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
 
-    #create plotly plot figure
-    config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
-    #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-    print('Successfully loaded and analysed data in the backend')
+        ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
+        Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
 
-    ########## VARS SPECIFICALLY FOR DASH  ###############
-    config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
-    config.chosen_site = '' #to make this VAR global
-    
+        ## STEP 4: Calculate Weekly averages
+        config.Weekly_Pricing_Data = WeeklyAverage(Checked_Pricing_Data_0) 
+            
+        ## STEP 5: Calculate Daily Averages
+        config.Daily_Pricing_Data = DailyAverage(Checked_Pricing_Data_1)
 
-    #create excess solar plots for DASH
-    if config.Solar_Exists: #only make this if the solar data has been uploaded
-        config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
-        config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
+        #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
+        print('Successfully loaded and analysed pricing data')
 
-    config.Data_Uploaded = True #allow other pages to open in the Dash App 
+    else: #do the normal data analysis 
+            
+        ## STEP 1: Read the file 
+        try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
+            # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+            Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
+        except UnboundLocalError: 
+            pass
+        try: #read the solar data
+            if not solar_interval.empty: #only read if solar data is input
+                config.Solar_Imported = True #for data handling later on. 
+                Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
+        except AttributeError: 
+            pass
+
+        ## STEP 1A: join the solar data to the dataframe (if necessary)
+        if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
+            # config.Solar_Exists = True
+            Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+        else: #does not combine the solar data to the back of the interval load data
+            Full_Interval_Data = Interval_Data
+            # config.Solar_Exists = False
+
+        ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
+        Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
+
+        ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
+        Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
+
+        ## STEP 4: Calculate Weekly averages
+        config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
+            
+        ## STEP 5: Calculate Daily Averages
+        config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
+
+        ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
+        config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
+        config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)
+
+        #create plotly plot figure
+        config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
+        #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
+        print('Successfully loaded and analysed data in the backend')
+
+        ########## VARS SPECIFICALLY FOR DASH  ###############
+        config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
+        config.chosen_site = '' #to make this VAR global
+        
+
+        #create excess solar plots for DASH
+        if config.Solar_Exists: #only make this if the solar data has been uploaded
+            config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
+            config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
+
+        config.Data_Uploaded = True #allow other pages to open in the Dash App 
     return #nothing
     
 def parse_contents(contents, filename, date):
@@ -177,12 +204,12 @@ def parse_contents(contents, filename, date):
     ## Do the magic analysis here
     if not config.Consumption.empty and not config.Solar.empty and config.number_of_files_uploaded == 2: #ie, 2 files uploaded, pass both to the analysier function 
         #convert to global list of dataframes, and do the averaging etc for backend work 
-        Data_Analyser(config.Consumption, config.Solar) #pass consumption data AND solar data
+        Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar) #pass consumption data AND solar data
         # config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
 
     elif not config.Consumption.empty and config.Solar.empty and config.number_of_files_uploaded == 1: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
         #convert to global list of dataframes, and do the averaging etc for backend work 
-        Data_Analyser(config.Consumption) #only pass the interval data
+        Data_Analyser(consumption_interval = config.Consumption) #only pass the interval data
         # config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
 
 
