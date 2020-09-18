@@ -196,9 +196,8 @@ def update_weekly_graph(selected_name):
     return fig
 
 
-
 if __name__ == '__main__':
-    app.run_server(debug = True
+    app.run_server(debug = True, 
         # port=8050, #for development server comment this line out 
         # host='0.0.0.0' #and this line out
         )
