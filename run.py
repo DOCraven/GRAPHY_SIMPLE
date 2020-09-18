@@ -42,7 +42,8 @@ import config
 # PROCFILE NOTES
 #   web: gunicorn app:server
 #
-#   app refers to app.py
+#   app refers to app.py (however, note that it needs to be relative (ie, if it is in a folder it is myfolder.myapp))
+#      https://stackoverflow.com/a/61480963/13181119
 #   server refers to the variable server INSIDE app.py
 #
 # #make sure local dir has the most recent version of the master
