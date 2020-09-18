@@ -169,7 +169,6 @@ def update_output(n_clicks, value):
             values[0]
         )
 
-
 ######### CALLBACK FOR DASH IMPORTING/LOADING FILES ##########
 @app.callback(Output('output-data-upload', 'children'),
               [Input('upload-data', 'contents')],
@@ -185,5 +184,47 @@ def update_output(list_of_contents, list_of_names, list_of_dates): #literal magi
         return children
 
 
+## CALLBACK FOR PRICING DAILY GRAPH ###
+@app.callback( 
+    Output('Price_daily_graph', 'figure'), 
+    [Input('Price_Drop_Down_menu', 'value')])
+def update_daily_graph(selected_name):
+    #filter the names 
+    chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+    dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+    try: #create the figure to send to dash to plot
+        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+
+    return fig
+
+### CALLBACK FOR PRICING WEEKLY GRAPH ###
+@app.callback(
+    Output('Price_weekly_graph', 'figure'),
+    [Input('Price_Drop_Down_menu', 'value')])
+def update_weekly_graph(selected_name):
+    #filter the names 
+    chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+    time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
+    dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
+    try: #create the figure to send to dash to plot
+        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
+        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+    
+    return fig
+
+
+
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(
+        port=8050, #for development server comment this line out 
+        host='0.0.0.0' #and this line out
+        )
+
+# to run the file locally just input 
+    # waitress-serve run:app.server
+#into the Command Line
