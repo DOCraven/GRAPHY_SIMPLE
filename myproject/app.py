@@ -30,16 +30,18 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
-
-
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
+
+###### IMPORTING AND DEALING WITH SPOT PRICE 
+
+
+
 
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
 image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 
