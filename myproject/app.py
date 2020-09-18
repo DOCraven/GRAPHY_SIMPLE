@@ -30,16 +30,21 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
-
-
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
+
+###### IMPORTING AND DEALING WITH SPOT PRICE 
+# to go into function 
+Price_filename = str(os.getcwd()) + '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019)
+VIC1_Price_Data_Raw = pd.read_excel(Price_filename) #read teh file , header=None
+Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages
+
+
 
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
 image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
-
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 
@@ -56,6 +61,7 @@ app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TA
         dcc.Tab(label='Excess Solar', value='tab-4'),
         dcc.Tab(label='Export Load Shift Data', value='tab-5'),
         dcc.Tab(label='Total Site Summation', value='tab-6'),
+        dcc.Tab(label='Average Pricing', value='tab-7'),
         dcc.Tab(label='About', value='tab-99'),
     ]),
     html.Div(id='tabs-example-content')
@@ -100,12 +106,14 @@ def render_content(tab):
             return html.Div([
                 html.H3('Historical Energy Load Anaylsis Tool'), #quick graph
                 dcc.Dropdown(id = 'Drop_Down_menu', #make selection menu
-                    options=[{'label':name, 'value':name} for name in config.names],
+                    options=[{'label':name, 'value':name} for name in config.Pricing_names],
                     value = config.names[0],#initial default selection upon loading 
                     multi=False #do not allow multiple selections 
                     ), 
-                dcc.Graph(id='daily_graph'), #display daily graph
-                dcc.Graph(id='weekly_graph'), #display weekly graph
+                dcc.Graph(id='Pricing_daily_graph'), #display daily graph
+                dcc.Graph(id='Pricing_weekly_graph'), #display weekly graph
+                
+                
             ])
         else: 
             return html.Div([
@@ -210,6 +218,26 @@ def render_content(tab):
                     html.H3('Please upload interval and/or solar')
                 ])
 
+
+    elif tab == 'tab-7': #Pricing Data
+            if config.Data_Uploaded: 
+                return html.Div([
+                    html.H3('Pricing Data'),
+                    dcc.Dropdown(id = 'Price_Drop_Down_menu', #make selection menu
+                        options=[{'label':name, 'value':name} for name in config.Pricing_names],
+                        value = config.Pricing_names[0],#initial default selection upon loading 
+                        multi=False #do not allow multiple selections 
+                        ), 
+                    dcc.Graph(id='Price_daily_graph'), #display daily graph
+                    dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display all excess solar graph as a line graph per month
+                    dcc.Graph(id='Price_weekly_graph'), #display weekly graph
+                    ])
+            else: 
+                return html.Div([
+                    html.H3('Please upload interval and/or solar')
+                ])
+
+
     elif tab == 'tab-99': #ABOUT - FILL IN WITH THE README WHEN I HAVE TIME
             return html.Div([
                 html.H3('About'),
@@ -218,8 +246,6 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
-
-
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser
     app.run_server(port=8888, debug=True)
