@@ -46,9 +46,9 @@ def Extension_Checker(file_name_to_check):
             read_file = xlsxReader_Monthly(file_name_to_check)
         except AttributeError: 
             pass
-    elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
+    # elif file_name_to_check.endswith('.csv') or file_name_to_check.endswith('.xlsx'): #open via csv reader
         # print('PLEASE ENSURE FILE IS A \'XLSX\' ONLY') #make this a bit better later
-    else: 
+    # else: 
         # print('ERROR') #make this a bit better later
     
     return read_file
