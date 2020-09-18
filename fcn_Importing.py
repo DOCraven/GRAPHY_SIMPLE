@@ -76,35 +76,40 @@ def intervalResampler(input_df, chosen_interval = 30):
     
     return resampledDF
 
-def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file = None): #solar can equal none because solar is not always passed to this function 
+def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file = None, execute_price_analysis = False): #solar can equal none because solar is not always passed to this function 
     """
     function to hold all the data anaylsis functions 
     """
-    if not Price_file.empty: 
-        #read the price data and analyise it 
-        try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
-            # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
-            Pricing_Data = xlsxReader_Monthly(Price_file) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
-        except UnboundLocalError: 
-            pass
-        
-        Full_Pricing_Data = Pricing_Data
-            # config.Solar_Exists = False
-
-        ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
-        Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
-
-        ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
-        Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
-
-        ## STEP 4: Calculate Weekly averages
-        config.Weekly_Pricing_Data = WeeklyAverage(Checked_Pricing_Data_0) 
+    # try: 
+    print('\ntrying price analysis\n')
+    if execute_price_analysis:
+        if not Price_file.empty: #only execute this block if the price file is NOT empty OR 
+            #read the price data and analyise it 
+            try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
+                # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
+                Pricing_Data = xlsxReader_Monthly(Price_file) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
+            except UnboundLocalError: 
+                pass
             
-        ## STEP 5: Calculate Daily Averages
-        config.Daily_Pricing_Data = DailyAverage(Checked_Pricing_Data_1)
+            Full_Pricing_Data = Pricing_Data
+                # config.Solar_Exists = False
 
-        #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-        print('Successfully loaded and analysed pricing data')
+            ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
+            Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
+
+            ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
+            Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
+
+            ## STEP 4: Calculate Weekly averages
+            config.Weekly_Pricing_Data = WeeklyAverage(Checked_Pricing_Data_0) 
+                
+            ## STEP 5: Calculate Daily Averages
+            config.Daily_Pricing_Data = DailyAverage(Checked_Pricing_Data_1)
+
+            config.Pricing_names = list(config.Daily_Pricing_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
+            #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
+            print('Successfully loaded and analysed pricing data')
+            
 
     else: #do the normal data analysis 
             
@@ -148,7 +153,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         #create plotly plot figure
         config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
         #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-        print('Successfully loaded and analysed data in the backend')
+        print('Successfully loaded and analysed interval data')
 
         ########## VARS SPECIFICALLY FOR DASH  ###############
         config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list

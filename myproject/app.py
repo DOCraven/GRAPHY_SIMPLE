@@ -36,7 +36,7 @@ from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA I
 # to go into function 
 Price_filename = str(os.getcwd()) + '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019)
 VIC1_Price_Data_Raw = pd.read_excel(Price_filename) #read teh file , header=None
-Data_Analyser(Price_file = VIC1_Price_Data_Raw) #create daily/weekly averages
+Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages
 
 
 
@@ -61,6 +61,7 @@ app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TA
         dcc.Tab(label='Excess Solar', value='tab-4'),
         dcc.Tab(label='Export Load Shift Data', value='tab-5'),
         dcc.Tab(label='Total Site Summation', value='tab-6'),
+        dcc.Tab(label='Average Pricing', value='tab-7'),
         dcc.Tab(label='About', value='tab-99'),
     ]),
     html.Div(id='tabs-example-content')
@@ -105,12 +106,12 @@ def render_content(tab):
             return html.Div([
                 html.H3('Historical Energy Load Anaylsis Tool'), #quick graph
                 dcc.Dropdown(id = 'Drop_Down_menu', #make selection menu
-                    options=[{'label':name, 'value':name} for name in config.names],
+                    options=[{'label':name, 'value':name} for name in config.Pricing_names],
                     value = config.names[0],#initial default selection upon loading 
                     multi=False #do not allow multiple selections 
                     ), 
-                dcc.Graph(id='daily_graph'), #display daily graph
-                dcc.Graph(id='weekly_graph'), #display weekly graph
+                dcc.Graph(id='Pricing_daily_graph'), #display daily graph
+                dcc.Graph(id='Pricing_weekly_graph'), #display weekly graph
             ])
         else: 
             return html.Div([
@@ -215,6 +216,25 @@ def render_content(tab):
                     html.H3('Please upload interval and/or solar')
                 ])
 
+
+    elif tab == 'tab-7': #Pricing Data
+            if config.Data_Uploaded: 
+                return html.Div([
+                    html.H3('Pricing Data'),
+                    dcc.Dropdown(id = 'Price_Drop_Down_menu', #make selection menu
+                        options=[{'label':name, 'value':name} for name in config.Pricing_names],
+                        value = config.Pricing_names[0],#initial default selection upon loading 
+                        multi=False #do not allow multiple selections 
+                        ), 
+                dcc.Graph(id='Price_daily_graph'), #display daily graph
+                dcc.Graph(id='Price_weekly_graph'), #display weekly graph
+                ])
+            else: 
+                return html.Div([
+                    html.H3('Please upload interval and/or solar')
+                ])
+
+
     elif tab == 'tab-99': #ABOUT - FILL IN WITH THE README WHEN I HAVE TIME
             return html.Div([
                 html.H3('About'),
@@ -223,7 +243,38 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
+## CALLBACK FOR PRICING DAILY GRAPH ###
+@app.callback( 
+    Output('Price_daily_graph', 'figure'), 
+    [Input('Price_Drop_Down_menu', 'value')])
+def update_daily_graph(selected_name):
+    #filter the names 
+    chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+    dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+    try: #create the figure to send to dash to plot
+        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
+        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
 
+    return fig
+
+### CALLBACK FOR PRICING WEEKLY GRAPH ###
+@app.callback(
+    Output('Price_weekly_graph', 'figure'),
+    [Input('Price_Drop_Down_menu', 'value')])
+def update_weekly_graph(selected_name):
+    #filter the names 
+    chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+    time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
+    dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
+    try: #create the figure to send to dash to plot
+        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
+        Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+    
+    return fig
 
 if __name__ == '__main__': ## run the server
     webbrowser.open('http://127.0.0.1:8888/')  # open the DASH app in default webbrowser

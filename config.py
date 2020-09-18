@@ -5,13 +5,13 @@ Weekly_Interval_Data = []
 Daily_Interval_Data = []
 Monthly_Sum = []
 Yearly_Sum = []
-names = []
+names = [] #placeholder for column headers (ie, site names) for interval data
 chosen_site = ''
 
 #pricing data
 Daily_Pricing_Data = []
 Weekly_Pricing_Data = []
-
+Pricing_names = [] #placeholder for column headers for pricing data
 
 
 Solar_Imported = False
@@ -25,7 +25,7 @@ solar_figure_summed = ''
 yearly_summed_figure = ''
 
 
-#importing stuff 
+#importing stuff - related to parse_contents file 
 Solar = pd.DataFrame() #empty dataframe for solar 
 Consumption = pd.DataFrame() #empty dataframe for consumption  
 reset_dataframes = False
