@@ -50,6 +50,9 @@ import config
 # 
 # push the code change to heroku
 #   git push heroku HEAD:master
+#
+# start a dyno 
+#   heroku ps:scale web=1
 ####################################################
 
 
