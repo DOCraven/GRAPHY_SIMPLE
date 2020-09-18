@@ -33,7 +33,10 @@ import config
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
-
+# to go into function 
+Price_filename = str(os.getcwd()) + '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019)
+VIC1_Price_Data_Raw = pd.read_excel(Price_filename) #read teh file , header=None
+Data_Analyser(Price_file = VIC1_Price_Data_Raw) #create daily/weekly averages
 
 
 
