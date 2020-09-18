@@ -1,5 +1,5 @@
 
-from myproject.my_app import app
+from myproject.app import app
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 
 
@@ -198,7 +198,7 @@ def update_weekly_graph(selected_name):
 
 
 if __name__ == '__main__':
-    app.run_server(
+    app.run_server(debug = True
         # port=8050, #for development server comment this line out 
         # host='0.0.0.0' #and this line out
         )
