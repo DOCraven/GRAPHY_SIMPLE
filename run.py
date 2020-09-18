@@ -202,7 +202,6 @@ def render_content(tab):
                     html.H3('Please upload interval and/or solar')
                 ])
 
-
     elif tab == 'tab-7': #Pricing Data
             if config.Data_Uploaded: 
                 return html.Div([
@@ -375,8 +374,8 @@ def update_weekly_graph(selected_name):
 
 if __name__ == '__main__':
     app.run_server(
-        port=8050, #for development server comment this line out 
-        host='0.0.0.0' #and this line out
+        # port=8050, #for development server comment this line out 
+        # host='0.0.0.0' #and this line out
         )
 
 # to run the file locally just input 
