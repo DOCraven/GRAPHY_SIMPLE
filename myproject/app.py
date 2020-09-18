@@ -47,8 +47,7 @@ config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
 # image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
 image_filename = '/assets/NEW_LOGO.jpg' # replace with your own image
-
-encoded_image = base64.b64encode(open(image_URL, 'rb').read())
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 

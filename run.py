@@ -31,11 +31,25 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+####################################################
+#
+# HEROKU DEPLOYMENT NOTES (relative to local development machine)
+# open CMD in heroku foler
+# master branch is the deployed branch
+# code
+#
+#
+# #make sure local dir has the most recent version of the master
+#   git pull 
+# 
+# push the code change to heroku
+#   git push heroku HEAD:master
+####################################################
 
 
 
 
-######### CALLBACKS FOR APP.PY FUNCTIONALITY GO HERE #########
+######## CALLBACKS FOR APP.PY FUNCTIONALITY GO HERE #########
 
 ## CALLBACK FOR DAILY GRAPH ###
 @app.callback( 
