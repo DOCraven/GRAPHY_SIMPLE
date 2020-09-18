@@ -112,6 +112,8 @@ def render_content(tab):
                     ), 
                 dcc.Graph(id='Pricing_daily_graph'), #display daily graph
                 dcc.Graph(id='Pricing_weekly_graph'), #display weekly graph
+                
+                
             ])
         else: 
             return html.Div([
@@ -226,9 +228,10 @@ def render_content(tab):
                         value = config.Pricing_names[0],#initial default selection upon loading 
                         multi=False #do not allow multiple selections 
                         ), 
-                dcc.Graph(id='Price_daily_graph'), #display daily graph
-                dcc.Graph(id='Price_weekly_graph'), #display weekly graph
-                ])
+                    dcc.Graph(id='Price_daily_graph'), #display daily graph
+                    dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display all excess solar graph as a line graph per month
+                    dcc.Graph(id='Price_weekly_graph'), #display weekly graph
+                    ])
             else: 
                 return html.Div([
                     html.H3('Please upload interval and/or solar')
