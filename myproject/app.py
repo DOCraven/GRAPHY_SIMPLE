@@ -19,7 +19,6 @@ from calendar import day_name
 import ctypes 
 import time
 import base64
-import PySimpleGUI as sg
 import cufflinks as cf
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer

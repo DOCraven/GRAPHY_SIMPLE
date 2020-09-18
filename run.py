@@ -20,7 +20,6 @@ import webbrowser
 from calendar import day_name
 import ctypes 
 import time
-import PySimpleGUI as sg
 import cufflinks as cf
 import base64
 #USER CREATED FUNCTIONS 
