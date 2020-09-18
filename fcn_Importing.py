@@ -80,9 +80,7 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     """
     function to hold all the data anaylsis functions 
     """
-    ## VARS ##
-    # Interval_Data = [] #empty list for scope 
-    # values = [consumption_interval, solar_interval] #dont need
+ 
 ## STEP 1: Read the file 
     try: #read the inverval load data and store it as a list of dataframes per month (ie, JAN = 0, FEB = 1 etc)
         # Interval_Data = Extension_Checker(values[0]) #check to see if the interval load data is input is valid (ie, xlsx only)
@@ -97,12 +95,12 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
         pass
 
     ## STEP 1A: join the solar data to the dataframe (if necessary)
-    if config.Solar_Imported: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
-        config.Solar_Exists = True
+    if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
+        # config.Solar_Exists = True
         Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
     else: #does not combine the solar data to the back of the interval load data
         Full_Interval_Data = Interval_Data
-        config.Solar_Exists = False
+        # config.Solar_Exists = False
 
     ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
     Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
@@ -123,7 +121,7 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     #create plotly plot figure
     config.yearly_summed_figure = config.Yearly_Sum.iplot(kind = 'bar', xTitle='Site', yTitle='Total Consumption (kWh)', title = 'Yearly Consumption', asFigure = True) 
     #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
-    print('succesfully loaded and did the backend stuff')
+    print('Successfully loaded and analysed data in the backend')
 
     ########## VARS SPECIFICALLY FOR DASH  ###############
     config.names = list(config.Daily_Interval_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
@@ -140,19 +138,17 @@ def Data_Analyser(consumption_interval, solar_interval = None): #solar can equal
     
 def parse_contents(contents, filename, date):
     ## VARS
-    #create empty dataframes
-    config.parse_contents_run_number = config.parse_contents_run_number + 1 #to keep track of the number of times it is run 
 
-    if config.parse_contents_run_number > 1: #ie, solar has been added
-        #clear the dataframes 
-        config.Solar = config.Solar.iloc[0:0]
-        config.Consumption = config.Consumption.iloc[0:0]
-        config.parse_contents_run_number = 0 #reset the number 
-        config.Solar_Imported = False #for data anlyser to not make a mistake 
+    if config.number_of_files_uploaded == 1: #only consumption data uploaded
+        config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
+        config.Solar = config.Solar.iloc[0:0] #clear the dataframe
         config.Solar_Exists = False
-        print('RESET ALL DATAFRAMES')
 
-
+    elif config.number_of_files_uploaded == 2 and config.reset_dataframes: #consumption AND solar data uploaded
+        config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
+        config.Solar = config.Solar.iloc[0:0] #clear the dataframe
+        config.Solar_Exists = True
+        config.reset_dataframes = False #to stop this function being called again
 
     content_type, content_string = contents.split(',')
 
@@ -172,27 +168,24 @@ def parse_contents(contents, filename, date):
         ])
 
     #Pass each interval data to the respective CONSUMPTION or SOLAR dataframe
-    # global config.Solar #make solar global 
-    # global config.Consumption #make consumption global 
     if "SOLAR" in str(filename.upper()): #look for solar in the filename
         config.Solar = df #assume it is solar 
-        print('reading solar input')
+        print('Solar Data Read')
     else: 
         config.Consumption = df #else assume it is the Consumption data
-        print('reading consumption input')
+        print('Consumption Data Read')
     ## Do the magic analysis here
-
-    if not config.Consumption.empty and not config.Solar.empty: #ie, 2 files uploaded, pass both to the analysier function 
-
+    if not config.Consumption.empty and not config.Solar.empty and config.number_of_files_uploaded == 2: #ie, 2 files uploaded, pass both to the analysier function 
         #convert to global list of dataframes, and do the averaging etc for backend work 
         Data_Analyser(config.Consumption, config.Solar) #pass consumption data AND solar data
-        config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
+        # config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
 
-    elif not config.Consumption.empty and config.Solar.empty: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
-
+    elif not config.Consumption.empty and config.Solar.empty and config.number_of_files_uploaded == 1: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
         #convert to global list of dataframes, and do the averaging etc for backend work 
         Data_Analyser(config.Consumption) #only pass the interval data
-        config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
+        # config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
+
+
 
 
     return html.Div([ #display the data in the dash app for verification
