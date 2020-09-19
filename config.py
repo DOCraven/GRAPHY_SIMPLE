@@ -28,5 +28,9 @@ yearly_summed_figure = ''
 #importing stuff - related to parse_contents file 
 Solar = pd.DataFrame() #empty dataframe for solar 
 Consumption = pd.DataFrame() #empty dataframe for consumption  
+
+
+
+
 reset_dataframes = False
 number_of_files_uploaded = 0
