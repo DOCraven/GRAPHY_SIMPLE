@@ -46,6 +46,8 @@ Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%2
 config.Consumption = pd.read_excel(Consumption_URL)
 Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
 config.Solar = pd.read_excel(Solar_URL)
+config.Solar_Exists = True #telling the app that solar exists
+
 
 #pass it to the data analyser function 
 Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar)
@@ -94,6 +96,7 @@ def render_content(tab):
             html.P('Please upload a maximum of 2 interval files'),
             html.P('There is minimal error checking for number of data files uploaded. This may be added in future versions'),
             html.P('Please be aware that the program takes a little while to do the analysis in the background. Currently there is no loading animation. This may change in future versions. Please be patient, this is a work in progress'),
+            html.H3('UPLOAD IS CURRENTLY BROKEN - DATA HAS BEEN HARDCODED FOR THE TIME BEING'),
             dcc.Upload(
                 html.Button('Upload Files'), 
                 id='upload-data',
