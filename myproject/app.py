@@ -141,8 +141,8 @@ def render_content(tab):
         if config.Data_Uploaded: 
             if config.Solar_Exists: 
                 return html.Div([
-                    dcc.Store(id='memory_output'), #storing the selected site here
-                    dcc.Store(id='month_selection_output'), #storing the selected site here
+                    dcc.Store(id='memory_output', storage_type= 'session'), #storing the selected site here
+                    dcc.Store(id='month_selection_output', storage_type= 'session'), #storing the selected site here
                     html.H3('Select a site to investigate'), 
                     dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
                         id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
