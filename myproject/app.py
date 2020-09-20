@@ -33,8 +33,8 @@ import config
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
-# to go into function 
-# Price_filename = str(os.getcwd()) + '\\assets\\VIC1_SPOT_PRICE_2019.xlsx' # file name for VIC1 Spot print (2019) 
+# set up flask name 
+
 
 # file name for VIC1 Spot print (2019) (Pulling straight from GitHub for Heroku)
 Price_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/assets/VIC1_SPOT_PRICE_2019.xlsx?raw=true'  
@@ -50,7 +50,7 @@ Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #cr
 
 
 #pass it to the data analyser function 
-Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar)
+# Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar)
 
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
@@ -110,7 +110,7 @@ def render_content(tab):
                 'margin': '10px'
             },
             # Allow multiple files to be uploaded
-            multiple=False
+            # multiple=False 
             ),
             html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
 

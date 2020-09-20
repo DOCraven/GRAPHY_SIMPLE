@@ -119,20 +119,23 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
             Interval_Data = xlsxReader_Monthly(consumption_interval) #pass the entire year dataframe to a function that will return a dataframe for each month in a list 
         except UnboundLocalError: 
             pass
-        try: #read the solar data
-            if not solar_interval.empty: #only read if solar data is input
-                config.Solar_Imported = True #for data handling later on. 
-                Solar_Data = xlsxReader_Monthly(solar_interval) #check to see if Solar_data input is valid (ie, xlsx only)
-        except AttributeError: 
-            pass
+        #read SOLAR from Github
+        Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
+        config.Solar = pd.read_excel(Solar_URL) #read solar and create dataframe
+
+        #import solar data
+        config.Solar_Imported = True #for data handling later on. 
+        Solar_Data = xlsxReader_Monthly(config.Solar) #check to see if Solar_data input is valid (ie, xlsx only) and return a list of months 
+        # except AttributeError: 
+            # pass
 
         ## STEP 1A: join the solar data to the dataframe (if necessary)
-        if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
+        # if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
             # config.Solar_Exists = True
-            Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
-        else: #does not combine the solar data to the back of the interval load data
-            Full_Interval_Data = Interval_Data
-            # config.Solar_Exists = False
+        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+        # else: #does not combine the solar data to the back of the interval load data
+        #     Full_Interval_Data = Interval_Data
+        #     # config.Solar_Exists = False
 
         ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
         Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
@@ -161,9 +164,9 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         
 
         #create excess solar plots for DASH
-        if config.Solar_Exists: #only make this if the solar data has been uploaded
-            config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
-            config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
+        # if config.Solar_Exists: #only make this if the solar data has been uploaded
+        config.solar_figure_summed = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'bar' ) #make fancy figure 
+        config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
         config.Data_Uploaded = True #allow other pages to open in the Dash App 
     return #nothing
@@ -171,40 +174,38 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
 def parse_contents(contents, filename, date):
     ## VARS
 
-    if config.number_of_files_uploaded == 1: #only consumption data uploaded
-        config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
-        config.Solar = config.Solar.iloc[0:0] #clear the dataframe
-        config.Solar_Exists = False
+    # if config.number_of_files_uploaded == 1: #only consumption data uploaded
+    #     config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
+    #     config.Solar = config.Solar.iloc[0:0] #clear the dataframe
+    #     config.Solar_Exists = False
 
-    elif config.number_of_files_uploaded == 2 and config.reset_dataframes: #consumption AND solar data uploaded
-        config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
-        config.Solar = config.Solar.iloc[0:0] #clear the dataframe
-        config.Solar_Exists = True
-        config.reset_dataframes = False #to stop this function being called again
+    # elif config.number_of_files_uploaded == 2 and config.reset_dataframes: #consumption AND solar data uploaded
+    #     config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
+    #     config.Solar = config.Solar.iloc[0:0] #clear the dataframe
+    #     config.Solar_Exists = True
+    #     config.reset_dataframes = False #to stop this function being called again
 
+    
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
+    config.Consumption = config.Consumption.iloc[0:0] #clear the dataframe
     try:
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
+            config.Consumption = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+            config.Consumption = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
         # print(e)
         return html.Div([
             'There was an error processing this file.'
         ])
 
-    #read SOLAR from Github
-    Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
-    config.Solar = pd.read_excel(Solar_URL) #read solar and create dataframe
-
-
-    Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar) #pass consumption data AND solar data
+    
+    Data_Analyser(consumption_interval = config.Consumption) #pass consumption data AND solar data
     config.Solar_Exists = True #telling the app that solar exists 
 
 
@@ -213,8 +214,8 @@ def parse_contents(contents, filename, date):
         html.H6(dt.datetime.fromtimestamp(date)),
 
         dash_table.DataTable( #display the data in a table in the webbrowser
-            data=df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns]
+            data=config.Consumption.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in config.Consumption.columns]
         ),
         html.Hr(),  # horizontal line
     ])

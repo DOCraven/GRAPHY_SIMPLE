@@ -124,7 +124,6 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
     ### STEP 4 - do the load shift calculations, and return a single dataframe of each month 
     shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - IE, I PLOT THIS 
     
-
     ### STEP 5 - create a figure via cufflinks to ploit 
     plot_title = str(chosen_month) + ' - ' + chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%' #create title for graph depending on what is given to plot
 
@@ -156,13 +155,21 @@ def update_output(value):
               [Input('upload-data', 'contents')],
               [State('upload-data', 'filename'),
                State('upload-data', 'last_modified')])
-def update_output(list_of_contents, list_of_names, list_of_dates): #literal magic - I have no idea how it works,
+def update_output(list_of_contents, list_of_names, list_of_dates):
     if list_of_contents is not None:
-        config.number_of_files_uploaded = len(list_of_names) #determine the number of files uploaded
-        config.reset_dataframes = True #to stop this function being called again
+        #fix dashes screwup
+        #create empty list
+        list_of_contents_fixed = []
+        list_of_names_fixed = []
+        list_of_dates_fixed = []
+        #append the broken object
+        list_of_contents_fixed.append(list_of_contents)
+        list_of_names_fixed.append(list_of_names)
+        list_of_dates_fixed.append(list_of_dates)
+        #normal dash functionality occurs here
         children = [
             parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
+            zip(list_of_contents_fixed, list_of_names_fixed, list_of_dates_fixed)]
         return children
 
 
@@ -206,6 +213,3 @@ if __name__ == '__main__':
         # host='0.0.0.0' #and this line out
         )
 
-# to run the file locally just input 
-    # waitress-serve run:app.server
-#into the Command Line
