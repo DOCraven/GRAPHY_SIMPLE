@@ -42,11 +42,11 @@ VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages
 
 ## hacked together for heroku deployment 
-Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD%20_SUBSET.xlsx?raw=true'
-config.Consumption = pd.read_excel(Consumption_URL)
-Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
-config.Solar = pd.read_excel(Solar_URL)
-config.Solar_Exists = True #telling the app that solar exists
+# Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD%20_SUBSET.xlsx?raw=true'
+# config.Consumption = pd.read_excel(Consumption_URL)
+# Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
+# config.Solar = pd.read_excel(Solar_URL)
+# config.Solar_Exists = True #telling the app that solar exists
 
 
 #pass it to the data analyser function 
@@ -90,10 +90,9 @@ app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TA
 def render_content(tab):
     if tab == 'tab-1': #LOAD DATA - PLACEHOLDER - TO BE BUILT
         return html.Div([
-            html.H3('Load Interval and Solar Data'),
+            html.H3('Load Interval Data'),
             #upload data
-            html.P('Please upload consumption interval files and/or solar files\n. Please ensure the solar data file has the word "Solar" in it.'),
-            html.P('Please upload a maximum of 2 interval files'),
+            html.P('Please upload consumption interval files.'),
             html.P('There is minimal error checking for number of data files uploaded. This may be added in future versions'),
             html.P('Please be aware that the program takes a little while to do the analysis in the background. Currently there is no loading animation. This may change in future versions. Please be patient, this is a work in progress'),
             html.H3('UPLOAD IS CURRENTLY BROKEN - DATA HAS BEEN HARDCODED FOR THE TIME BEING'),
@@ -111,7 +110,7 @@ def render_content(tab):
                 'margin': '10px'
             },
             # Allow multiple files to be uploaded
-            multiple=True
+            multiple=False
             ),
             html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
 
