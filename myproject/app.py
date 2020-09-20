@@ -42,7 +42,7 @@ VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages
 
 ## hacked together for heroku deployment 
-Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD.xlsx?raw=true'
+Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD%20_SUBSET.xlsx?raw=true'
 config.Consumption = pd.read_excel(Consumption_URL)
 Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
 config.Solar = pd.read_excel(Solar_URL)
