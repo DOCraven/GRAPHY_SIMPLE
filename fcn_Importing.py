@@ -199,25 +199,13 @@ def parse_contents(contents, filename, date):
             'There was an error processing this file.'
         ])
 
-    #Pass each interval data to the respective CONSUMPTION or SOLAR dataframe
-    if "SOLAR" in str(filename.upper()): #look for solar in the filename
-        config.Solar = df #assume it is solar 
-        # print('Solar Data Read')
-    else: 
-        config.Consumption = df #else assume it is the Consumption data
-        # print('Consumption Data Read')
-    ## Do the magic analysis here
-    if not config.Consumption.empty and not config.Solar.empty and config.number_of_files_uploaded == 2: #ie, 2 files uploaded, pass both to the analysier function 
-        #convert to global list of dataframes, and do the averaging etc for backend work 
-        Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar) #pass consumption data AND solar data
-        # config.Solar_Exists = True #reset the solar funcionality flag as only consumption data is uploaded 
-
-    elif not config.Consumption.empty and config.Solar.empty and config.number_of_files_uploaded == 1: #check that consumption data exists and solar does not. Pass only consumption data to the analyser
-        #convert to global list of dataframes, and do the averaging etc for backend work 
-        Data_Analyser(consumption_interval = config.Consumption) #only pass the interval data
-        # config.Solar_Exists = False #reset the solar funcionality flag as only consumption data is uploaded 
+    #read SOLAR from Github
+    Solar_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/SOLAR_REPRESENTATIVE_YEAR_30_MINUTES.xlsx?raw=true'
+    config.Solar = pd.read_excel(Solar_URL) #read solar and create dataframe
 
 
+    Data_Analyser(consumption_interval = config.Consumption, solar_interval = config.Solar) #pass consumption data AND solar data
+    config.Solar_Exists = True #telling the app that solar exists 
 
 
     return html.Div([ #display the data in the dash app for verification
