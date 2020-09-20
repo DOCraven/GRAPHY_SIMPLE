@@ -143,7 +143,7 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
 def filter_sites(value):
     return value #just return the value and store it in the location called "memory_output"
         
-######### CALLBACK FOR MONTH DROP DOWN BOX ######
+######### CALLBACK FOR MONTH DROP DOWN BOX IN SITE SELECTION ######
 @app.callback(
     dash.dependencies.Output('month_selection_output', 'children'),
     [dash.dependencies.Input('month_selection', 'value')])
@@ -173,34 +173,58 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         return children
 
 
+######### CALLBACK FOR MONTH DROP DOWN BOX IN PRICING ######
+@app.callback(
+    dash.dependencies.Output('pricing_month_selection_output', 'children'),
+    [dash.dependencies.Input('pricing_month_selection', 'value')])
+def update_output(value):
+    return (value) #ie, what is selected via the drop down box 
+
+
 ## CALLBACK FOR PRICING DAILY GRAPH ###
 @app.callback( 
-    Output('Price_daily_graph', 'figure'), 
-    [Input('Price_Drop_Down_menu', 'value')])
-def update_daily_graph(selected_name):
-    #filter the names 
+    dash.dependencies.Output('Price_daily_graph', 'figure'), #no brackets indicate a single thing returned, brackets indicate a list
+    [
+    dash.dependencies.Input('Price_Drop_Down_menu', 'value'),
+    dash.dependencies.Input('pricing_month_selection_output', 'children')
+        ] #read the stored month )
+    )
+def update_daily_pricing_graph(selected_name, children):
+    #filter the names
+    chosen_month = children #selected month 
     chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
     dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
+    shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     try: #create the figure to send to dash to plot
-        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
         Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
 
     return fig
 
 ### CALLBACK FOR PRICING WEEKLY GRAPH ###
-@app.callback(
-    Output('Price_weekly_graph', 'figure'),
-    [Input('Price_Drop_Down_menu', 'value')])
-def update_weekly_graph(selected_name):
+@app.callback( 
+    
+    
+    dash.dependencies.Output('Price_weekly_graph', 'figure'), 
+    [
+    dash.dependencies.Input('Price_Drop_Down_menu', 'value'),
+    dash.dependencies.Input('pricing_month_selection_output', 'children')
+        ] #read the stored month )
+    )
+def update_weekly_pricing_graph(selected_name, children):
     #filter the names 
+    chosen_month = children #selected month 
     chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    
     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
     time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
+
     dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
+    shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     try: #create the figure to send to dash to plot
-        fig = dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
         Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
     

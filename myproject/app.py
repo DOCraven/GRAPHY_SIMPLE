@@ -237,15 +237,38 @@ def render_content(tab):
     elif tab == 'tab-7': #Pricing Data
             if config.Data_Uploaded: 
                 return html.Div([
+                    dcc.Store(id='pricing_month_selection_output', storage_type= 'session'), #storing the selected site here
                     html.H3('Pricing Data'),
                     dcc.Dropdown(id = 'Price_Drop_Down_menu', #make selection menu
                         options=[{'label':name, 'value':name} for name in config.Pricing_names],
                         value = config.Pricing_names[0],#initial default selection upon loading 
                         multi=False #do not allow multiple selections 
                         ), 
+                    html.H3('Select a Month to Plot'), 
+                    dcc.Dropdown(
+                        id='pricing_month_selection',
+                        options=[ #display options for dropdown value 
+                            {'label': 'January', 'value': 'January'},
+                            {'label': 'February', 'value': 'February'},
+                            {'label': 'March', 'value': 'March'},
+                            {'label': 'April', 'value': 'April'},
+                            {'label': 'May', 'value': 'May'},
+                            {'label': 'June', 'value': 'June'},
+                            {'label': 'July', 'value': 'July'},
+                            {'label': 'August', 'value': 'August'},
+                            {'label': 'September', 'value': 'September'},
+                            {'label': 'October', 'value': 'October'},
+                            {'label': 'November', 'value': 'November'},
+                            {'label': 'December', 'value': 'December'},
+                            ],
+                        value='January',
+                        multi=True
+                    ),
+                    
                     dcc.Graph(id='Price_daily_graph'), #display daily graph
-                    dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display all excess solar graph as a line graph per month
                     dcc.Graph(id='Price_weekly_graph'), #display weekly graph
+                    dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display all excess solar graph as a line graph per month
+                    
                     ])
             else: 
                 return html.Div([
