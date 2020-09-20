@@ -123,12 +123,12 @@ def render_content(tab):
             return html.Div([
                 html.H3('Historical Energy Load Anaylsis Tool'), #quick graph
                 dcc.Dropdown(id = 'Drop_Down_menu', #make selection menu
-                    options=[{'label':name, 'value':name} for name in config.Pricing_names],
+                    options=[{'label':name, 'value':name} for name in config.names],
                     value = config.names[0],#initial default selection upon loading 
                     multi=False #do not allow multiple selections 
                     ), 
-                dcc.Graph(id='Pricing_daily_graph'), #display daily graph
-                dcc.Graph(id='Pricing_weekly_graph'), #display weekly graph
+                dcc.Graph(id='daily_graph'), #display daily graph
+                dcc.Graph(id='weekly_graph'), #display weekly graph
                 
                 
             ])
