@@ -22,6 +22,8 @@ import time
 import base64
 import cufflinks as cf
 import flask
+from rq import Queue
+from worker import conn
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
