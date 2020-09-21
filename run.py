@@ -203,7 +203,7 @@ def update_output(value):
     dash.dependencies.Output('Price_daily_graph', 'figure'), #no brackets indicate a single thing returned, brackets indicate a list
     [
     dash.dependencies.Input('Price_Drop_Down_menu', 'value'),
-    dash.dependencies.Input('tab1_month_selection_output', 'children')
+    dash.dependencies.Input('pricing_month_selection_output', 'children')
         ] #read the stored month )
     )
 def update_daily_pricing_graph(selected_name, children):
