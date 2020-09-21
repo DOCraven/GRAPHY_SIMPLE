@@ -13,7 +13,7 @@ import dash_html_components as html
 import dash_table
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
-from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
 #IMPORT USER DEFINED GLOBAL VARIABLES 
@@ -170,7 +170,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
         config.Data_Uploaded = True #allow other pages to open in the Dash App 
-    return #nothing
+    return 'foo'
     
 def parse_contents(contents, filename, date):
     ## VARS

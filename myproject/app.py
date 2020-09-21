@@ -22,9 +22,11 @@ import time
 import base64
 import cufflinks as cf
 import flask
+from rq import Queue
+from worker import conn
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
-from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
@@ -33,19 +35,22 @@ import config
 
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 
+## WORKER QUEING FOR BACKGROUND TASKS ##
+q = Queue(connection=conn)
+
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
 # file name for VIC1 Spot print (2019) (Pulling straight from GitHub for Heroku)
 Price_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/assets/VIC1_SPOT_PRICE_2019.xlsx?raw=true'  
 VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
-Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
-
+# Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
+bar = q.enqueue(Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True)) #create daily/weekly averages of price file
 #heroku hacking 
 #read CONSUMPTION from GITHUB
 Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD.xlsx?raw=true'
 config.Consumption = pd.read_excel(Consumption_URL) #read solar and create dataframe
 config.Solar_Exists = True
 #punch out the analysis for heroku
-Data_Analyser(consumption_interval = config.Consumption) #, solar_interval = None, Price_file = None, execute_price_analysis = False) 
+bar = q.enqueue(Data_Analyser(consumption_interval = config.Consumption)) #, solar_interval = None, Price_file = None, execute_price_analysis = False) 
 
 
 ### MAIN - hacked together for now ###

@@ -25,7 +25,7 @@ import base64
 import flask
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
-from fcn_plotting import character_removal, dataframe_chooser, Mbox, dash_solar_plotter
+from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
