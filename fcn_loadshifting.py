@@ -17,14 +17,10 @@ def load_shifter_average(dataframe_to_shift, value_to_shift):
     shifted_site_consumption = []
     inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
     
-    ### TESTING PURPOSES
-    # value_to_shift = 50 # FOR TESTING 
-    ### TESTING PURPOSES
-    
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
     value_to_shift_percentage = value_to_shift/100 #t
     
-    for month in range(0, len(dataframe_to_shift)):
+    for month in range(0, len(dataframe_to_shift)): #iterate through each month in the list
 
         #isolate single dataframe to work on 
         single_df_site = dataframe_to_shift[month]
@@ -60,9 +56,7 @@ def load_shifter_average(dataframe_to_shift, value_to_shift):
         #combine the two dataframe 
         shifted_inside_solar_hours.update(shifted_outside_solar_hours)
 
-        
-
-
+        #append shifted dataframe to big list to return 
         shifted_site_consumption.append(shifted_inside_solar_hours)
 
     #convert list of dataframe to single dataframe 
