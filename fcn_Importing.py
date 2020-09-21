@@ -126,7 +126,8 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         #import solar data
         config.Solar_Imported = True #for data handling later on. 
         Solar_Data = xlsxReader_Monthly(config.Solar) #check to see if Solar_data input is valid (ie, xlsx only) and return a list of months 
-        # except AttributeError: 
+        
+        
             # pass
 
         ## STEP 1A: join the solar data to the dataframe (if necessary)

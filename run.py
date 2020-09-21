@@ -252,8 +252,9 @@ def update_output(value):
     return (value) #ie, what is selected via the drop down box 
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     app.run_server(debug = True, 
-        # port=8050, #for development server comment this line out 
+        # port=port, #for development server comment this line out 
         # host='0.0.0.0' #and this line out
         )
 

@@ -39,6 +39,15 @@ Price_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/assets/VIC1_S
 VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
 
+#heroku hacking 
+#read CONSUMPTION from GITHUB
+Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD.xlsx?raw=true'
+config.Consumption = pd.read_excel(Consumption_URL) #read solar and create dataframe
+config.Solar_Exists = True
+#punch out the analysis for heroku
+Data_Analyser(consumption_interval = config.Consumption) #, solar_interval = None, Price_file = None, execute_price_analysis = False) 
+
+
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
