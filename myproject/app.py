@@ -113,11 +113,6 @@ def render_content(tab):
             # Allow multiple files to be uploaded
             # multiple=False 
             ),
-            dcc.Loading(
-                id="loading-1",
-                type="default",
-                children=html.Div(id="loading-output-1")
-            ),
             html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
 
 
@@ -126,12 +121,33 @@ def render_content(tab):
     elif tab == 'tab-2': #FANCY INTERVAL GRAPHS
         if config.Data_Uploaded: 
             return html.Div([
+                dcc.Store(id='tab1_month_selection_output', storage_type= 'session'), #storing the selected site here
                 html.H3('Historical Energy Load Anaylsis Tool'), #quick graph
                 dcc.Dropdown(id = 'Drop_Down_menu', #make selection menu
                     options=[{'label':name, 'value':name} for name in config.names],
                     value = config.names[0],#initial default selection upon loading 
                     multi=False #do not allow multiple selections 
                     ), 
+                 html.H3('Select a Month to Plot'), 
+                    dcc.Dropdown(
+                        id='tab1_month_selection',
+                        options=[ #display options for dropdown value 
+                            {'label': 'January', 'value': 'January'},
+                            {'label': 'February', 'value': 'February'},
+                            {'label': 'March', 'value': 'March'},
+                            {'label': 'April', 'value': 'April'},
+                            {'label': 'May', 'value': 'May'},
+                            {'label': 'June', 'value': 'June'},
+                            {'label': 'July', 'value': 'July'},
+                            {'label': 'August', 'value': 'August'},
+                            {'label': 'September', 'value': 'September'},
+                            {'label': 'October', 'value': 'October'},
+                            {'label': 'November', 'value': 'November'},
+                            {'label': 'December', 'value': 'December'},
+                            ],
+                        value='January',
+                        multi=True
+                    ),
                 dcc.Graph(id='daily_graph'), #display daily graph
                 dcc.Graph(id='weekly_graph'), #display weekly graph
                 
@@ -290,11 +306,13 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
-@app.callback(Output("loading-output-1", "children"), [Input("upload-data", "value")])
-def input_triggers_spinner(value):
-    time.sleep(1)
-    print('Loading Called')
-    return value
+
+######### CALLBACK FOR MONTH DROP DOWN BOX IN SITE GRAPGHS (TAB 1) ######
+@app.callback(
+    dash.dependencies.Output('tab1_month_selection_output', 'children'),
+    [dash.dependencies.Input('tab1_month_selection', 'value')])
+def update_output(value):
+    return (value) #ie, what is selected via the drop down box 
 
 
 
