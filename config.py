@@ -1,6 +1,7 @@
 import pandas as pd 
-
 ## file to define global variables ##
+
+#interval data
 Weekly_Interval_Data = []
 Daily_Interval_Data = []
 Monthly_Sum = []
@@ -28,8 +29,6 @@ yearly_summed_figure = ''
 #importing stuff - related to parse_contents file 
 Solar = pd.DataFrame() #empty dataframe for solar 
 Consumption = pd.DataFrame() #empty dataframe for consumption  
-
-
 
 
 reset_dataframes = False
