@@ -35,23 +35,12 @@ import config
 
 from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 
-## WORKER QUEING FOR BACKGROUND TASKS ##
-q = Queue(connection=conn)
-
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
 # file name for VIC1 Spot print (2019) (Pulling straight from GitHub for Heroku)
 Price_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/assets/VIC1_SPOT_PRICE_2019.xlsx?raw=true'  
 VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 # Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
-bar = q.enqueue(Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True)) #create daily/weekly averages of price file
-#heroku hacking 
-#read CONSUMPTION from GITHUB
-Consumption_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/INPUT%20DATA/2019_NE_WATER_EXTERNAL_LOAD.xlsx?raw=true'
-config.Consumption = pd.read_excel(Consumption_URL) #read solar and create dataframe
-config.Solar_Exists = True
-#punch out the analysis for heroku
-bar = q.enqueue(Data_Analyser(consumption_interval = config.Consumption)) #, solar_interval = None, Price_file = None, execute_price_analysis = False) 
-
+Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
 
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
