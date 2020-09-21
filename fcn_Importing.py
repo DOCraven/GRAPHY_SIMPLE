@@ -170,7 +170,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         config.solar_figure_line = dash_solar_plotter(df_to_plot = config.Daily_Interval_Data, plot_type = 'line' ) #make fancy figure 
 
         config.Data_Uploaded = True #allow other pages to open in the Dash App 
-    return #nothing
+    return 'foo'
     
 def parse_contents(contents, filename, date):
     ## VARS
