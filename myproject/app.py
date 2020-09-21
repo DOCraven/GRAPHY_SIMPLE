@@ -5,6 +5,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_table
 #ANALYSIS ETC
 import pandas as pd
@@ -62,7 +63,7 @@ plt.close('all') #ensure all windows are closed
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
+# external_stylesheets=[dbc.themes.BOOTSTRAP]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 server = app.server
@@ -111,6 +112,11 @@ def render_content(tab):
             },
             # Allow multiple files to be uploaded
             # multiple=False 
+            ),
+            dcc.Loading(
+                id="loading-1",
+                type="default",
+                children=html.Div(id="loading-output-1")
             ),
             html.Div(id='output-data-upload'), #show the data, and this needs to exist for the code to work 
 
@@ -284,7 +290,11 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
-
+@app.callback(Output("loading-output-1", "children"), [Input("upload-data", "value")])
+def input_triggers_spinner(value):
+    time.sleep(1)
+    print('Loading Called')
+    return value
 
 
 
