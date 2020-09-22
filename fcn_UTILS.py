@@ -1,6 +1,7 @@
 import pandas as pd
 import ctypes
 import cufflinks as cf
+import os
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
@@ -69,6 +70,27 @@ def dataframe_compactor(dataframes_to_compact):
 
     return compacted_dataframe
 
+def dataframe_saver(time_frame = 'Average'): 
+    """
+    function to save a given dataframe using dataframes already existing in memory from other functions 
+    """
+    #yes this is bad juju 
+
+    # test is output directory exists
+    file_save_location = os.getcwd() + '\\SHIFTED FILES'
+    if not os.path.exists(file_save_location): #check to see if folder is created
+     os.makedirs(file_save_location) #create folder if not created
+
+    if time_frame == 'Average': #only save the average
+        csv_save_name = config.plot_title + '.csv' #dymamically generated plot title
+        csv_save_name = csv_save_name.replace(':', '-') #remove : sign to save it in windows
+        csv_save_name = file_save_location +'\\' + csv_save_name.replace('%', 'PC') #remove % sign to save it in windows
+        config.shifted_site_to_save.to_csv(csv_save_name) #save the whole year
+    
+    elif time_frame == 'Yearly': 
+        pass #placeholder for future code
+
+    return #nothing
 
 
 

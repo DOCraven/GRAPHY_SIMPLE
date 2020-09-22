@@ -36,4 +36,4 @@ number_of_files_uploaded = 0
 
 #load shifting vars
 plot_title = ''
-shifted_site = pd.DataFrame() #empty dataframe
+shifted_site_to_save = pd.DataFrame() #empty dataframe

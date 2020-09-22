@@ -139,15 +139,18 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
     site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
     
     ### STEP 4 - do the load shift calculations, and return a single dataframe of each month 
-    config.shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
+    shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
     
-    ### STEP 5 - create a title for the figre
+    ### STEP 5 - copy dataframe to save it for later
+    config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope
+    
+    ### STEP 6 - create a title for the figre
     config.plot_title = str(chosen_month) + ' - ' + chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%' #create title for graph depending on what is given to plot
 
     ### STEP 6 - Filter selected month - HERE BE LOGIC ERRORS
-    month_filtered_site = config.shifted_site.loc[:, chosen_month] #return only selected months 
+    month_filtered_site = shifted_site.loc[:, chosen_month] #return only selected months 
 
-    ### STEP 7 - create figure from filtered site and selected month
+    ### STEP 8 - create figure from filtered site and selected month
     figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
     
     message = 'You have load shifted {}'.format(value) + '%' #to display in DASH

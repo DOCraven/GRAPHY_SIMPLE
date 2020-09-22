@@ -23,13 +23,12 @@ import base64
 import cufflinks as cf
 import flask
 from rq import Queue
-from worker import conn
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
-from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
@@ -308,10 +307,8 @@ def render_content(tab):
 def update_output(n_clicks):
     if n_clicks is not None: 
         #save modified dataframe
-        csv_save_name = config.plot_title + '.csv' #dymamically generated plot title
-        csv_save_name = csv_save_name.replace('%', 'PC') #remove % sign to save it in windows
-        print(csv_save_name)
-        config.shifted_site.to_csv(csv_save_name) #save the whole year
+        dataframe_saver(time_frame = 'Average') #save the dataframe as a csv file 
+        
         return 'Average File Saved'
 
 
