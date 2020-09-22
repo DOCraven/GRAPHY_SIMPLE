@@ -188,8 +188,19 @@ def render_content(tab):
                         value='January',
                         multi=True #allow multiple months to be selected
                     ),
+                    ### EXPORTING BUTTON SAVES
+                    html.Button('Export Average Load Shifted Data', id='Average_Save'),
+                    html.Div(id='Average_File_Saved_Output',
+                        children='Enter a value and press submit'),
+                    html.Button('Export Yearly Load Shifted Data', id='Yearly_Save'),
+                    html.Div(id='Yearly_File_Saved_Output',
+                        children='Enter a value and press submit'),
                     
+                    #display graph
                     dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
+                    html.P(' '), #blank row
+                    
+                    
                     html.H4('Excess Solar'), #blank row 
                     dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display sum of all solar graph as a summed box per month
                     ])
@@ -289,7 +300,29 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
+### CALLBACK TO SAVE AVERAGE LOAD SHIFTED FILE ###
+@app.callback(
+    dash.dependencies.Output('Average_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Average_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        #save modified dataframe
+        csv_save_name = config.plot_title + '.csv' #dymamically generated plot title
+        csv_save_name = csv_save_name.replace('%', 'PC') #remove % sign to save it in windows
+        print(csv_save_name)
+        config.shifted_site.to_csv(csv_save_name) #save the whole year
+        return 'Average File Saved'
 
+
+### CALLBACK TO SAVE WHOLE YEAR LOAD SHIFTED FILE ###
+@app.callback(
+    dash.dependencies.Output('Yearly_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Yearly_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        return 'Yearly File Saved'
 
 
 
