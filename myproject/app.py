@@ -319,6 +319,8 @@ def update_output(n_clicks):
     # [dash.dependencies.State('input-box', 'value')])
 def update_output(n_clicks):
     if n_clicks is not None: 
+        dataframe_saver(time_frame = 'Average') #save the dataframe as a csv file 
+        
         return 'Yearly File Saved'
 
 

@@ -23,29 +23,33 @@ def load_shifter_average(dataframe_to_shift, value_to_shift):
     for month in range(0, len(dataframe_to_shift)): #iterate through each month in the list
 
         #isolate single dataframe to work on 
-        single_df_site = dataframe_to_shift[month]
+        single_df_site = dataframe_to_shift[month] #SINGLE DATAFRAME W/ EXCESS SOLAR GENERATION FOR THE MONTH
 
-        #create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
+        #create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS  (RETURNS NAN FOR HOURS WHERE SOLAR EXCESS EXISTS [ie, daytime])
         no_solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] > single_df_site['Excess Solar Generation (Total)']) #change name it OUTSIDE
 
-        #create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS
+        #create new dataframe only where consumption < PV availability        IE< SOLAR EXCESS HOURS / INSIDE SOLAR HOURS   (RETURNS NAN FOR HOURS WHERE THERE IS NO SOLAR EXCESS [ie, night time hours])
         solar_hours_consumption = single_df_site.iloc[:,0].where(single_df_site.iloc[:,0] < single_df_site['Excess Solar Generation (Total)']) #change name to INSIDE
 
         # sum the total excess solar hours 
-        solar_summed = solar_hours_consumption.sum() #total (summed) SOLAR GENERATION to shift
+        solar_summed = solar_hours_consumption.sum() #total (summed) of NON SOLAR HOURS (ie, evening hours) 
 
-        # determine solar ratio by dividing half hourly solar generation by total solar generation 
-        solar_hours_consumption_ratio = solar_hours_consumption/solar_summed #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
+        # scaling available excess solar by the total available 
+        #add this to the summed NON SOLAR EXCESS load #CHANGE NAME TO INSIDE
+        # (RETURNS NAN FOR HOURS WHERE THERE IS NO SOLAR EXCESS [ie, night time hours])
+        solar_hours_consumption_ratio = solar_hours_consumption/solar_summed 
 
         ## shift NON EXCESS SOLAR hours by value_to_shift_percentage,           value is negative, as we want to TAKE AWAY these hours
-        no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter #multiple to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
+        # multiply to get smaller number (ie, number to add to original dataframe) #change name to OUTSIDE
+        no_solar_hours_consumption_scaled = no_solar_hours_consumption*value_to_shift_percentage*inverter 
 
-        ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
+        ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR [evening hours])
         summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
         summed_positive = summed*inverter #to give a positive number for dividing 
 
-        #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
-        scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
+        #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS (IE, NAN for NON SOLAR HHOURS [ie, evening])
+        #this is what we need to ADD to INSIDE SOLAR HOURS
+        scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive 
 
         #adding the scaled shifted consumption to the original solar hours 
         shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 

@@ -88,7 +88,10 @@ def dataframe_saver(time_frame = 'Average'):
         config.shifted_site_to_save.to_csv(csv_save_name) #save the whole year
     
     elif time_frame == 'Yearly': 
-        pass #placeholder for future code
+        csv_save_name = 'YEARLY' + config.plot_title + '.csv' #dymamically generated plot title - bit janky for now, so we will have to fix it later
+        csv_save_name = csv_save_name.replace(':', '-') #remove : sign to save it in windows
+        csv_save_name = file_save_location +'\\' + csv_save_name.replace('%', 'PC') #remove % sign to save it in windows
+        config.YEARLY_shifted_site.to_csv(csv_save_name) #save the whole year
 
     return #nothing
 

@@ -139,8 +139,12 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
     ### STEP 3 - extract solar from the original dataframe, and add it to each list 
     site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
     
-    ### STEP 4 - do the load shift calculations, and return a single dataframe of each month 
+    ### STEP 4A - do the load shift calculations for daily averaged data (list of dataframes), and return a single dataframe of each month 
     shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
+    
+    ### STEP 4B - do the load shift calculations for the entire year (single datagframe) and return a single dataframe
+    #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
+    config.YEARLY_shifted_site = load_shifter_average(config.Checked_YEARLY_Interval_Data, load_shift_number) 
     
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope
