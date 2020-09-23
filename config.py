@@ -37,3 +37,4 @@ number_of_files_uploaded = 0
 #load shifting vars
 plot_title = ''
 shifted_site_to_save = pd.DataFrame() #empty dataframe
+load_shifting_long_list = pd.DataFrame() #for shifting and exporting yearly interval data

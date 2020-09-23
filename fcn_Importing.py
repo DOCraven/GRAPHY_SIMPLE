@@ -92,13 +92,14 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
                 pass
             
             Full_Pricing_Data = Pricing_Data
-                # config.Solar_Exists = False
+            config.load_shifting_long_list = Full_Pricing_Data #for load shifting and exporting
 
             ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
             Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
 
             ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
             Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
+            
 
             ## STEP 4: Calculate Weekly averages
             config.Weekly_Pricing_Data = WeeklyAverage(Checked_Pricing_Data_0) 

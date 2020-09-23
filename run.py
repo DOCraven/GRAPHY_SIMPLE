@@ -132,7 +132,8 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
     site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
     #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
     
-    ### STEP 2 - Convert the dataframe for a list of dataframes 
+    
+    ### STEP 2 - Convert the dataframe for a list of dataframes - NOT NECESSARY FOR YEARLY DATA
     site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
 
     ### STEP 3 - extract solar from the original dataframe, and add it to each list 
