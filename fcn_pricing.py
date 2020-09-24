@@ -49,15 +49,13 @@ def spot_Component():
     facility = 0
 
     spotDemand = np.empty(shape=[0,2])
-    price = 0
 
     for i in range(17520):
         
         spot = spotPrices.iloc[i,0] * demandProfiles.iloc[i,facility] / 1000 * lossFactors.iloc[facility, 0] * lossFactors.iloc[facility,1]*spotPrem
         spotDemand = np.append(spotDemand, [[demandProfiles.index[i],spot]], axis=0)
-        price = price + spot
-
-    print(price)
+    spotDemandDF = pd.DataFrame(data=spotDemand[0:,1], index=spotDemand[0:,0], columns=['Wholesale Demand'])
+    spotDemandDF['Wholesale Demand'].sum()
 
 
 def network_Component():
@@ -67,11 +65,7 @@ def network_Component():
     
     #print(demandProfiles.index[48].dayofweek)
     networkCharge = np.empty(shape=[0,2])
-    charge = 0
-    print(demandProfiles.index[0].hour, " , ", demandProfiles.index[1].hour, " , ", demandProfiles.index[2].hour)
-    print(tariffType14.iloc[0,5])
-    print(tariffType14.iloc[7,5])
-    print(tariffType14.iloc[6,5])
+    
     for i in range(17520):
 
         day = demandProfiles.index[i].dayofweek
@@ -87,7 +81,7 @@ def network_Component():
         elif tariffType == '13.00':
             TOU = tariffType13.iloc[hour, day]
 
-        elif tariffType == '14.00':
+        elif tariffType == '14':
             TOU = tariffType14.iloc[hour, day]
 
         elif tariffType == 'NDM':
@@ -99,15 +93,32 @@ def network_Component():
         
         networkRate = demandProfiles.iloc[i, 30] * networkTariffs.iloc[networkFacility, 8+TOU] /100
         
-        
-
-
         standingCharge = networkTariffs.iloc[networkFacility,8]/365/48
         totalNetworkCharge = networkRate + standingCharge
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
-        charge = charge + totalNetworkCharge
+    networkChargeDF = pd.DataFrame(data = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
+    networkChargeDF['Network Charge'].sum()
+    
 
-    print(charge)
-    print(demandProfiles.iloc[0, 30])
 
-network_Component()
+
+def market_Component():
+    marketFacility = 9
+    ancil = 0.08
+    AEMOpool = 0.04
+    LRET = 1.02
+    VEET = 0.35
+    SRES = 0.51
+
+    combMarket = ancil + AEMOpool + LRET + VEET + SRES
+
+    marketCharge = np.empty(shape=[0,2])
+
+    for i in range(17520):
+
+        market = combMarket * demandProfiles.iloc[i, 30] / 100 * lossFactors.iloc[marketFacility,0]
+        marketCharge = np.append(marketCharge, [[demandProfiles.index[i],market]], axis=0)
+    marketChargeDF = pd.DataFrame(data=marketCharge[0:,1], index=marketCharge[0:,0], columns=['Market Charge'])
+    print(marketChargeDF['Market Charge'].sum())
+
+
