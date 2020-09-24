@@ -24,26 +24,17 @@ tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0
 tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
 
 
-
-"""
-tariffType2.index = pd.to_datetime(tariffType2.index)
-tariffType3.index = pd.to_datetime(tariffType3.index)
-tariffType13.index = pd.to_datetime(tariffType13.index)
-tariffType14.index = pd.to_datetime(tariffType14.index)
-"""
 spotPrem = 1.0425
 print(spotPrem)
 
 
-
-#print(spotPrices.at['VIC1 Price'[5]],'VIC1 Price')
 
 Test = 'Yarrawonga Offtake Pump station'
 Time = 'Tue 01 Jan 2019 00:30'
 #print(demandProfiles.loc[Time, Test])
 #print(demandProfiles.index)
 
-#spotPricedDmd = pd.DataFrame(index = demandProfiles.index)
+
 
 def spot_Component():
     facility = 0
@@ -63,7 +54,6 @@ def network_Component():
     tariffType = networkTariffs.iloc[networkFacility,18]
     print(networkTariffs.iloc[networkFacility, 4])
     
-    #print(demandProfiles.index[48].dayofweek)
     networkCharge = np.empty(shape=[0,2])
     
     for i in range(17520):
@@ -100,8 +90,6 @@ def network_Component():
     networkChargeDF['Network Charge'].sum()
     
 
-
-
 def market_Component():
     marketFacility = 9
     ancil = 0.08
@@ -122,3 +110,21 @@ def market_Component():
     print(marketChargeDF['Market Charge'].sum())
 
 
+def retailerFee_Component():
+    retailFeeFacility = 30
+
+    serviceCharge = 1.1 # $/day
+    poolMonitor = 0.15 # c/kWh
+    CTlevy = 110 # $/yr
+    meterCharge = 720 # $/yr
+
+    retailerFee = np.empty(shape=[0,2])
+
+    for i in range(17520):
+
+        fee = serviceCharge/48 + CTlevy/(365*48) + meterCharge/(365*48) + poolMonitor*demandProfiles.iloc[i, retailFeeFacility] / 100
+        retailerFee = np.append(retailerFee, [[demandProfiles.index[i], fee]], axis=0)
+    retailerFeeDF = pd.DataFrame(data=retailerFee[0:,1], index = retailerFee[0:,0], columns=['Retailer Fee'])
+    print(retailerFeeDF['Retailer Fee'].sum())
+
+retailerFee_Component()
