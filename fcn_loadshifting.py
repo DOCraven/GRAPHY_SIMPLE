@@ -76,11 +76,15 @@ def load_shifter_long_list(dataframe_to_shift, value_to_shift, site_to_shift): #
     # shifted_site_consumption = []
     inverter = -1 #used to invert the shifted hours when adding a negative, you minus - NEEDED
 
-
+    
     ### STEP 1 - convert value_to_shift into % (ie, 20 = 0.2)
     value_to_shift_percentage = value_to_shift/100 
-    shifted_sites_inc_solar = [site_to_shift, 'Excess Solar Generation (Total)'] #create new column for excess solar generation
-    single_df_site = dataframe_to_shift.loc[:, shifted_sites_inc_solar] #slice the dataframe to only include the site under consideration and the total excess solar generation 
+
+    ## HERE BE LOGIC ERRORS - NOT SLICING THE SITES PROPERLY
+    # shifted_sites_inc_solar = [site_to_shift, 'Excess Solar Generation (Total)'] #create new column for excess solar generation
+    single_df_site = dataframe_to_shift.loc[:,[site_to_shift, 'Excess Solar Generation (Total)']]
+    
+    # single_df_site = dataframe_to_shift.loc[:, shifted_sites_inc_solar] #slice the dataframe to only include the site under consideration and the total excess solar generation 
     
     ### STEP 2 - Generate solar and no solar hours 
     # create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS

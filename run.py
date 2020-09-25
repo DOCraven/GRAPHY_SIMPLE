@@ -61,6 +61,29 @@ import config
 
 ######## CALLBACKS FOR APP.PY FUNCTIONALITY GO HERE #########
 
+######### CALLBACK FOR DASH IMPORTING/LOADING FILES ##########
+@app.callback(Output('output-data-upload', 'children'),
+              [Input('upload-data', 'contents')],
+              [State('upload-data', 'filename'),
+               State('upload-data', 'last_modified')])
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None: #this function of broken for some reason, and the empty lists fixes it
+        #create empty list
+        list_of_contents_fixed = []
+        list_of_names_fixed = []
+        list_of_dates_fixed = []
+        #append the broken object to the list, allowing the zip function to iterate over an int
+        list_of_contents_fixed.append(list_of_contents)
+        list_of_names_fixed.append(list_of_names)
+        list_of_dates_fixed.append(list_of_dates)
+        #normal dash functionality occurs here
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents_fixed, list_of_names_fixed, list_of_dates_fixed)]
+        return children
+    
+
+
 ## CALLBACK FOR DAILY GRAPH ###
 @app.callback( 
     dash.dependencies.Output('daily_graph', 'figure'), 
@@ -123,7 +146,7 @@ def update_weekly_graph(selected_name, children):
         dash.dependencies.Input('memory_output', 'data'), #read the stored site 
         dash.dependencies.Input('month_selection_output', 'children') #read the stored month 
         ]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
-def update_output(value, data, children): #slider is value, dropdown menue is data, selected month is children 
+def update_output(value, data, children): #slider is value, Selected site via dropdown menu is data, selected month is children 
     ## VARS
     chosen_site = data #to narrow down the dataframe using previously existing data
     load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
@@ -132,19 +155,18 @@ def update_output(value, data, children): #slider is value, dropdown menue is da
     site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
     #the above returns a 12x? dataframe. need to convert it to a list of dataframes 
     
-    
-    ### STEP 2 - Convert the dataframe for a list of dataframes - NOT NECESSARY FOR YEARLY DATA
+    ### STEP 2 - Convert the single 12xN dataframe into a dataframe for each month  - NOT NECESSARY FOR YEARLY DATA
     site_to_plot_list = dataframe_list_generator(non_list_dataframe = site_to_plot_raw) #converts the above into a list of 1x month per list entry 
 
     ### STEP 3 - extract solar from the original dataframe, and add it to each list 
     site_to_plot_solar_added = solar_extractor_adder(single_site = site_to_plot_list, all_sites = config.Daily_Interval_Data) #adds the respective monthly solar to the respective month (in the list)
     
-    ### STEP 4A - do the load shift calculations for daily averaged data (list of dataframes), and return a single dataframe of each month 
+    ### STEP 4A - do the load shift calculations for daily averaged data (list of dataframes), and return a single dataframe of each month - site_to_plopt_solar_added is a list of dataframes
     shifted_site = load_shifter_average(site_to_plot_solar_added, load_shift_number) #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
     
     ### STEP 4B - do the load shift calculations for the entire year (single datagframe) and return a single dataframe
-    #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING
-    config.YEARLY_shifted_site = load_shifter_average(config.Checked_YEARLY_Interval_Data, load_shift_number) 
+    #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING ,  - NEED TO ADD EXCESS SOLAR GENERATION (TOTAL) to this dataframe
+    config.YEARLY_shifted_site = load_shifter_long_list(dataframe_to_shift = config.Checked_YEARLY_Interval_Data,  value_to_shift = load_shift_number, site_to_shift = chosen_site) 
     
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope
@@ -174,27 +196,6 @@ def filter_sites(value):
     [dash.dependencies.Input('month_selection', 'value')])
 def update_output(value):
     return (value) #ie, what is selected via the drop down box 
-
-######### CALLBACK FOR DASH IMPORTING/LOADING FILES ##########
-@app.callback(Output('output-data-upload', 'children'),
-              [Input('upload-data', 'contents')],
-              [State('upload-data', 'filename'),
-               State('upload-data', 'last_modified')])
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None: #this function of broken for some reason, and the empty lists fixes it
-        #create empty list
-        list_of_contents_fixed = []
-        list_of_names_fixed = []
-        list_of_dates_fixed = []
-        #append the broken object to the list, allowing the zip function to iterate over an int
-        list_of_contents_fixed.append(list_of_contents)
-        list_of_names_fixed.append(list_of_names)
-        list_of_dates_fixed.append(list_of_dates)
-        #normal dash functionality occurs here
-        children = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents_fixed, list_of_names_fixed, list_of_dates_fixed)]
-        return children
 
 ######### CALLBACK FOR MONTH DROP DOWN BOX IN PRICING ######
 @app.callback(

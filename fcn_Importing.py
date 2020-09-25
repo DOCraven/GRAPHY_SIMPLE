@@ -129,17 +129,17 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         Solar_Data = xlsxReader_Monthly(config.Solar) #check to see if Solar_data input is valid (ie, xlsx only) and return a list of months 
         
 
-        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
+        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data) #Append Solar data to the back of the interval data
         
         ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
         Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data) #list of dataframes 
 
         ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
         Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0) #list of dataframes 
-        
-        #unpack list of dataframes to single dataframe for load shifting yearly data
-        config.Checked_YEARLY_Interval_Data = dataframe_compactor(Checked_Interval_Data_1)
+        Checked_Interval_Data_2 = CopyCat(Checked_Interval_Data_0) #list of dataframes 
 
+        #unpack list of dataframes to single dataframe for load shifting yearly data - no analysis occurs here
+        config.Checked_YEARLY_Interval_Data = dataframe_compactor(dataframes_to_compact = Checked_Interval_Data_2, yearly_data = True)
 
         ## STEP 4: Calculate Weekly averages
         config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 

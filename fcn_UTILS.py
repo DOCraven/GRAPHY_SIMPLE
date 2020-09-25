@@ -57,18 +57,25 @@ def dataframe_list_generator(non_list_dataframe):
     
     return listed_dataframes
 
-def dataframe_compactor(dataframes_to_compact): 
+def dataframe_compactor(dataframes_to_compact, yearly_data = False): 
     """takes in a list of len N of dataframes, and returns a single dataframe with N columns"""
-    index_names = list(dataframes_to_compact[0].index) #rip index from first dataframe  
-    compacted_dataframe = pd.DataFrame(index = index_names)
-    column_to_drop = 'Excess Solar Generation (Total)'
     
-    for month in range(0, len(dataframes_to_compact)): #iterate through each 
-        dataframes_to_compact[month].drop(columns = column_to_drop, inplace = True) #remove the solar generarion for the respective month
-        
-    compacted_dataframe = pd.concat(dataframes_to_compact, axis = 1) #merge all of them into a single dataframe 
+    if not yearly_data: #
+        index_names = list(dataframes_to_compact[0].index) #rip index from first dataframe  
+        compacted_dataframe = pd.DataFrame(index = index_names) 
+        column_to_drop = 'Excess Solar Generation (Total)'
+    
+        for month in range(0, len(dataframes_to_compact)): #iterate through each 
+            dataframes_to_compact[month].drop(columns = column_to_drop, inplace = True) #remove the solar generarion for the respective month
+            
+        compacted_dataframe = pd.concat(dataframes_to_compact, axis = 1) #merge all of them into a single dataframe 
+        return compacted_dataframe
 
-    return compacted_dataframe
+    elif yearly_data: 
+        compacted_dataframe = pd.DataFrame() #create empty dataframe
+        compacted_dataframe = pd.concat(dataframes_to_compact, axis = 0) #merge all of them into a single dataframe - NO INDEX HERE
+        compacted_dataframe.set_index('Interval End')
+        return compacted_dataframe
 
 def dataframe_saver(time_frame = 'Average'): 
     """
@@ -88,7 +95,7 @@ def dataframe_saver(time_frame = 'Average'):
         config.shifted_site_to_save.to_csv(csv_save_name) #save the whole year
     
     elif time_frame == 'Yearly': 
-        csv_save_name = 'YEARLY' + config.plot_title + '.csv' #dymamically generated plot title - bit janky for now, so we will have to fix it later
+        csv_save_name = 'YEARLY ' + config.plot_title + '.csv' #dymamically generated plot title - bit janky for now, so we will have to fix it later
         csv_save_name = csv_save_name.replace(':', '-') #remove : sign to save it in windows
         csv_save_name = file_save_location +'\\' + csv_save_name.replace('%', 'PC') #remove % sign to save it in windows
         config.YEARLY_shifted_site.to_csv(csv_save_name) #save the whole year
