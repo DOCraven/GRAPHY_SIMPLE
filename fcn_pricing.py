@@ -22,31 +22,35 @@ tariffType3 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff3", index_col=0)
 tariffType13 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff13", index_col=0)
 tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0)
 tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
+tariffTypeLLV = pd.read_excel(tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
+tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col=0)
 
 
 spotPrem = 1.0425
 print(spotPrem)
 
 
-
+"""
 Test = 'Yarrawonga Offtake Pump station'
 Time = 'Tue 01 Jan 2019 00:30'
-#print(demandProfiles.loc[Time, Test])
-#print(demandProfiles.index)
-
+print(demandProfiles.loc[Time, Test])
+print(demandProfiles.index)
+"""
 
 
 def spot_Component():
-    facility = 0
+    demandFacility = 30
+    lossFacility = 9
 
     spotDemand = np.empty(shape=[0,2])
 
     for i in range(17520):
         
-        spot = spotPrices.iloc[i,0] * demandProfiles.iloc[i,facility] / 1000 * lossFactors.iloc[facility, 0] * lossFactors.iloc[facility,1]*spotPrem
+        spot = spotPrices.iloc[i,0] * demandProfiles.iloc[i,demandFacility] / 1000 * lossFactors.iloc[lossFacility, 0] * lossFactors.iloc[lossFacility,1]*spotPrem
         spotDemand = np.append(spotDemand, [[demandProfiles.index[i],spot]], axis=0)
     spotDemandDF = pd.DataFrame(data=spotDemand[0:,1], index=spotDemand[0:,0], columns=['Wholesale Demand'])
     spotDemandDF['Wholesale Demand'].sum()
+    return spotDemandDF['Wholesale Demand']
 
 
 def network_Component():
@@ -88,6 +92,7 @@ def network_Component():
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
     networkChargeDF = pd.DataFrame(data = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
     networkChargeDF['Network Charge'].sum()
+    return networkChargeDF['Network Charge']
     
 
 def market_Component():
@@ -107,7 +112,8 @@ def market_Component():
         market = combMarket * demandProfiles.iloc[i, 30] / 100 * lossFactors.iloc[marketFacility,0]
         marketCharge = np.append(marketCharge, [[demandProfiles.index[i],market]], axis=0)
     marketChargeDF = pd.DataFrame(data=marketCharge[0:,1], index=marketCharge[0:,0], columns=['Market Charge'])
-    print(marketChargeDF['Market Charge'].sum())
+    marketChargeDF['Market Charge'].sum()
+    return marketChargeDF['Market Charge']
 
 
 def retailerFee_Component():
@@ -125,6 +131,17 @@ def retailerFee_Component():
         fee = serviceCharge/48 + CTlevy/(365*48) + meterCharge/(365*48) + poolMonitor*demandProfiles.iloc[i, retailFeeFacility] / 100
         retailerFee = np.append(retailerFee, [[demandProfiles.index[i], fee]], axis=0)
     retailerFeeDF = pd.DataFrame(data=retailerFee[0:,1], index = retailerFee[0:,0], columns=['Retailer Fee'])
-    print(retailerFeeDF['Retailer Fee'].sum())
+    retailerFeeDF['Retailer Fee'].sum()
+    return retailerFeeDF['Retailer Fee']
 
-retailerFee_Component()
+
+def total_Retail_Bill():
+
+    bill = spot_Component() + network_Component() + market_Component() + retailerFee_Component()
+
+    retailBillDF = pd.DataFrame(data=bill, index=demandProfiles.index, columns=['Retail Bill'])
+    
+    print(retailBillDF['Retail Bill'].sum())
+    
+total_Retail_Bill()
+
