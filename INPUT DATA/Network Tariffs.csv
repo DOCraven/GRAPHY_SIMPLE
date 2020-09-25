@@ -1,7 +1,7 @@
 ﻿No. of Active Accounts,NMI,Meter Number,Electricity Supply Address,Techone Facility name,NMI WO CHECK SUM,Tariff code,DB,Standing Charge ($/year),Peak (c/kWh),Shoulder (c/kWh),Off-peak (c/kWh),Capacity ($/kVA/year),Critical Peak Demand ($/kVA/year),Monthly peak kW Demand ($/kW/month),Monthly off peak kW Demand ($/kW/month),Monthy Peak kW demand charge Dec-Mar ($/kW/month),Monthy Peak kW demand charge Apr-Nov ($/kW/month),Tariff Structure
 1,63059173058,7669314,83 Thomas Mitchell Drive ,Wodonga Head Office,6305917305,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
-2,63050098551,7711802,Murray Valley Highway,Wodonga Water Treatment Plant,6305009855,NEE51 - Medium two rate 5 day - closed to new,Ausnet,118,19.6475,,4.1612,,,,,,,3
-3,63058168132,7597965,228 Phillipson Street,Wangaratta - Phillipson St Storage  CWPS,6305816813,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
+2,63050098551,7711802,Murray Valley Highway,Baranduda Low Level Water Pump Station,6305009855,NEE51 - Medium two rate 5 day - closed to new,Ausnet,118,19.6475,,4.1612,,,,,,,3
+3,63058168132,7597965,228 Phillipson Street,Wangaratta - Phillipson St Storage  Clear Water Pump Station,6305816813,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
 4,62033505425,8042374,Beatties Rd,Yarrawonga Wastewater Winter Storage - Irrigation,6203350542,LLV - Large low voltage (KVA),Powercor,8800,4.67,,2.47,,119.99,,,,,LLV
 5,VBBB0020205,8091170,Cadel Terrace,Wahgunyah Water Treatment Plant,VBBB002020,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 6,VBBB0022629,8091191,Murray Valley Highway,Wodonga Water Treatment Plant,VBBB002262,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
@@ -10,24 +10,24 @@
 9,VBBB0024971,8096209,Great Alpine Road,Myrtleford Wastewater Purification Plant - Area 2 (Depot),VBBB002497,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 10,63058775605,7661082,Halls Road,Myrtleford Water Treatment Plant & Reservoir,6305877560,NSP56 - Critical Peak Demand multirate>50KVA &<400Mwh,Ausnet,2811,13.1978,10.1666,4.3812,19.39,32.32,,,,,13
 11,63051238956,7678035,Whytes Road,Wodonga (Baranduda) Wastewater Purification Plant,6305123895,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
-12,VBBB0002664,8091254,Mill Street,Wodonga Offtake SPS,VBBB000266,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
+12,VBBB0002664,8091254,Mill Street,Wodonga Raw Water Pump Station,VBBB000266,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 13,VBBB0004561,8091169,Faithfull Street,Wangaratta Offtake / Treatment Plant / Distribution Pumping,VBBB000456,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 14,VBBB0018363,8091192,Holdworth Road,Benalla Wastewater Purification Plant / Farm,VBBB001836,NSP56 - Critical Peak Demand multirate>50KVA &<400Mwh,Ausnet,2811,13.1978,10.1666,4.3812,19.39,32.32,,,,,13
-15,VBBB0020147,8091255,South Street,Wodonga Ps01,VBBB002014,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
+15,VBBB0020147,8091255,South Street,Wodonga Pump Station 01,VBBB002014,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 16,63055575040,A7650224,Back Porepunkah Road,Bright Wastewater Purification Plant,6305557504,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
-17,VBBB0019122,8086116,Hawthorn Lane,Bright Hawthorn Lane SPS,VBBB001912,NEE21 - Small business two rate,Ausnet,118,18.8563,,4.4043,,,,,,,3
+17,VBBB0019122,8086116,Hawthorn Lane,Bright Hawthorn Lane Sewer pump station,VBBB001912,NEE21 - Small business two rate,Ausnet,118,18.8563,,4.4043,,,,,,,3
 18,VBBB0019543,7582372/7720805,Detour Road,Wangaratta Wastewater Purification Plant,VBBB001954,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 19,63050024622,7654106,Kerr Street,Wangaratta Kerr St Tanks,6305002462,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
-20,63050075510,7669986,Buffalo Creek Road,Myrtleford Buffalo Creek SPS,6305007551,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
-21,VBBB0019691,7712716,Swan Street,Wangaratta Swan St SPS,VBBB001969,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
-22,VBBB0020443,8054215,Nariel Road,Corryong Offtake SPS (Nariel Creek),VBBB002044,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
+20,63050075510,7669986,Buffalo Creek Road,Myrtleford Buffalo Creek Sewer Pump Station,6305007551,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
+21,VBBB0019691,7712716,Swan Street,Wangaratta Swan St Sewer Pump Station,VBBB001969,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
+22,VBBB0020443,8054215,Nariel Road,Corryong Offtake Sewer Pump Station (Nariel Creek),VBBB002044,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
 23,VBBB0019790,7632424,Back Wahgunyah Road,Wahgunyah Wastewater Purification Plant,VBBB001979,NSP56 - Critical Peak Demand multirate>50KVA &<400Mwh,Ausnet,2811,13.1978,10.1666,4.3812,19.39,32.32,,,,,13
-24,VBBB0020344,8091188,Beechworth Road,Wodonga High Level SPS - Wodonga,VBBB002034,NEE51 - Medium two rate 5 day - closed to new,Ausnet,118,19.6475,,4.1612,,,,,,,3
-25,62030078765,8044000,River Road,Yarrawonga Offtake PS,6203007876,NDM-Medium business demand,Powercor,1200,4.41,4.41,,,,14.31,7.15,14.31,7.15,NDM
+24,VBBB0020344,8091188,Beechworth Road,Wodonga High Level Water Pump Station,VBBB002034,NEE51 - Medium two rate 5 day - closed to new,Ausnet,118,19.6475,,4.1612,,,,,,,3
+25,62030078765,8044000,River Road,Yarrawonga Offtake Pump station,6203007876,NDM-Medium business demand,Powercor,1200,4.41,,4.41,,,14.31,7.15,14.31,7.15,NDM
 26,63056714489,7678036,PPWWTP Cochranes Road,Wodonga West Wod Wastewater Purification Plant,6305671448,NSP81 - critical Peak two rate 5 day demand supplied at >1KV,Ausnet,5962,2.6215,,0.803,38.77,63.54,,,,,14
 27,63059040043,7678042,Greenwattle Gap Road,Corryong Water Treatment Plant - Water Storage 3,6305904004,NASN21 - Business>40Mwh Two rate,Ausnet,118,17.0093,,4.1517,,,5.8,1.45,,,2
 28,VBBB0019719,7606150,Treatment Plant1 Sandford Rd,Wangaratta Trade Waste Treatment Plant,VBBB001971,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 29,63050025126,7718579,Detour Road,Wangaratta Wastewater Purification Plant,6305002512,NSP75 - Critical Peak demand multirate>150 KVA &<750Mwh,Ausnet,5962,5.2916,4.2463,1.8246,47.11,79.01,,,,,13
 30,63051254838,7679275,WWTP  Embankment Drive,Mount Beauty Wastewater Purification Plant,6305125483,NEE21 - Small business two rate,Ausnet,118,18.8563,,4.4043,,,,,,,3
-31,62038364603,DZ168515,Bailey Street,Non Potable Offtake Water PS (purple pipe),6203836460,ND5 - Non residential Interval ,Powercor,180,14.12,,3.49,,,,,,,ND5
+31,62038364603,DZ168515,Bailey Street,Non Potable Offtake Water Pump Station (purple pipe),6203836460,ND5 - Non residential Interval ,Powercor,180,14.12,,3.49,,,,,,,ND5
 32,6305967127,7679254,Great Alpine Road Freeburgh,Bright Water Treatment Plant & Off stream storage,6305967127,NSP56 - Critical Peak Demand multirate>50KVA &<400Mwh,Ausnet,2811,13.1978,10.1666,4.3812,19.39,32.32,,,,,13

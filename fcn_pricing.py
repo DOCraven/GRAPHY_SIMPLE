@@ -27,7 +27,7 @@ tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col
 facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
 
 
-spotPrem = 1.0425
+spotPrem = float(1.0425)
 
 facility = 0
 demandFacility = int(facilityIndex.iloc[facility, 0])
@@ -45,7 +45,7 @@ print(demandProfiles.index)
 
 def spot_Component():
     # 0.6% discrepancy with Excel model.
-    spot = spotPrices.iloc[0:,0] * demandProfiles.iloc[0:,demandFacility] / 1000 * lossFactors.iloc[lossFacility, 0] * lossFactors.iloc[lossFacility,1]*spotPrem
+    spot = spotPrices.iloc[0:,0] * demandProfiles.iloc[0:,demandFacility] / 1000 * float(lossFactors.iloc[lossFacility, 0]) * float(lossFactors.iloc[lossFacility,1])*spotPrem
     spotDemandDF = pd.DataFrame(data = spot, index=demandProfiles.index, columns=['Wholesale Demand'])
     
     """
@@ -123,9 +123,9 @@ def market_Component():
 
     combMarket = float(ancil + AEMOpool + LRET + VEET + SRES)
     market = demandProfiles.iloc[0:,demandFacility] * float(lossFactors.iloc[lossFacility,0]) * combMarket / 100
-    marketChargeDF = pd.DataFrame(data = market, index = demandProfiles.index, columns = ['Market Charge'])
+    marketChargeDF = pd.DataFrame(data = 0, index = demandProfiles.index, columns = ['Market Charge'])
     marketChargeDF['Market Charge'] = market
-    print(marketChargeDF)
+    #print(marketChargeDF)
     """
     marketCharge = np.empty(shape=[0,2])
 
@@ -147,7 +147,13 @@ def retailerFee_Component():
     poolMonitor = 0.15 # c/kWh
     CTlevy = 110 # $/yr
     meterCharge = 720 # $/yr
+    
+    staticFee = serviceCharge/48 + CTlevy/(365*48) + meterCharge/(365*48)
+    fee = staticFee + poolMonitor * demandProfiles.iloc[0:,demandFacility] /100
+    retailerFeeDF = pd.DataFrame(data = 0, index = demandProfiles.index, columns = ['Retailer Fee'])
+    retailerFeeDF['Retailer Fee'] = fee
 
+    """
     retailerFee = np.empty(shape=[0,2])
 
     for i in range(17520):
@@ -155,6 +161,7 @@ def retailerFee_Component():
         fee = serviceCharge/48 + CTlevy/(365*48) + meterCharge/(365*48) + poolMonitor*demandProfiles.iloc[i, demandFacility] / 100
         retailerFee = np.append(retailerFee, [[demandProfiles.index[i], fee]], axis=0)
     retailerFeeDF = pd.DataFrame(data=retailerFee[0:,1], index = retailerFee[0:,0], columns=['Retailer Fee'])
+    """
     sumR = retailerFeeDF['Retailer Fee'].sum()
     print(sumR)
     return retailerFeeDF['Retailer Fee']
