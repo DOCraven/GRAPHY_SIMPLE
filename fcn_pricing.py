@@ -1,3 +1,5 @@
+import time
+startTime = time.time()
 import pandas as pd
 import numpy as np
 import datetime
@@ -6,11 +8,13 @@ import io
 
 spotPrices = pd.read_csv("INPUT Data/Spot Price.csv", index_col=0)
 spotPrices.index = pd.to_datetime(spotPrices.index)
+#spotPrices.iloc[0:,0].astype(float)
 
 lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
 
 demandProfiles = pd.read_csv("INPUT DATA/Input Demand Profile.csv", index_col=0)
 demandProfiles.index = pd.to_datetime(demandProfiles.index)
+
 
 networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
 networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
@@ -33,7 +37,8 @@ facility = 0
 demandFacility = int(facilityIndex.iloc[facility, 0])
 lossFacility = facilityIndex.iloc[facility, 2]
 networkFacility = facilityIndex.iloc[facility, 1]
-print(demandFacility ,lossFacility ,networkFacility )
+tariffType = networkTariffs.iloc[networkFacility,18]
+#demandProfiles.iloc[0:,demandFacility].astype(float)
 
 """
 Test = 'Yarrawonga Offtake Pump station'
@@ -41,10 +46,11 @@ Time = 'Tue 01 Jan 2019 00:30'
 print(demandProfiles.loc[Time, Test])
 print(demandProfiles.index)
 """
-
+loadTime = time.time() - startTime
+print("Load time: ",loadTime)
 
 def spot_Component():
-    # 0.6% discrepancy with Excel model.
+    # 0.6% discrepancy with Excel model. Possible error in rounding
     spot = spotPrices.iloc[0:,0] * demandProfiles.iloc[0:,demandFacility] / 1000 * float(lossFactors.iloc[lossFacility, 0]) * float(lossFactors.iloc[lossFacility,1])*spotPrem
     spotDemandDF = pd.DataFrame(data = spot, index=demandProfiles.index, columns=['Wholesale Demand'])
     
@@ -58,15 +64,16 @@ def spot_Component():
     spotDemandDF = pd.DataFrame(data=spotDemand[0:,1], index=spotDemand[0:,0], columns=['Wholesale Demand'])
     """
     sumS = spotDemandDF['Wholesale Demand'].sum()
-    print(sumS)
-    
+    #print(sumS)
+   
     return spotDemandDF['Wholesale Demand']
 
 
 def network_Component():
     
-    tariffType = networkTariffs.iloc[networkFacility,18]
-    print(networkTariffs.iloc[networkFacility, 4])
+    
+    #print(networkTariffs.iloc[networkFacility, 4])
+
     
     networkCharge = np.empty(shape=[0,2])
     
@@ -108,10 +115,48 @@ def network_Component():
         totalNetworkCharge = networkRate + standingCharge
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
     networkChargeDF = pd.DataFrame(data = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
+    
+    
     sumN = networkChargeDF['Network Charge'].sum()
-    print(sumN)
+    networkTime = time.time() - startTime - loadTime
+    print(sumN," - Time: ", networkTime)
     return networkChargeDF['Network Charge']
     
+def demandCharge_Component():
+
+    if tariffType == '2':
+        demand = 0
+
+    elif tariffType == '3':
+        demand = 0
+
+    elif tariffType == '13':
+        demand = demandProfiles.between_time('15:00:00','19:00:00', True, False)
+        maxDemand = demand.iloc[0:,demandFacility]
+        fiveDays = maxDemand.sample(n=5)
+        demandCharge = fiveDays.mean()
+        print(demandCharge)
+    
+    elif tariffType == '14':
+        demand = 0
+
+    elif tariffType == 'NDM':
+        demand = 0
+    
+    elif tariffType == 'LLV':
+        demand = 0
+
+    elif tariffType == 'ND5':
+        demand = 0
+    
+    else:
+        print('No Tariff Found')
+        
+
+    
+    
+
+demandCharge_Component()
 
 def market_Component():
     
@@ -136,13 +181,12 @@ def market_Component():
     marketChargeDF = pd.DataFrame(data=marketCharge[0:,1], index=marketCharge[0:,0], columns=['Market Charge'])
     """
     sumM = marketChargeDF['Market Charge'].sum()
-    print(sumM)
+    #print(sumM)
     return marketChargeDF['Market Charge']
 
 
 def retailerFee_Component():
     
-
     serviceCharge = 1.1 # $/day
     poolMonitor = 0.15 # c/kWh
     CTlevy = 110 # $/yr
@@ -163,7 +207,7 @@ def retailerFee_Component():
     retailerFeeDF = pd.DataFrame(data=retailerFee[0:,1], index = retailerFee[0:,0], columns=['Retailer Fee'])
     """
     sumR = retailerFeeDF['Retailer Fee'].sum()
-    print(sumR)
+    #print(sumR)
     return retailerFeeDF['Retailer Fee']
 
 
@@ -174,7 +218,6 @@ def total_Retail_Bill():
     retailBillDF = pd.DataFrame(data=bill, index=demandProfiles.index, columns=['Retail Bill'])
     
     print(retailBillDF['Retail Bill'].sum())
-    
+    endTime = time.time() - startTime
+    print("Total time: ",endTime)
 
-
-total_Retail_Bill()
