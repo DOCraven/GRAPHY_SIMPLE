@@ -39,3 +39,4 @@ plot_title = ''
 shifted_site_to_save = pd.DataFrame() #empty dataframe
 Checked_YEARLY_Interval_Data = pd.DataFrame() #dataframe for inputting into load shifter 
 YEARLY_shifted_site = pd.DataFrame() #for saving the load shifted data after analysis
+yearly_summed_positive = 0

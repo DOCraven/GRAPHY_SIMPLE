@@ -105,10 +105,10 @@ def load_shifter_long_list(dataframe_to_shift, value_to_shift, site_to_shift): #
 
     ### STEP 4 - sum total SHIFTED HOURS (ie, in NO EXCESS SOLAR)
     summed = no_solar_hours_consumption_scaled.sum() #total kWh in NON SOLAR HOURS to shift
-    summed_positive = summed*inverter #to give a positive number for dividing 
+    config.yearly_summed_positive = summed*inverter #to give a positive number for dividing 
 
     #create a dataframe with consumption to ADD to each interval INSIDE SOLAR HOURS
-    scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
+    scaled_inside_solar_hours_consumption = solar_hours_consumption_ratio*config.yearly_summed_positive #this is what we need to ADD to INSIDE SOLAR HOURS
 
     #adding the scaled shifted consumption to the original solar hours 
     shifted_inside_solar_hours = solar_hours_consumption + scaled_inside_solar_hours_consumption 

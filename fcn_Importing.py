@@ -96,9 +96,9 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
 
             ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
             Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
-
             ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
             Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
+            
             
 
             ## STEP 4: Calculate Weekly averages
@@ -106,6 +106,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
                 
             ## STEP 5: Calculate Daily Averages
             config.Daily_Pricing_Data = DailyAverage(Checked_Pricing_Data_1)
+            config.Daily_Pricing_Data[0].to_csv('JAN Average Pricing Data.csv')
 
             config.Pricing_names = list(config.Daily_Pricing_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
             #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
@@ -147,6 +148,7 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         ## STEP 5: Calculate Daily Averages
         config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
+        config.Daily_Interval_Data[0].to_csv('JAN Excess Solar.csv')
         ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
         config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
         config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)

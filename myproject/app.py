@@ -44,9 +44,8 @@ Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #cr
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
-# image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
-# image_filename = '/assets/NEW_LOGO.jpg' # replace with your own image
-# encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 
@@ -56,7 +55,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_ca
 server = app.server #PROCFILE must point to this. 
 
 app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TAB CALLBSCKS###
-    # html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO - commented out for heroku deployment
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO - commented out for heroku deployment
     dcc.Tabs(id='tabs-example', value='tab-1', children=[ #DISPLAY TABS
         dcc.Tab(label='Load Data', value='tab-1'),
         dcc.Tab(label='Site Graphs', value='tab-2'),

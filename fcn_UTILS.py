@@ -73,7 +73,7 @@ def dataframe_compactor(dataframes_to_compact, yearly_data = False):
 
     elif yearly_data: 
         compacted_dataframe = pd.DataFrame() #create empty dataframe
-        compacted_dataframe = pd.concat(dataframes_to_compact, axis = 0) #merge all of them into a single dataframe - NO INDEX HERE
+        compacted_dataframe = pd.concat(dataframes_to_compact, axis = 0) #merge all of them into a single dataframe, axis = 0 
         compacted_dataframe.set_index('Interval End')
         return compacted_dataframe
 
