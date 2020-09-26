@@ -23,13 +23,12 @@ import base64
 import cufflinks as cf
 import flask
 from rq import Queue
-from worker import conn
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
-from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
@@ -45,9 +44,8 @@ Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #cr
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
 plt.close('all') #ensure all windows are closed
-# image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
-# image_filename = '/assets/NEW_LOGO.jpg' # replace with your own image
-# encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+image_filename = str(os.getcwd()) + '\\assets\\NEW_LOGO.jpg' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 ##################////////////////// DASH \\\\\\\\\\\\\\\\\\################
 
@@ -57,7 +55,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_ca
 server = app.server #PROCFILE must point to this. 
 
 app.layout = html.Div([ ### LAYOUT FOR TABS - ACTUAL LAYOUT IS DEFINED INSIDE TAB CALLBSCKS###
-    # html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO - commented out for heroku deployment
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())), #DISPLAY the NEW LOGO - commented out for heroku deployment
     dcc.Tabs(id='tabs-example', value='tab-1', children=[ #DISPLAY TABS
         dcc.Tab(label='Load Data', value='tab-1'),
         dcc.Tab(label='Site Graphs', value='tab-2'),
@@ -188,8 +186,19 @@ def render_content(tab):
                         value='January',
                         multi=True #allow multiple months to be selected
                     ),
+                    ### EXPORTING BUTTON SAVES
+                    html.Button('Export Average Load Shifted Data', id='Average_Save'),
+                    html.Div(id='Average_File_Saved_Output',
+                        children='Enter a value and press submit'),
+                    html.Button('Export Yearly Load Shifted Data', id='Yearly_Save'),
+                    html.Div(id='Yearly_File_Saved_Output',
+                        children='Enter a value and press submit'),
                     
+                    #display graph
                     dcc.Graph(id='shifting_slider_display'), #display the dynamically shifted graph upon update of slider 
+                    html.P(' '), #blank row
+                    
+                    
                     html.H4('Excess Solar'), #blank row 
                     dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display sum of all solar graph as a summed box per month
                     ])
@@ -289,7 +298,29 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
+### CALLBACK TO SAVE AVERAGE LOAD SHIFTED FILE ###
+@app.callback(
+    dash.dependencies.Output('Average_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Average_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        #save modified dataframe
+        dataframe_saver(time_frame = 'Average') #save the dataframe as a csv file 
+        
+        return 'Average File Saved'
 
+
+### CALLBACK TO SAVE WHOLE YEAR LOAD SHIFTED FILE ###
+@app.callback(
+    dash.dependencies.Output('Yearly_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Yearly_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        dataframe_saver(time_frame = 'Yearly') #save the dataframe as a csv file, does not have a time index, so will have to recreate that 
+        
+        return 'Yearly File Saved'
 
 
 

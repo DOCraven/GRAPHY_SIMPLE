@@ -92,19 +92,21 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
                 pass
             
             Full_Pricing_Data = Pricing_Data
-                # config.Solar_Exists = False
+            
 
             ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
             Checked_Pricing_Data_0 = Data_Consistency_Checker(Full_Pricing_Data)
-
             ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
             Checked_Pricing_Data_1 = CopyCat(Checked_Pricing_Data_0)
+            
+            
 
             ## STEP 4: Calculate Weekly averages
             config.Weekly_Pricing_Data = WeeklyAverage(Checked_Pricing_Data_0) 
                 
             ## STEP 5: Calculate Daily Averages
             config.Daily_Pricing_Data = DailyAverage(Checked_Pricing_Data_1)
+            config.Daily_Pricing_Data[0].to_csv('JAN Average Pricing Data.csv')
 
             config.Pricing_names = list(config.Daily_Pricing_Data[0].columns) #get the names of the column, assuming every name is the same across each dataframe in the list
             #########////////////////////////\\\\\\\\\\\\\\\\\\\\#################
@@ -127,29 +129,26 @@ def Data_Analyser(consumption_interval = None, solar_interval = None, Price_file
         config.Solar_Imported = True #for data handling later on. 
         Solar_Data = xlsxReader_Monthly(config.Solar) #check to see if Solar_data input is valid (ie, xlsx only) and return a list of months 
         
+
+        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data) #Append Solar data to the back of the interval data
         
-            # pass
-
-        ## STEP 1A: join the solar data to the dataframe (if necessary)
-        # if config.Solar_Exists: #combine Solar data to back of the interval load data if it exists - ALSO CALCULATES THE TOTAL CONSUMPTION - REQUIRED FOR LOAD SHIFTER - HERE BE LOGIC ERRORS 
-            # config.Solar_Exists = True
-        Full_Interval_Data = dataJoiner(Interval_Data, Solar_Data)
-        # else: #does not combine the solar data to the back of the interval load data
-        #     Full_Interval_Data = Interval_Data
-        #     # config.Solar_Exists = False
-
         ## STEP 2: Check for consistency, and interpolate to 30 minute intervals if requried
-        Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data)
+        Checked_Interval_Data_0 = Data_Consistency_Checker(Full_Interval_Data) #list of dataframes 
 
         ## STEP 3: Copy dataframe (to get around an error of the dataframe being modifed by WeeklyAverage(), will fix properly later)
-        Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0)
+        Checked_Interval_Data_1 = CopyCat(Checked_Interval_Data_0) #list of dataframes 
+        Checked_Interval_Data_2 = CopyCat(Checked_Interval_Data_0) #list of dataframes 
+
+        #unpack list of dataframes to single dataframe for load shifting yearly data - no analysis occurs here
+        config.Checked_YEARLY_Interval_Data = dataframe_compactor(dataframes_to_compact = Checked_Interval_Data_2, yearly_data = True)
 
         ## STEP 4: Calculate Weekly averages
         config.Weekly_Interval_Data = WeeklyAverage(Checked_Interval_Data_0) 
-            
+        
         ## STEP 5: Calculate Daily Averages
         config.Daily_Interval_Data = DailyAverage(Checked_Interval_Data_1)
 
+        config.Daily_Interval_Data[0].to_csv('JAN Excess Solar.csv')
         ## STEP 6: Calculate summation of energy used (Yearly, monthly, weekly, daily) and create figure
         config.Monthly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'MONTHLY') #Total consumption for each site for each month (list of dataframes)
         config.Yearly_Sum = ConsumptionSummer(df_to_sum = Checked_Interval_Data_1, sum_interval = 'YEARLY') #total consumption for each site for the year (dataframe)

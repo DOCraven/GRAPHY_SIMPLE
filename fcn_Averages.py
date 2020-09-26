@@ -34,9 +34,11 @@ def DailyAverage(monthly_data):
             monthly_data[months].drop(columns=['index'], inplace = True) #clean up the dataframe
         except KeyError: 
             pass
-        averaged_bad_index =  (monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
+        # averaged_bad_index =  (monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).mean()) #sum each days demand, 
         #     returns the mean of the hours over the month 
             # https://stackoverflow.com/a/30580906/13181119
+
+        averaged_bad_index =  (monthly_data[months].groupby([monthly_data[months].index.hour, monthly_data[months].index.minute]).median()) #sum each days demand, 
         ### FIXING THE INDEX for later plotting ### - not the best but #yolo 
         try: #code errors out for some reason without this. Even though this will fail, it needs to "force" the dataframe to do something. It just works now
             averaged_bad_index.reset_index(inplace = True) #removes the index, reverts it to a 0 1 2 3 etc
