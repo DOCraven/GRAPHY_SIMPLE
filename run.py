@@ -117,7 +117,7 @@ def update_daily_graph(selected_name, children):
     dash.dependencies.Input('Drop_Down_menu', 'value'), #site selection 
     dash.dependencies.Input('tab1_month_selection_output', 'children')#read the stored month )
         ] 
-        
+         
         )
 def update_weekly_graph(selected_name, children):
     #filter the names 
