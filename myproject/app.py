@@ -144,27 +144,32 @@ def render_content(tab):
     elif tab == 'tab-3': #LOAD SHIFTING SITE STUFF
         if config.Data_Uploaded: #only show if data is uploaded
             if config.Solar_Exists: #only show if solar is uploaded
-                return html.Div([
+                return html.Div([ #overaching layout
+                    html.Div([ #should place the drop down and load shifter side by side, but it is currently broken. I suspect it has to do with external stylesheets
+                        html.H3('Select a site to investigate'), 
+                        dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
+                            id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
+                            options=[{'label':name, 'value':name} for name in config.names], #dynamically populating the list 
+                            value = config.names[0],#initial default selection upon loading 
+                            multi=False #do not allow multiple selections 
+                            ), 
+                        
+                        html.P(''), #blank row 
+                        html.H3('Select a % to load shift by'), 
+                        dcc.Slider( #load shifting slider thingo 
+                            id='shifting_slider', #unique identifier for DASH Callbacks
+                            min=0,
+                            max=50,
+                            step=1,
+                            value=0, #initial slider value - TODO: read dataframe holding that information in it 
+                        ),
+                        html.Div(id='slider-output-container'), #display slider output
+
+
+                    ]),
                     dcc.Store(id='memory_output', storage_type= 'session'), #storing the user selected site here
                     dcc.Store(id='month_selection_output', storage_type= 'session'), #storing the user selected month here
-                    html.H3('Select a site to investigate'), 
-                    dcc.Dropdown(  #make drop down selection menu - STORING THIS BAD BOY IN THE DCC.STORE ABOVE
-                        id = 'Shifted_Drop_Down_menu', #unique identifier for DASH Callbacks
-                        options=[{'label':name, 'value':name} for name in config.names], #dynamically populating the list 
-                        value = config.names[0],#initial default selection upon loading 
-                        multi=False #do not allow multiple selections 
-                        ), 
-                    
-                    html.P(''), #blank row 
-                    html.H3('Select a % to load shift by'), 
-                    dcc.Slider( #load shifting slider thingo 
-                        id='shifting_slider', #unique identifier for DASH Callbacks
-                        min=0,
-                        max=50,
-                        step=1,
-                        value=0, #initial slider value - TODO: read dataframe holding that information in it 
-                    ),
-                    html.Div(id='slider-output-container'), #display slider output
+                   
                     html.P(''), #blank row 
                     html.H3('Select a Month to Plot'), 
                     dcc.Dropdown( #month selection plot
@@ -280,8 +285,8 @@ def render_content(tab):
                     ),
                     
                     dcc.Graph(id='Price_daily_graph'), #display daily graph
-                    dcc.Graph(id='Price_weekly_graph'), #display weekly graph
-                    dcc.Graph(id='Daily Excess Summmed Solar - line ', figure = config.solar_figure_line), #display all excess solar graph as a line graph per month
+                    dcc.Graph(id='Price_daily_solar_graph'), #display all excess solar graph as a line graph per month
+                    # dcc.Graph(id='Price_weekly_graph'), #display weekly graph
                     
                     ])
             else: #no consumption data uploaded

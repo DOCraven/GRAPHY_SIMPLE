@@ -23,6 +23,7 @@ import time
 import cufflinks as cf
 import base64
 import flask
+import plotly.graph_objects as go
 #USER CREATED FUNCTIONS 
 from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, ConsumptionSummer
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
@@ -216,42 +217,82 @@ def update_daily_pricing_graph(selected_name, children):
     #filter the names
     chosen_month = children #selected month 
     chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    solar_name = 'Excess Solar Generation (Total)'
+
     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
-    dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
-    shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
+    #dynamically create load dataframes to plot 12x months on top of each other for the selected site
+    dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) 
+    #dynamically create Solar dataframes to plot 12x months on top of each other for the selected site
+    solar_dataframe_to_plot = dataframe_chooser(config.Daily_Interval_Data, solar_name) 
+    ### DYNAMICALLY SLICE DATAFRAME FOR MONTH 
+    shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months,  
+    shifted_dataframe_to_plot_solar = solar_dataframe_to_plot.loc[:, chosen_month] #return only selected months, SOLAR 
+
     try: #create the figure to send to dash to plot
         fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+        ## update the figure with other excess solar generation 
+
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
         pass
 
     return fig
 
 ### CALLBACK FOR PRICING WEEKLY GRAPH ###
+# @app.callback( 
+#     #input (single item)
+#     dash.dependencies.Output('Price_weekly_graph', 'figure'),
+#     #output list
+#     [ 
+#     dash.dependencies.Input('Price_Drop_Down_menu', 'value'), 
+#     dash.dependencies.Input('pricing_month_selection_output', 'children') #read the stored month )
+#     ]
+#     )
+# def update_weekly_pricing_graph(selected_name, children):
+#     #filter the names 
+#     chosen_month = children #selected month 
+#     chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    
+#     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
+#     time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
+
+#     dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
+#     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
+#     # try: #create the figure to send to dash to plot
+#     fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+#     # except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
+#         # pass
+    
+#     return fig
+
+### CALLBACK FOR SOLAR EXCESS GRAPH IN AVERAGE PRICING
 @app.callback( 
     #input (single item)
-    dash.dependencies.Output('Price_weekly_graph', 'figure'),
+    dash.dependencies.Output('Price_daily_solar_graph', 'figure'),
     #output list
     [ 
-    dash.dependencies.Input('Price_Drop_Down_menu', 'value'), 
+    dash.dependencies.Input('Price_Drop_Down_menu', 'value'), #selected site, unused in this function
     dash.dependencies.Input('pricing_month_selection_output', 'children') #read the stored month )
     ]
     )
-def update_weekly_pricing_graph(selected_name, children):
+def update_daily_pricing_solar_graph(selected_name, children):
     #filter the names 
     chosen_month = children #selected month 
-    chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
-    
+    # chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
+    chosen_site = 'Excess Solar Generation (Total)'
     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
     time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
 
-    dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
+    dataframe_to_plot = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
-    try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
-    except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
-        pass
+    # try: #create the figure to send to dash to plot
+    fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Excess Solar Generation (kWh)', title = chosen_site, asFigure = True) 
+    # except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
+        # pass
     
     return fig
+
+
+
 
 ######### CALLBACK FOR MONTH DROP DOWN BOX IN SITE GRAPGHS (TAB 1) ######
 @app.callback(
