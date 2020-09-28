@@ -8,7 +8,7 @@ import io
 
 spotPrices = pd.read_csv("INPUT Data/Spot Price.csv", index_col=0)
 spotPrices.index = pd.to_datetime(spotPrices.index)
-#spotPrices.iloc[0:,0].astype(float)
+
 
 lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
 
@@ -32,22 +32,17 @@ facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index
 
 
 spotPrem = float(1.0425)
+pwrFactor = float(0.89)
 
-facility = 0
+facility = 25
 demandFacility = int(facilityIndex.iloc[facility, 0])
 lossFacility = facilityIndex.iloc[facility, 2]
 networkFacility = facilityIndex.iloc[facility, 1]
 tariffType = networkTariffs.iloc[networkFacility,18]
-#demandProfiles.iloc[0:,demandFacility].astype(float)
 
-"""
-Test = 'Yarrawonga Offtake Pump station'
-Time = 'Tue 01 Jan 2019 00:30'
-print(demandProfiles.loc[Time, Test])
-print(demandProfiles.index)
-"""
+
 loadTime = time.time() - startTime
-print("Load time: ",loadTime)
+print("Load time: ",round(loadTime,2),'sec')
 
 def spot_Component():
     # 0.6% discrepancy with Excel model. Possible error in rounding
@@ -64,17 +59,13 @@ def spot_Component():
     spotDemandDF = pd.DataFrame(data=spotDemand[0:,1], index=spotDemand[0:,0], columns=['Wholesale Demand'])
     """
     sumS = spotDemandDF['Wholesale Demand'].sum()
-    #print(sumS)
+    print('Wholesale Demand: $',round(sumS,2))
    
     return spotDemandDF['Wholesale Demand']
 
 
-def network_Component():
-    
-    
-    #print(networkTariffs.iloc[networkFacility, 4])
-
-    
+def network_Component(): 
+    #print(networkTariffs.iloc[networkFacility, 4])   
     networkCharge = np.empty(shape=[0,2])
     
     for i in range(17520):
@@ -115,48 +106,61 @@ def network_Component():
         totalNetworkCharge = networkRate + standingCharge
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
     networkChargeDF = pd.DataFrame(data = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
-    
-    
+        
     sumN = networkChargeDF['Network Charge'].sum()
     networkTime = time.time() - startTime - loadTime
-    print(sumN," - Time: ", networkTime)
+    print('Network Charges: $',round(sumN,2)," - Time: ", round(networkTime,2), 'sec')
     return networkChargeDF['Network Charge']
     
+
+
 def demandCharge_Component():
 
-    if tariffType == '2':
-        demand = 0
+    if tariffType == '2' or tariffType == 'NDM':
+        demand = demandProfiles[(demandProfiles.index.dayofweek >=0) & (demandProfiles.index.dayofweek <=4) & (demandProfiles.index.hour >=15) & (demandProfiles.index.hour <21)]
+        maxDemand = demand.iloc[0:, demandFacility]
+        mnthMaxDF = pd.DataFrame(data = 0, index = [1,2,3,4,5,6,7,8,9,10,11,12], columns = ['Monthly Max'])
+        for i in range(12):
+                mnthMaxDF.iloc[i] = maxDemand[(maxDemand.index.month ==i+1)].max() * 2 /pwrFactor
+            
+    elif tariffType == '3' or tariffType == 'ND5':
+        demandCharge = 0
 
-    elif tariffType == '3':
-        demand = 0
-
-    elif tariffType == '13':
+    elif tariffType == '13' or tariffType == '14':
         demand = demandProfiles.between_time('15:00:00','19:00:00', True, False)
         maxDemand = demand.iloc[0:,demandFacility]
         fiveDays = maxDemand.sample(n=5)
-        demandCharge = fiveDays.mean()
-        print(demandCharge)
-    
-    elif tariffType == '14':
-        demand = 0
-
-    elif tariffType == 'NDM':
-        demand = 0
-    
+        peakDemand = fiveDays.mean() * 2 / pwrFactor
+        demandCharge = peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48) 
+        
     elif tariffType == 'LLV':
-        demand = 0
-
-    elif tariffType == 'ND5':
-        demand = 0
+        demand = demandProfiles.iloc[0:, demandFacility]
+        peakDemand = demand.max() * 2 / pwrFactor
+        demandCharge = peakDemand * networkTariffs.iloc[networkFacility, 13] / (365*48)
+        print(peakDemand)
     
     else:
         print('No Tariff Found')
         
+    
+    demandChargeDF = pd.DataFrame(data=0, index=demandProfiles.index, columns=['Demand Charge'])
+    
+    if tariffType == '2' or tariffType == 'NDM':
+        for i in range(12):
+            if i+1 == 1 or i+1==2 or i+1==3 or i+1==12:
+                rate = networkTariffs.iloc[networkFacility, 14]
+            else:
+                rate = networkTariffs.iloc[networkFacility, 15]
+            month = 30 #recode to get exact day in a given month
+            demandChargeDF[(demandChargeDF.index.month==i+1)] = float(mnthMaxDF.iloc[i]) * float(rate)/(month*48) 
+    else:
+        demandChargeDF['Demand Charge'] = demandCharge
 
+    sumD = demandChargeDF['Demand Charge'].sum()
+    print('Demand Charge: $', round(sumD,2))
+    return demandChargeDF['Demand Charge']
     
     
-
-demandCharge_Component()
 
 def market_Component():
     
@@ -171,17 +175,9 @@ def market_Component():
     marketChargeDF = pd.DataFrame(data = 0, index = demandProfiles.index, columns = ['Market Charge'])
     marketChargeDF['Market Charge'] = market
     #print(marketChargeDF)
-    """
-    marketCharge = np.empty(shape=[0,2])
-
-    for i in range(17520):
-
-        market = combMarket * demandProfiles.iloc[i, demandFacility] / 100 * lossFactors.iloc[lossFacility,0]
-        marketCharge = np.append(marketCharge, [[demandProfiles.index[i],market]], axis=0)
-    marketChargeDF = pd.DataFrame(data=marketCharge[0:,1], index=marketCharge[0:,0], columns=['Market Charge'])
-    """
+    
     sumM = marketChargeDF['Market Charge'].sum()
-    #print(sumM)
+    print('Market Charge: $', round(sumM,2))
     return marketChargeDF['Market Charge']
 
 
@@ -197,27 +193,19 @@ def retailerFee_Component():
     retailerFeeDF = pd.DataFrame(data = 0, index = demandProfiles.index, columns = ['Retailer Fee'])
     retailerFeeDF['Retailer Fee'] = fee
 
-    """
-    retailerFee = np.empty(shape=[0,2])
-
-    for i in range(17520):
-
-        fee = serviceCharge/48 + CTlevy/(365*48) + meterCharge/(365*48) + poolMonitor*demandProfiles.iloc[i, demandFacility] / 100
-        retailerFee = np.append(retailerFee, [[demandProfiles.index[i], fee]], axis=0)
-    retailerFeeDF = pd.DataFrame(data=retailerFee[0:,1], index = retailerFee[0:,0], columns=['Retailer Fee'])
-    """
     sumR = retailerFeeDF['Retailer Fee'].sum()
-    #print(sumR)
+    print("Retailer Fee: $", round(sumR,2))
     return retailerFeeDF['Retailer Fee']
 
 
 def total_Retail_Bill():
 
-    bill = spot_Component() + network_Component() + market_Component() + retailerFee_Component()
+    bill = spot_Component() + network_Component() + demandCharge_Component() + market_Component() + retailerFee_Component()
 
     retailBillDF = pd.DataFrame(data=bill, index=demandProfiles.index, columns=['Retail Bill'])
     
-    print(retailBillDF['Retail Bill'].sum())
+    print('Total Annual Retail Bill: $', round(retailBillDF['Retail Bill'].sum(),2))
     endTime = time.time() - startTime
-    print("Total time: ",endTime)
+    print("Total time: ",round(endTime,2),'sec')
 
+total_Retail_Bill()
