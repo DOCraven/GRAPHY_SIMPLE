@@ -18,7 +18,9 @@ demandProfiles.index = pd.to_datetime(demandProfiles.index)
 
 networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
 networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
+networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
 demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
+
 
 tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
 tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
@@ -108,7 +110,6 @@ def network_Component():
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
     networkChargeDF = pd.DataFrame(data
      = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
-        
     sumN = networkChargeDF['Network Charge'].sum()
     networkTime = time.time() - startTime - loadTime
     print('Network Charges: $',round(sumN,2)," - Time: ", round(networkTime,2), 'sec')
@@ -131,9 +132,14 @@ def demandCharge_Component():
     elif tariffType == '13' or tariffType == '14':
         demand = demandProfiles.between_time('15:00:00','19:00:00', True, False)
         maxDemand = demand.iloc[0:,demandFacility]
-        fiveDays = maxDemand.sample(n=2920)
+        dailyPeak = pd.DataFrame(data=0,index=range(365),columns=['Daily Peak'])
+        for i in range(365):
+            dailyPeak.iloc[i] = maxDemand[(maxDemand.index.dayofyear==i+1)].max()
+
+        fiveDays = dailyPeak.sample(n=365)
         peakDemand = fiveDays.mean() * 2 / pwrFactor
-        demandCharge = peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48) 
+        demandCharge = float(peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48))
+        
         
     elif tariffType == 'LLV':
         demand = demandProfiles.iloc[0:, demandFacility]
