@@ -18,7 +18,7 @@ demandProfiles.index = pd.to_datetime(demandProfiles.index)
 
 networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
 networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
-
+demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
 
 tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
 tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
@@ -34,7 +34,7 @@ facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index
 spotPrem = float(1.0425)
 pwrFactor = float(0.89)
 
-facility = 25
+facility = 11
 demandFacility = int(facilityIndex.iloc[facility, 0])
 lossFacility = facilityIndex.iloc[facility, 2]
 networkFacility = facilityIndex.iloc[facility, 1]
@@ -43,7 +43,7 @@ tariffType = networkTariffs.iloc[networkFacility,18]
 
 loadTime = time.time() - startTime
 print("Load time: ",round(loadTime,2),'sec')
-
+print(networkTariffs.iloc[networkFacility, 4]) 
 def spot_Component():
     # 0.6% discrepancy with Excel model. Possible error in rounding
     spot = spotPrices.iloc[0:,0] * demandProfiles.iloc[0:,demandFacility] / 1000 * float(lossFactors.iloc[lossFacility, 0]) * float(lossFactors.iloc[lossFacility,1])*spotPrem
@@ -65,7 +65,7 @@ def spot_Component():
 
 
 def network_Component(): 
-    #print(networkTariffs.iloc[networkFacility, 4])   
+     
     networkCharge = np.empty(shape=[0,2])
     
     for i in range(17520):
@@ -103,9 +103,11 @@ def network_Component():
         networkRate = demandProfiles.iloc[i, demandFacility] * networkTariffs.iloc[networkFacility, 8+TOU] /100
         
         standingCharge = networkTariffs.iloc[networkFacility,8]/365/48
-        totalNetworkCharge = networkRate + standingCharge
+        capacityCharge = demandCapacity.iloc[networkFacility,1] * networkTariffs.iloc[networkFacility,12]/(365*48)
+        totalNetworkCharge = networkRate + standingCharge + capacityCharge
         networkCharge = np.append(networkCharge, [[demandProfiles.index[i],totalNetworkCharge]], axis=0)
-    networkChargeDF = pd.DataFrame(data = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
+    networkChargeDF = pd.DataFrame(data
+     = networkCharge[0:, 1], index=networkCharge[0:,0], columns =['Network Charge'])
         
     sumN = networkChargeDF['Network Charge'].sum()
     networkTime = time.time() - startTime - loadTime
@@ -129,7 +131,7 @@ def demandCharge_Component():
     elif tariffType == '13' or tariffType == '14':
         demand = demandProfiles.between_time('15:00:00','19:00:00', True, False)
         maxDemand = demand.iloc[0:,demandFacility]
-        fiveDays = maxDemand.sample(n=5)
+        fiveDays = maxDemand.sample(n=2920)
         peakDemand = fiveDays.mean() * 2 / pwrFactor
         demandCharge = peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48) 
         
@@ -160,7 +162,7 @@ def demandCharge_Component():
     print('Demand Charge: $', round(sumD,2))
     return demandChargeDF['Demand Charge']
     
-    
+
 
 def market_Component():
     
@@ -174,7 +176,7 @@ def market_Component():
     market = demandProfiles.iloc[0:,demandFacility] * float(lossFactors.iloc[lossFacility,0]) * combMarket / 100
     marketChargeDF = pd.DataFrame(data = 0, index = demandProfiles.index, columns = ['Market Charge'])
     marketChargeDF['Market Charge'] = market
-    #print(marketChargeDF)
+   
     
     sumM = marketChargeDF['Market Charge'].sum()
     print('Market Charge: $', round(sumM,2))
