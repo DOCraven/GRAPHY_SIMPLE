@@ -139,8 +139,15 @@ def demandCharge_Component():
         fiveDays = dailyPeak.sample(n=365)
         peakDemand = fiveDays.mean() * 2 / pwrFactor
         demandCharge = float(peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48))
-        
-        
+        """ The following code activates the sensitivity analysis
+        sensitivityDF = pd.DataFrame(data=0, index=range(50000), columns=['Demand Charge'])
+        for i in range(50000):
+            sample = dailyPeak.sample(n=5)
+            sampleD = sample.mean() * 2/ pwrFactor
+            sampleCharge = float(sampleD * networkTariffs.iloc[networkFacility, 13])
+            sensitivityDF.iloc[i] = sampleCharge
+        sensitivityDF.to_excel("INPUT DATA/Demand Charge Analysis.xlsx")
+        """
     elif tariffType == 'LLV':
         demand = demandProfiles.iloc[0:, demandFacility]
         peakDemand = demand.max() * 2 / pwrFactor
@@ -168,7 +175,7 @@ def demandCharge_Component():
     print('Demand Charge: $', round(sumD,2))
     return demandChargeDF['Demand Charge']
     
-
+demandCharge_Component()
 
 def market_Component():
     
@@ -216,4 +223,3 @@ def total_Retail_Bill():
     endTime = time.time() - startTime
     print("Total time: ",round(endTime,2),'sec')
 
-total_Retail_Bill()
