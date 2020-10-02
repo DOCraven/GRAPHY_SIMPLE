@@ -281,7 +281,7 @@ def render_content(tab):
                             {'label': 'December', 'value': 'December'},
                             ],
                         value='January',
-                        multi=True #allow multiple months
+                        multi=False #allow multiple months
                     ),
                     
                     dcc.Graph(id='Price_daily_graph'), #display daily graph

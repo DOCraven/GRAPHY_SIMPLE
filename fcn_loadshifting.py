@@ -84,7 +84,6 @@ def load_shifter_long_list(dataframe_to_shift, value_to_shift, site_to_shift): #
     # shifted_sites_inc_solar = [site_to_shift, 'Excess Solar Generation (Total)'] #create new column for excess solar generation
     single_df_site = dataframe_to_shift.loc[:,[site_to_shift, 'Excess Solar Generation (Total)']]
     
-    # single_df_site = dataframe_to_shift.loc[:, shifted_sites_inc_solar] #slice the dataframe to only include the site under consideration and the total excess solar generation 
     
     ### STEP 2 - Generate solar and no solar hours 
     # create new dataframe only where consumption > PV availability        IE< NON SOLAR EXCESS HOURS / OUTSIDE SOLAR HOURS
