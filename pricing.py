@@ -6,4 +6,7 @@ import datetime
 import io
 import sys
 
-from fcn_pricing import total_Retail_Bill
+from fcn_pricing import total_Retail_Bill, dave_test
+
+
+print(dave_test())

@@ -199,7 +199,8 @@ def total_Retail_Bill(facilityName):
 
 
 
-
+def dave_test():
+    return "returned function from fcn_pricing.py"
 
 
 ### To be transfered to pricing.py ####
