@@ -281,12 +281,10 @@ def render_content(tab):
                             {'label': 'December', 'value': 'December'},
                             ],
                         value='January',
-                        multi=True #allow multiple months
+                        multi=False #allow multiple months
                     ),
                     
                     dcc.Graph(id='Price_daily_graph'), #display daily graph
-                    dcc.Graph(id='Price_daily_solar_graph'), #display all excess solar graph as a line graph per month
-                    # dcc.Graph(id='Price_weekly_graph'), #display weekly graph
                     
                     ])
             else: #no consumption data uploaded
@@ -304,30 +302,6 @@ def render_content(tab):
 
 ### CALLBACK TESTING ###
 ### CALLBACK TO SAVE AVERAGE LOAD SHIFTED FILE ###
-@app.callback(
-    dash.dependencies.Output('Average_File_Saved_Output', 'children'),
-    [dash.dependencies.Input('Average_Save', 'n_clicks')])
-    # [dash.dependencies.State('input-box', 'value')])
-def update_output(n_clicks):
-    if n_clicks is not None: 
-        #save modified dataframe
-        dataframe_saver(time_frame = 'Average') #save the dataframe as a csv file 
-        
-        return 'Average File Saved'
-
-
-### CALLBACK TO SAVE WHOLE YEAR LOAD SHIFTED FILE ###
-@app.callback(
-    dash.dependencies.Output('Yearly_File_Saved_Output', 'children'),
-    [dash.dependencies.Input('Yearly_Save', 'n_clicks')])
-    # [dash.dependencies.State('input-box', 'value')])
-def update_output(n_clicks):
-    if n_clicks is not None: 
-        dataframe_saver(time_frame = 'Yearly') #save the dataframe as a csv file, does not have a time index, so will have to recreate that 
-        
-        return 'Yearly File Saved'
-
-
 
 
 if __name__ == '__main__': ## run the server

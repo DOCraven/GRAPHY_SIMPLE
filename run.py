@@ -57,7 +57,7 @@ import config
 #   heroku ps:scale web=1
 ####################################################
 
-
+#sean helping me
 
 
 ######## CALLBACKS FOR APP.PY FUNCTIONALITY GO HERE #########
@@ -221,48 +221,27 @@ def update_daily_pricing_graph(selected_name, children):
 
     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
     #dynamically create load dataframes to plot 12x months on top of each other for the selected site
-    dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) 
+    consumption_dataframe_to_plot = dataframe_chooser(config.Daily_Pricing_Data, chosen_site) 
     #dynamically create Solar dataframes to plot 12x months on top of each other for the selected site
     solar_dataframe_to_plot = dataframe_chooser(config.Daily_Interval_Data, solar_name) 
     ### DYNAMICALLY SLICE DATAFRAME FOR MONTH 
-    shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months,  
+    shifted_dataframe_to_plot_consumption = consumption_dataframe_to_plot.loc[:, chosen_month] #return only selected months,  
     shifted_dataframe_to_plot_solar = solar_dataframe_to_plot.loc[:, chosen_month] #return only selected months, SOLAR 
 
+
+    #combine both dataframes 
+    actual_dataframe_to_plot = pd.concat([shifted_dataframe_to_plot_consumption, shifted_dataframe_to_plot_solar], axis = 1) #columns headers are both the month - Need to change
+    actual_dataframe_to_plot.columns = ['Monthly Spot Price', 'Excess Solar Generation']
+
     try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
+        fig = actual_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, secondary_y = ['Excess Solar Generation'], secondary_y_title="Excess Solar Generation (MWh)",   asFigure = True) 
         ## update the figure with other excess solar generation 
+        ## https://stackoverflow.com/a/60374362/13181119
 
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
         pass
 
     return fig
-
-### CALLBACK FOR PRICING WEEKLY GRAPH ###
-# @app.callback( 
-#     #input (single item)
-#     dash.dependencies.Output('Price_weekly_graph', 'figure'),
-#     #output list
-#     [ 
-#     dash.dependencies.Input('Price_Drop_Down_menu', 'value'), 
-#     dash.dependencies.Input('pricing_month_selection_output', 'children') #read the stored month )
-#     ]
-#     )
-# def update_weekly_pricing_graph(selected_name, children):
-#     #filter the names 
-#     chosen_month = children #selected month 
-#     chosen_site = character_removal(selected_name) #this sanitises the chosen input into a standard string
-    
-#     ### DYNAMICALLY CREATE DATAFRAME TO SHOW ALL MONTHS ###
-#     time.sleep(0.25) #mitigate an error where calling the plot function twice in a short amount of time means it does not plot the 2nd graph
-
-#     dataframe_to_plot = dataframe_chooser(config.Weekly_Pricing_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
-#     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
-#     # try: #create the figure to send to dash to plot
-#     fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Spot Price ($)', title = chosen_site, asFigure = True) 
-#     # except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
-#         # pass
-    
-#     return fig
 
 ### CALLBACK FOR SOLAR EXCESS GRAPH IN AVERAGE PRICING
 @app.callback( 
@@ -290,6 +269,30 @@ def update_daily_pricing_solar_graph(selected_name, children):
         # pass
     
     return fig
+
+
+@app.callback(
+    dash.dependencies.Output('Average_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Average_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        #save modified dataframe
+        dataframe_saver(time_frame = 'Average') #save the dataframe as a csv file 
+        
+        return 'Average File Saved'
+
+
+### CALLBACK TO SAVE WHOLE YEAR LOAD SHIFTED FILE ###
+@app.callback(
+    dash.dependencies.Output('Yearly_File_Saved_Output', 'children'),
+    [dash.dependencies.Input('Yearly_Save', 'n_clicks')])
+    # [dash.dependencies.State('input-box', 'value')])
+def update_output(n_clicks):
+    if n_clicks is not None: 
+        dataframe_saver(time_frame = 'Yearly') #save the dataframe as a csv file, does not have a time index, so will have to recreate that 
+        
+        return 'Yearly File Saved'
 
 
 
