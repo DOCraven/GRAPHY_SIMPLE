@@ -57,7 +57,7 @@ import config
 #   heroku ps:scale web=1
 ####################################################
 
-
+#sean helping me
 
 
 ######## CALLBACKS FOR APP.PY FUNCTIONALITY GO HERE #########
