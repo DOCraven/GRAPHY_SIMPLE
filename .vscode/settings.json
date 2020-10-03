@@ -1,5 +1,7 @@
 {
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
-    "python.pythonPath": "C:\\Users\\josea\\Anaconda3\\envs\\2020\\python.exe"
+    "python.linting.banditEnabled": false,
+    "python.pythonPath": "C:\\Users\\David\\AppData\\Local\\Programs\\Python\\Python38\\python.exe",
+    "files.autoSave": "onFocusChange"
 }

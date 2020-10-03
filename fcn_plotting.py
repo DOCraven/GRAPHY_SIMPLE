@@ -37,10 +37,6 @@ def dataframe_chooser(Daily_Interval_Data, chosen_site):
     dynamically_created_dataframe.columns = Months #insert month name as the respective header
     return dynamically_created_dataframe
 
-def Mbox(title, text, style):
-    """ERROR BOX FUNCTION POP UP WINDOW"""
-    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
-
 def dash_solar_plotter(df_to_plot, plot_type): 
     """sum and plot the total solar consumption for each month"""
     ### VARS 
@@ -53,14 +49,14 @@ def dash_solar_plotter(df_to_plot, plot_type):
         try: #create the figure to send to dash to plot
             figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+            pass
         
         return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
     elif plot_type == 'line': #plot a line for each month
         try: #create the figure to send to dash to plot
             fig = dataframe_to_plot[0].iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site[0], asFigure = True) 
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
-            Mbox('PLOT ERROR', 'Dash has encountered an error. Please select another site, and try again', 1)
+            pass
 
         return fig
 

@@ -1,12 +1,12 @@
 # Compiled source #
 ###################
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-*.pyc
+.com
+.class
+.dll
+.exe
+.o
+.so
+.pyc
 
 # Packages #
 ############
@@ -39,15 +39,21 @@ Thumbs.db
 
 # Folders to Ignore #
 ######################
-/.vscode
-/__pycache__
-/Daily Outputs
+.vscode
+__pycache__
+Daily Outputs
+SHIFTED FILES
+INPUT DATA/Testing
+
 
 # Files to Ignore #
 ###################
 TEST*.py
+venv
+*.pyc
+.DS_Store
+.env
 
-__pycache__/dash_Graphs.cpython-38.pyc
-__pycache__/fcn_Averages.cpython-38.pyc
-__pycache__/fcn_UTILS.cpython-38.pyc
-__pycache__/noit a test.cpython-38.pyc
+#
+TTT.py
+INPUT DATA/A_test.xlsx
