@@ -43,22 +43,24 @@ Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #cr
 
 ### SET UP PRICING DATA ###
 config.networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
-config.networkTariffs['Tariff Structure'] = config.networkTariffsnetworkTariffs['Tariff Structure'].astype(str)
-config.networkTariffs['Capacity ($/kVA/year)'] = config.networkTariffsnetworkTariffs['Capacity ($/kVA/year)'].fillna(0)
+config.networkTariffs['Tariff Structure'] = config.networkTariffs['Tariff Structure'].astype(str)
+config.networkTariffs['Capacity ($/kVA/year)'] = config.networkTariffs['Capacity ($/kVA/year)'].fillna(0)
 config.demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
 
 
 config.tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
-config.tariffType2 = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="Tariff2", index_col=0)
-config.tariffType3 = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="Tariff3", index_col=0)
-config.tariffType13 = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="Tariff13", index_col=0)
-config.tariffType14 = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="Tariff14", index_col=0)
-config.tariffTypeNDM = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="TariffNDM", index_col=0)
-config.tariffTypeLLV = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="TariffLLV", index_col=0)
-config.tariffTypeND5 = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="TariffND5", index_col=0)
-config.facilityIndex = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
-config.timeOfUse = pd.read_excel(config.tariffTypeExceltariffTypeExcel, sheet_name="TOU", index_col=0)
 
+config.tariffType2 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff2", index_col=0)
+
+config.tariffType3 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff3", index_col=0)
+config.tariffType13 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff13", index_col=0)
+config.tariffType14 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff14", index_col=0)
+config.tariffTypeNDM = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
+config.tariffTypeLLV = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
+config.tariffTypeND5 = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffND5", index_col=0)
+config.facilityIndex = pd.read_excel(config.tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
+config.timeOfUse = pd.read_excel(config.tariffTypeExcel, sheet_name="TOU", index_col=0)
+print('SUCCESS')
 
 
 ### MAIN - hacked together for now ###
