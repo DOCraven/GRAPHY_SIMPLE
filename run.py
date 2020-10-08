@@ -29,7 +29,7 @@ from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, Consumption
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
-from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
@@ -147,7 +147,13 @@ def update_weekly_graph(selected_name, children):
         dash.dependencies.Input('memory_output', 'data'), #read the stored site 
         dash.dependencies.Input('month_selection_output', 'children') #read the stored month 
         ]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
-def update_output(value, data, children): #slider is value, Selected site via dropdown menu is data, selected month is children 
+def update_output(value, data, children): 
+    # slider is value, 
+    # Selected site via dropdown menu is data, 
+    # selected month is children 
+
+    
+    
     ## VARS
     chosen_site = data #to narrow down the dataframe using previously existing data
     load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
@@ -169,8 +175,11 @@ def update_output(value, data, children): #slider is value, Selected site via dr
     #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING ,  - NEED TO ADD EXCESS SOLAR GENERATION (TOTAL) to this dataframe
     config.YEARLY_shifted_site = load_shifter_long_list(dataframe_to_shift = config.Checked_YEARLY_Interval_Data,  value_to_shift = load_shift_number, site_to_shift = chosen_site) 
     
+    ### STEP 4C - integrate the shifted site into the original dataframe passed to it 
+    config.Entire_Yearly_Site_With_Single_Shifted = config.Checked_YEARLY_Interval_Data.copy() #create a copy of the original dataframe to insert the load shifted site into 
+    config.Entire_Yearly_Site_With_Single_Shifted[chosen_site] = config.YEARLY_shifted_site #insert the shifted site into the original dataframe
     ### STEP 5 - copy dataframe to save it for later
-    config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope
+    config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     
     ### STEP 6 - create a title for the figre
     config.plot_title = str(chosen_month) + ' - ' + chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%' #create title for graph depending on what is given to plot

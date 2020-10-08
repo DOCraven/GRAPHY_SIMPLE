@@ -13,26 +13,28 @@ spotPrices.index = pd.to_datetime(spotPrices.index)
 
 lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
 
-demandProfiles = pd.read_csv("INPUT DATA/Input Demand Profile.csv", index_col=0)
+# demandProfiles = pd.read_csv("INPUT DATA/Input Demand Profile.csv", index_col=0)
+demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
 demandProfiles.index = pd.to_datetime(demandProfiles.index)
 
+### MOVED TO config.py
+# networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
+# networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
+# networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
+# demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
 
-networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
-networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
-networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
-demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
 
+# tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
+# tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
+# tariffType3 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff3", index_col=0)
+# tariffType13 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff13", index_col=0)
+# tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0)
+# tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
+# tariffTypeLLV = pd.read_excel(tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
+# tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col=0)
+# facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
+# timeOfUse = pd.read_excel(tariffTypeExcel, sheet_name="TOU", index_col=0)
 
-tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
-tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
-tariffType3 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff3", index_col=0)
-tariffType13 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff13", index_col=0)
-tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0)
-tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
-tariffTypeLLV = pd.read_excel(tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
-tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col=0)
-facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
-timeOfUse = pd.read_excel(tariffTypeExcel, sheet_name="TOU", index_col=0)
 
 
 
@@ -67,14 +69,13 @@ def spot_Component(demandFacility, lossFacility):
    
     return spotDemandDF['Wholesale Demand']
 
-
 def network_Component(demandFacility, networkFacility, tariffType): 
      
     networkChargeDF = pd.DataFrame(index=demandProfiles.index,columns=['Network Charge'])
 
-    networkRate = demandProfiles.iloc[:, demandFacility] * timeOfUse.iloc[:,networkFacility] /100
-    standingCharge = networkTariffs.iloc[networkFacility,8]/365/48
-    capacityCharge = demandCapacity.iloc[networkFacility,1] * networkTariffs.iloc[networkFacility,12]/(365*48)
+    networkRate = demandProfiles.iloc[:, demandFacility] * config.timeOfUse.iloc[:,networkFacility] /100
+    standingCharge = config.networkTariffs.iloc[networkFacility,8]/365/48
+    capacityCharge = config.demandCapacity.iloc[networkFacility,1] * config.networkTariffs.iloc[networkFacility,12]/(365*48)
     totalNetworkCharge = networkRate + standingCharge + capacityCharge
     networkChargeDF['Network Charge'] = totalNetworkCharge
     
@@ -83,8 +84,6 @@ def network_Component(demandFacility, networkFacility, tariffType):
     print('Network Charges: $',round(sumN,2)," - Time: ", round(networkTime,2), 'sec')
     return networkChargeDF['Network Charge']
     
-
-
 def demandCharge_Component(demandFacility, networkFacility, tariffType):
     pwrFactor = float(0.89)
     if tariffType == '2' or tariffType == 'NDM':
@@ -106,7 +105,7 @@ def demandCharge_Component(demandFacility, networkFacility, tariffType):
 
         fiveDays = dailyPeak.sample(n=365)
         peakDemand = fiveDays.mean() * 2 / pwrFactor
-        demandCharge = float(peakDemand * networkTariffs.iloc[networkFacility, 13] /(365*48))
+        demandCharge = float(peakDemand * config.networkTariffs.iloc[networkFacility, 13] /(365*48))
         """ The following code activates the sensitivity analysis
         sensitivityDF = pd.DataFrame(data=0, index=range(50000), columns=['Demand Charge'])
         for i in range(50000):
@@ -119,7 +118,7 @@ def demandCharge_Component(demandFacility, networkFacility, tariffType):
     elif tariffType == 'LLV':
         demand = demandProfiles.iloc[0:, demandFacility]
         peakDemand = demand.max() * 2 / pwrFactor
-        demandCharge = peakDemand * networkTariffs.iloc[networkFacility, 13] / (365*48)
+        demandCharge = peakDemand * config.networkTariffs.iloc[networkFacility, 13] / (365*48)
         print(peakDemand)
     
     else:
@@ -131,9 +130,9 @@ def demandCharge_Component(demandFacility, networkFacility, tariffType):
     if tariffType == '2' or tariffType == 'NDM':
         for i in range(12):
             if i+1 == 1 or i+1==2 or i+1==3 or i+1==12:
-                rate = networkTariffs.iloc[networkFacility, 14]
+                rate = config.networkTariffs.iloc[networkFacility, 14]
             else:
-                rate = networkTariffs.iloc[networkFacility, 15]
+                rate = config.networkTariffs.iloc[networkFacility, 15]
             month = 30 #recode to get exact day in a given month
             demandChargeDF[(demandChargeDF.index.month==i+1)] = float(mnthMaxDF.iloc[i]) * float(rate)/(month*48) 
     else:
@@ -143,8 +142,6 @@ def demandCharge_Component(demandFacility, networkFacility, tariffType):
     print('Demand Charge: $', round(sumD,2))
     return demandChargeDF['Demand Charge']
     
-
-
 def market_Component(demandFacility, lossFacility):
     
     ancil = 0.08
@@ -162,7 +159,6 @@ def market_Component(demandFacility, lossFacility):
     print('Market Charge: $', round(sumM,2))
     return marketChargeDF['Market Charge']
 
-
 def retailerFee_Component(demandFacility):
     
     serviceCharge = 1.1 # $/day
@@ -179,14 +175,13 @@ def retailerFee_Component(demandFacility):
     print("Retailer Fee: $", round(sumR,2))
     return retailerFeeDF['Retailer Fee']
 
-
 def total_Retail_Bill(facilityName):
 
-    demandFacility = int(facilityIndex.iloc[facilityName, 0])
-    lossFacility = facilityIndex.iloc[facilityName, 2]
-    networkFacility = facilityIndex.iloc[facilityName, 1]
-    tariffType = networkTariffs.iloc[networkFacility,18]
-    print(networkTariffs.iloc[networkFacility, 4])
+    demandFacility = int(config.facilityIndex.iloc[facilityName, 0])
+    lossFacility = config.facilityIndex.iloc[facilityName, 2]
+    networkFacility = config.facilityIndex.iloc[facilityName, 1]
+    tariffType = config.networkTariffs.iloc[networkFacility,18]
+    print(config.networkTariffs.iloc[networkFacility, 4])
     bill = spot_Component(demandFacility, lossFacility) + network_Component(demandFacility, networkFacility, tariffType) + demandCharge_Component(demandFacility, networkFacility, tariffType) + market_Component(demandFacility, lossFacility) + retailerFee_Component(demandFacility)
 
     retailBillDF = pd.DataFrame(data=bill, index=demandProfiles.index, columns=['Retail Bill'])
@@ -204,7 +199,7 @@ def total_Retail_Bill(facilityName):
 
 ### To be transfered to pricing.py ####
 def populate_NEW_Retail_Bill():
-    newRetailBillDF = pd.DataFrame(index=range(17520), columns=facilityIndex.index)
+    newRetailBillDF = pd.DataFrame(index=range(17520), columns=config.facilityIndex.index)
     newRetailBillDF.index = demandProfiles.index
     for i in range(32):
         bill = total_Retail_Bill(i)
@@ -217,9 +212,9 @@ def populate_NEW_Retail_Bill():
 
 def tou(facilityName): #Creates the Time of Use Network Rates DataFrame for all sites
     
-    networkFacility = facilityIndex.iloc[facilityName, 1]
-    tariffType = networkTariffs.iloc[networkFacility,18]
-    print(networkTariffs.iloc[networkFacility, 4])
+    networkFacility = config.facilityIndex.iloc[facilityName, 1]
+    tariffType = config.networkTariffs.iloc[networkFacility,18]
+    print(config.networkTariffs.iloc[networkFacility, 4])
 
     touDF = pd.DataFrame(index=demandProfiles.index, columns=['TOU'])
     for i in range(17520):
@@ -229,31 +224,31 @@ def tou(facilityName): #Creates the Time of Use Network Rates DataFrame for all 
         TOU = 0
 
         if tariffType == '2':
-            TOU = tariffType2.iloc[hour, day]
+            TOU = config.tariffType2.iloc[hour, day]
 
         elif tariffType == '3':
-            TOU = tariffType3.iloc[hour, day]
+            TOU = config.tariffType3.iloc[hour, day]
 
         elif tariffType == '13':
-            TOU = tariffType13.iloc[hour, day]
+            TOU = config.tariffType13.iloc[hour, day]
 
         elif tariffType == '14':
-            TOU = tariffType14.iloc[hour, day]
+            TOU = config.tariffType14.iloc[hour, day]
 
         elif tariffType == 'NDM':
-            TOU = tariffTypeNDM.iloc[hour, day]
+            TOU = config.tariffTypeNDM.iloc[hour, day]
         
         elif tariffType == 'LLV':
-            TOU = tariffTypeLLV.iloc[hour, day]
+            TOU = config.tariffTypeLLV.iloc[hour, day]
 
         elif tariffType == 'ND5':
-            TOU = tariffTypeND5.iloc[hour, day]
+            TOU = config.tariffTypeND5.iloc[hour, day]
         
         else:
             print('No Tariff Found')
             break
         
-        touDF.iloc[i, 0] = networkTariffs.iloc[networkFacility, 8+TOU]
+        touDF.iloc[i, 0] = config.networkTariffs.iloc[networkFacility, 8+TOU]
 
     return touDF['TOU']
 
