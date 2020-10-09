@@ -197,8 +197,7 @@ def update_output(value, data, children):
 
     ### STEP 4D - Pass it to the pricing function 
     Shifted_Retail_Bill = populate_NEW_Retail_Bill()
-    print('Shifted Retail Bill\n')
-    print(Shifted_Retail_Bill.head(48))
+   
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     
