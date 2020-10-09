@@ -41,7 +41,7 @@ Checked_YEARLY_Interval_Data = pd.DataFrame() #dataframe for inputting into load
 YEARLY_shifted_site = pd.DataFrame() #for saving the load shifted data after analysis
 Entire_Yearly_Site_With_Single_Shifted = pd.DataFrame() #for shifted pricing data
 yearly_summed_positive = 0
-
+shifted_site_value = 0 #ie, the slider value for shifting
 ### PRICING DATA ###
 
 # networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
@@ -78,4 +78,7 @@ facilityIndex = pd.DataFrame()
 timeOfUse = pd.DataFrame()
 
 demandProfiles = pd.DataFrame()   
+
+total_site_bill = 0
+total_NEW_bill = 0
 

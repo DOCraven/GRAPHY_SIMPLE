@@ -29,7 +29,7 @@ from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, Consumption
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
-from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver, dataframe_matcher
 from myproject.pricing import total_Retail_Bill, tou, populate_NEW_Retail_Bill
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
@@ -152,12 +152,16 @@ def update_output(value, data, children):
     # slider is value, 
     # Selected site via dropdown menu is data, 
     # selected month is children 
-
+    
     
     
     ## VARS
-    chosen_site = data #to narrow down the dataframe using previously existing data
+    chosen_site = data #to narrow down the dataframe using previously existing data MY INPUT NAMES 
+    
+    chosen_site_output = dataframe_matcher(input_site = chosen_site)
     load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
+    config.shifted_site_value = load_shift_number # for displaying in the dash app. 
+    
     chosen_month = children #selected month
     ### STEP 1 - narrow down dataframe to chosen site 
     site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
@@ -185,8 +189,7 @@ def update_output(value, data, children):
     config.Entire_Yearly_Site_With_Single_Shifted.set_index('Interval End' ,inplace = True) #set index to datetime
     dataframe_columns_to_drop = [
         'Excess Solar Generation (Total)', 'Excess Solar Generation (WWTP)',  
-        'Total Consumption', 'Solar Generation (kW)', 'Witt Street YARRAWONGA - kWh Generation',
-        '83 Thomas Mitchell Drive WODONGA - kWh Generation', '40 Bailey Street BUNDALONG - kWh Generation', 
+        'Total Consumption', 'Solar Generation (kW)' 
         ] 
     config.Entire_Yearly_Site_With_Single_Shifted.drop(columns = dataframe_columns_to_drop, inplace = True)
     print(config.Entire_Yearly_Site_With_Single_Shifted.head(5))
@@ -197,7 +200,17 @@ def update_output(value, data, children):
 
     ### STEP 4D - Pass it to the pricing function 
     Shifted_Retail_Bill = populate_NEW_Retail_Bill()
-   
+    
+    ### STEP 4E - Sum total site bill and sum individual site bill
+    config.total_NEW_bill = Shifted_Retail_Bill.values.sum() #total NEW electricity bill 
+        #https://stackoverflow.com/a/32340834/13181119
+    print('\n#######\nTotal NEW Bill: ')
+    print('$' + str(config.total_NEW_bill))
+
+    config.total_site_bill = Shifted_Retail_Bill.loc[:, str(chosen_site_output)].sum() #sum price for chosen site
+    print('\n#######\nTotal SITE Bill: ')
+    print('$' + str(config.total_site_bill))
+    
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     
@@ -210,8 +223,8 @@ def update_output(value, data, children):
     ### STEP 8 - create figure from filtered site and selected month
     figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
     
-    message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
-
+    # message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
+    message = 'By loadshifting {}'.format(value) + '% ' + 'at NEW Site {}'.format(chosen_site_output) + ' the total NEW Electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
     return figure, message
 
 ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###

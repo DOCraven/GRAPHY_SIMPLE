@@ -50,6 +50,7 @@ tariffType = networkTariffs.iloc[networkFacility,18]
 
 loadTime = time.time() - startTime
 print("Load time: ",round(loadTime,2),'sec')
+print('Please Open NEW GRAPHY in your web browser')
  
 def spot_Component(demandFacility, lossFacility):
     spotPrem = float(1.0425)
