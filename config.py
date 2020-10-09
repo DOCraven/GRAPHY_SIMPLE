@@ -60,9 +60,10 @@ yearly_summed_positive = 0
 # facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
 # timeOfUse = pd.read_excel(tariffTypeExcel, sheet_name="TOU", index_col=0)
 
+spotPrices = pd.DataFrame()
+lossFactors = pd.DataFrame()
+
 networkTariffs = pd.DataFrame()
-# networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
-# networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
 demandCapacity = pd.DataFrame()
 
 tariffTypeExcel = pd.DataFrame()
@@ -75,4 +76,6 @@ tariffTypeLLV = pd.DataFrame()
 tariffTypeND5 = pd.DataFrame()
 facilityIndex = pd.DataFrame()
 timeOfUse = pd.DataFrame()
+
+demandProfiles = pd.DataFrame()   
 

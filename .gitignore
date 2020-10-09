@@ -44,7 +44,7 @@ __pycache__
 Daily Outputs
 SHIFTED FILES
 INPUT DATA/Testing
-
+OUTPUT DATA
 
 # Files to Ignore #
 ###################
@@ -57,3 +57,4 @@ venv
 #
 TTT.py
 INPUT DATA/A_test.xlsx
+INPUT DATA/New Retail Bill.xlsx

@@ -30,6 +30,7 @@ from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotte
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
 from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver
+from myproject.pricing import total_Retail_Bill, tou, populate_NEW_Retail_Bill
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
@@ -178,6 +179,26 @@ def update_output(value, data, children):
     ### STEP 4C - integrate the shifted site into the original dataframe passed to it 
     config.Entire_Yearly_Site_With_Single_Shifted = config.Checked_YEARLY_Interval_Data.copy() #create a copy of the original dataframe to insert the load shifted site into 
     config.Entire_Yearly_Site_With_Single_Shifted[chosen_site] = config.YEARLY_shifted_site #insert the shifted site into the original dataframe
+    print('BEFORE INDEX SET\n')
+    print(config.Entire_Yearly_Site_With_Single_Shifted.head(5))
+    print('AFTER INDEX SET \n')
+    config.Entire_Yearly_Site_With_Single_Shifted.set_index('Interval End' ,inplace = True) #set index to datetime
+    dataframe_columns_to_drop = [
+        'Excess Solar Generation (Total)', 'Excess Solar Generation (WWTP)',  
+        'Total Consumption', 'Solar Generation (kW)', 'Witt Street YARRAWONGA - kWh Generation',
+        '83 Thomas Mitchell Drive WODONGA - kWh Generation', '40 Bailey Street BUNDALONG - kWh Generation', 
+        ] 
+    config.Entire_Yearly_Site_With_Single_Shifted.drop(columns = dataframe_columns_to_drop, inplace = True)
+    print(config.Entire_Yearly_Site_With_Single_Shifted.head(5))
+
+
+    config.demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
+    config.demandProfiles.index = pd.to_datetime(config.demandProfiles.index)
+
+    ### STEP 4D - Pass it to the pricing function 
+    Shifted_Retail_Bill = populate_NEW_Retail_Bill()
+    print('Shifted Retail Bill\n')
+    print(Shifted_Retail_Bill.head(48))
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     

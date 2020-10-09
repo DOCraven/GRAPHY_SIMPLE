@@ -42,6 +42,14 @@ VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
 
 ### SET UP PRICING DATA ###
+
+config.spotPrices = pd.read_csv("INPUT Data/Spot Price.csv", index_col=0)
+config.spotPrices.index = pd.to_datetime(config.spotPrices.index)
+
+
+config.lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
+
+
 config.networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
 config.networkTariffs['Tariff Structure'] = config.networkTariffs['Tariff Structure'].astype(str)
 config.networkTariffs['Capacity ($/kVA/year)'] = config.networkTariffs['Capacity ($/kVA/year)'].fillna(0)
@@ -60,7 +68,6 @@ config.tariffTypeLLV = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffL
 config.tariffTypeND5 = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffND5", index_col=0)
 config.facilityIndex = pd.read_excel(config.tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
 config.timeOfUse = pd.read_excel(config.tariffTypeExcel, sheet_name="TOU", index_col=0)
-print('SUCCESS')
 
 
 ### MAIN - hacked together for now ###
