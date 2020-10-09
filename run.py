@@ -153,8 +153,6 @@ def update_output(value, data, children):
     # Selected site via dropdown menu is data, 
     # selected month is children 
     
-    
-    
     ## VARS
     chosen_site = data #to narrow down the dataframe using previously existing data MY INPUT NAMES 
     
@@ -183,34 +181,34 @@ def update_output(value, data, children):
     ### STEP 4C - integrate the shifted site into the original dataframe passed to it 
     config.Entire_Yearly_Site_With_Single_Shifted = config.Checked_YEARLY_Interval_Data.copy() #create a copy of the original dataframe to insert the load shifted site into 
     config.Entire_Yearly_Site_With_Single_Shifted[chosen_site] = config.YEARLY_shifted_site #insert the shifted site into the original dataframe
-    print('BEFORE INDEX SET\n')
-    print(config.Entire_Yearly_Site_With_Single_Shifted.head(5))
-    print('AFTER INDEX SET \n')
     config.Entire_Yearly_Site_With_Single_Shifted.set_index('Interval End' ,inplace = True) #set index to datetime
     dataframe_columns_to_drop = [
         'Excess Solar Generation (Total)', 'Excess Solar Generation (WWTP)',  
         'Total Consumption', 'Solar Generation (kW)' 
         ] 
     config.Entire_Yearly_Site_With_Single_Shifted.drop(columns = dataframe_columns_to_drop, inplace = True)
-    print(config.Entire_Yearly_Site_With_Single_Shifted.head(5))
 
 
-    config.demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
-    config.demandProfiles.index = pd.to_datetime(config.demandProfiles.index)
+    ## TURNING OFF PRICING ALGORITHM FOR NOW 
+
+    # config.demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
+    # config.demandProfiles.index = pd.to_datetime(config.demandProfiles.index)
 
     ### STEP 4D - Pass it to the pricing function 
-    Shifted_Retail_Bill = populate_NEW_Retail_Bill()
+    # Shifted_Retail_Bill = populate_NEW_Retail_Bill()
     
-    ### STEP 4E - Sum total site bill and sum individual site bill
-    config.total_NEW_bill = Shifted_Retail_Bill.values.sum() #total NEW electricity bill 
-        #https://stackoverflow.com/a/32340834/13181119
-    print('\n#######\nTotal NEW Bill: ')
-    print('$' + str(config.total_NEW_bill))
+    # ### STEP 4E - Sum total site bill and sum individual site bill
+    # config.total_NEW_bill = Shifted_Retail_Bill.values.sum() #total NEW electricity bill 
+    #     #https://stackoverflow.com/a/32340834/13181119
+    # print('\n#######\nTotal NEW Bill: ')
+    # print('$' + str(config.total_NEW_bill))
 
-    config.total_site_bill = Shifted_Retail_Bill.loc[:, str(chosen_site_output)].sum() #sum price for chosen site
-    print('\n#######\nTotal SITE Bill: ')
-    print('$' + str(config.total_site_bill))
-    
+    # config.total_site_bill = Shifted_Retail_Bill.loc[:, str(chosen_site_output)].sum() #sum price for chosen site
+    # print('\n#######\nTotal SITE Bill: ')
+    # print('$' + str(config.total_site_bill))
+
+    ## TURNING OFF PRICING ALGORITHM FOR NOW 
+
     ### STEP 5 - copy dataframe to save it for later
     config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     
@@ -223,8 +221,9 @@ def update_output(value, data, children):
     ### STEP 8 - create figure from filtered site and selected month
     figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
     
-    # message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
-    message = 'By loadshifting {}'.format(value) + '% ' + 'at Site {}'.format(chosen_site_output) + ' the total electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
+
+    message = 'You have load shifted {}'.format(value) + '%. Total kWh shifted: {}'.format(config.summed)  #to display in DASH
+    # message = 'By loadshifting {}'.format(value) + '% ' + 'at Site {}'.format(chosen_site_output) + ' the total electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
     return figure, message
 
 ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###

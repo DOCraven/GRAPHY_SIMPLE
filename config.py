@@ -42,6 +42,7 @@ YEARLY_shifted_site = pd.DataFrame() #for saving the load shifted data after ana
 Entire_Yearly_Site_With_Single_Shifted = pd.DataFrame() #for shifted pricing data
 yearly_summed_positive = 0
 shifted_site_value = 0 #ie, the slider value for shifting
+summed = 0 #total kWh hours summed
 ### PRICING DATA ###
 
 # networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
