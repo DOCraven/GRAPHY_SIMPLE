@@ -224,7 +224,7 @@ def update_output(value, data, children):
     figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
     
     # message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
-    message = 'By loadshifting {}'.format(value) + '% ' + 'at NEW Site {}'.format(chosen_site_output) + ' the total NEW Electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
+    message = 'By loadshifting {}'.format(value) + '% ' + 'at Site {}'.format(chosen_site_output) + ' the total electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
     return figure, message
 
 ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###
