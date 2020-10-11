@@ -105,7 +105,7 @@ def update_daily_graph(selected_name, children):
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     
     try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True, theme="white") 
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
         pass
 
@@ -130,7 +130,7 @@ def update_weekly_graph(selected_name, children):
     #Dynamically slice dataframe to only show the month 
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True, theme="white")  
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
         pass
     
@@ -219,10 +219,10 @@ def update_output(value, data, children):
     month_filtered_site = shifted_site.loc[:, chosen_month] #return only selected months 
 
     ### STEP 8 - create figure from filtered site and selected month
-    figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
+    figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True, theme="white") #plot the figure 
     
 
-    message = 'You have load shifted {}'.format(value) + '%. Total kWh shifted: {}'.format(config.summed)  #to display in DASH
+    message = 'You have load shifted {}'.format(value) + '%. Total kWh shifted: {}'.format(config.summed*-1)  #to display in DASH - *-1 to make the number positive to show
     # message = 'By loadshifting {}'.format(value) + '% ' + 'at Site {}'.format(chosen_site_output) + ' the total electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
     return figure, message
 
@@ -275,7 +275,7 @@ def update_daily_pricing_graph(selected_name, children):
     actual_dataframe_to_plot.columns = ['Monthly Spot Price', 'Excess Solar Generation']
 
     try: #create the figure to send to dash to plot
-        fig = actual_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, secondary_y = ['Excess Solar Generation'], secondary_y_title="Excess Solar Generation (MWh)",   asFigure = True) 
+        fig = actual_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, secondary_y = ['Excess Solar Generation'], secondary_y_title="Excess Solar Generation (MWh)",   asFigure = True, theme="white") 
         ## update the figure with other excess solar generation 
         ## https://stackoverflow.com/a/60374362/13181119
 
@@ -305,7 +305,7 @@ def update_daily_pricing_solar_graph(selected_name, children):
     dataframe_to_plot = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     # try: #create the figure to send to dash to plot
-    fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Excess Solar Generation (kWh)', title = chosen_site, asFigure = True) 
+    fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Excess Solar Generation (kWh)', title = chosen_site, asFigure = True, theme="white") 
     # except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
         # pass
     

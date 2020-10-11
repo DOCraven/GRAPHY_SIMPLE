@@ -47,14 +47,14 @@ def dash_solar_plotter(df_to_plot, plot_type):
         ## STEP 2 - SUM the dataframe 
         summed_dataframe = dataframe_to_plot[0].sum(axis = 0) #sum along rows
         try: #create the figure to send to dash to plot
-            figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True),
+            figure = summed_dataframe.iplot(kind = 'bar', xTitle='Month', yTitle='Total Consumption (kWh)', title = 'SOLAR TEST', asFigure = True, theme="white"),
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
             pass
         
         return figure[0] #it somehow makes itself a 1x1 list, and thus to return just the image one needs to index it. NFI why. 
     elif plot_type == 'line': #plot a line for each month
         try: #create the figure to send to dash to plot
-            fig = dataframe_to_plot[0].iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site[0], asFigure = True) 
+            fig = dataframe_to_plot[0].iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site[0], asFigure = True, theme="white") 
         except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
             pass
 
