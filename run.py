@@ -29,9 +29,15 @@ from fcn_Averages import DailyAverage, WeeklyAverage, MonthToDaySum, Consumption
 from fcn_plotting import character_removal, dataframe_chooser, dash_solar_plotter
 from fcn_Importing import xlsxReader_Monthly, Extension_Checker, Data_Consistency_Checker, intervalResampler, Data_Analyser, parse_contents
 from fcn_loadshifting import load_shifter_average, load_shifter_long_list, solar_extractor_adder
-from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor
+from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_compactor, dataframe_saver, dataframe_matcher
+from myproject.pricing import total_Retail_Bill, tou, populate_NEW_Retail_Bill
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
+
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
 
 ####################################################
 #
@@ -104,7 +110,7 @@ def update_daily_graph(selected_name, children):
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     
     try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True, theme="white") 
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.5s before calling the 2nd graph seems to aboid this
         pass
 
@@ -129,7 +135,7 @@ def update_weekly_graph(selected_name, children):
     #Dynamically slice dataframe to only show the month 
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     try: #create the figure to send to dash to plot
-        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True) 
+        fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Consumption (kWh)', title = chosen_site, asFigure = True, theme="white")  
     except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
         pass
     
@@ -147,10 +153,18 @@ def update_weekly_graph(selected_name, children):
         dash.dependencies.Input('memory_output', 'data'), #read the stored site 
         dash.dependencies.Input('month_selection_output', 'children') #read the stored month 
         ]) #AND READ THE STORED VALUE AT 'memory_output' in layout[]
-def update_output(value, data, children): #slider is value, Selected site via dropdown menu is data, selected month is children 
+def update_output(value, data, children): 
+    # slider is value, 
+    # Selected site via dropdown menu is data, 
+    # selected month is children 
+    
     ## VARS
-    chosen_site = data #to narrow down the dataframe using previously existing data
+    chosen_site = data #to narrow down the dataframe using previously existing data MY INPUT NAMES 
+    
+    chosen_site_output = dataframe_matcher(input_site = chosen_site)
     load_shift_number = value #%value to load shift selected site by - IT IS AN INT - need to convert it to % though
+    config.shifted_site_value = load_shift_number # for displaying in the dash app. 
+    
     chosen_month = children #selected month
     ### STEP 1 - narrow down dataframe to chosen site 
     site_to_plot_raw = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot 12x months on top of each other for the selected site
@@ -169,8 +183,39 @@ def update_output(value, data, children): #slider is value, Selected site via dr
     #returns a list of shifted sites - THIS IS SAVED AS A CSV WHEN EXPORTING ,  - NEED TO ADD EXCESS SOLAR GENERATION (TOTAL) to this dataframe
     config.YEARLY_shifted_site = load_shifter_long_list(dataframe_to_shift = config.Checked_YEARLY_Interval_Data,  value_to_shift = load_shift_number, site_to_shift = chosen_site) 
     
+    ### STEP 4C - integrate the shifted site into the original dataframe passed to it 
+    config.Entire_Yearly_Site_With_Single_Shifted = config.Checked_YEARLY_Interval_Data.copy() #create a copy of the original dataframe to insert the load shifted site into 
+    config.Entire_Yearly_Site_With_Single_Shifted[chosen_site] = config.YEARLY_shifted_site #insert the shifted site into the original dataframe
+    config.Entire_Yearly_Site_With_Single_Shifted.set_index('Interval End' ,inplace = True) #set index to datetime
+    dataframe_columns_to_drop = [
+        'Excess Solar Generation (Total)', 'Excess Solar Generation (WWTP)',  
+        'Total Consumption', 'Solar Generation (kW)' 
+        ] 
+    config.Entire_Yearly_Site_With_Single_Shifted.drop(columns = dataframe_columns_to_drop, inplace = True)
+
+
+    ## TURNING OFF PRICING ALGORITHM FOR NOW 
+
+    # config.demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
+    # config.demandProfiles.index = pd.to_datetime(config.demandProfiles.index)
+
+    ### STEP 4D - Pass it to the pricing function 
+    # Shifted_Retail_Bill = populate_NEW_Retail_Bill()
+    
+    # ### STEP 4E - Sum total site bill and sum individual site bill
+    # config.total_NEW_bill = Shifted_Retail_Bill.values.sum() #total NEW electricity bill 
+    #     #https://stackoverflow.com/a/32340834/13181119
+    # print('\n#######\nTotal NEW Bill: ')
+    # print('$' + str(config.total_NEW_bill))
+
+    # config.total_site_bill = Shifted_Retail_Bill.loc[:, str(chosen_site_output)].sum() #sum price for chosen site
+    # print('\n#######\nTotal SITE Bill: ')
+    # print('$' + str(config.total_site_bill))
+
+    ## TURNING OFF PRICING ALGORITHM FOR NOW 
+
     ### STEP 5 - copy dataframe to save it for later
-    config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope
+    config.shifted_site_to_save = shifted_site.copy() #copy it to go outside of scope - currently has no DateTime index (ie, just 0 1 2 ...... 99 100)
     
     ### STEP 6 - create a title for the figre
     config.plot_title = str(chosen_month) + ' - ' + chosen_site + ': LOAD SHIFTED ' + str(load_shift_number) + '%' #create title for graph depending on what is given to plot
@@ -179,10 +224,11 @@ def update_output(value, data, children): #slider is value, Selected site via dr
     month_filtered_site = shifted_site.loc[:, chosen_month] #return only selected months 
 
     ### STEP 8 - create figure from filtered site and selected month
-    figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True) #plot the figure 
+    figure = month_filtered_site.iplot(kind = 'line', xTitle='Time', yTitle='Consumption (kWh)', title = config.plot_title, asFigure = True, theme="white") #plot the figure 
     
-    message = 'You have load shifted {}'.format(value) + '%' #to display in DASH
 
+    message = 'You have load shifted {}'.format(value) + '%. Total kWh shifted: {}'.format(config.summed*-1)  #to display in DASH - *-1 to make the number positive to show
+    # message = 'By loadshifting {}'.format(value) + '% ' + 'at Site {}'.format(chosen_site_output) + ' the total electricity bill is ${}'.format(config.total_NEW_bill) + ' and the total shifted site bill is ${}'.format(config.total_site_bill) #to display in DASH
     return figure, message
 
 ### CALLBACK FOR SHIFTED DAILY GRAPH DROPDOWN SELECTOR ###
@@ -234,7 +280,7 @@ def update_daily_pricing_graph(selected_name, children):
     actual_dataframe_to_plot.columns = ['Monthly Spot Price', 'Excess Solar Generation']
 
     try: #create the figure to send to dash to plot
-        fig = actual_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, secondary_y = ['Excess Solar Generation'], secondary_y_title="Excess Solar Generation (MWh)",   asFigure = True) 
+        fig = actual_dataframe_to_plot.iplot(kind = 'line', xTitle='Time', yTitle='Spot Price ($)', title = chosen_site, secondary_y = ['Excess Solar Generation'], secondary_y_title="Excess Solar Generation (MWh)",   asFigure = True, theme="white") 
         ## update the figure with other excess solar generation 
         ## https://stackoverflow.com/a/60374362/13181119
 
@@ -264,7 +310,7 @@ def update_daily_pricing_solar_graph(selected_name, children):
     dataframe_to_plot = dataframe_chooser(config.Daily_Interval_Data, chosen_site) #dynamically create dataframes to plot entire year of chosen 
     shifted_dataframe_to_plot = dataframe_to_plot.loc[:, chosen_month] #return only selected months 
     # try: #create the figure to send to dash to plot
-    fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Excess Solar Generation (kWh)', title = chosen_site, asFigure = True) 
+    fig = shifted_dataframe_to_plot.iplot(kind = 'line', xTitle='Day and Time', yTitle='Excess Solar Generation (kWh)', title = chosen_site, asFigure = True, theme="white") 
     # except KeyError: #https://github.com/santosjorge/cufflinks/issues/180 - although waiting 0.25s before calling this graph seems to avoid this
         # pass
     

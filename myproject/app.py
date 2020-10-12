@@ -2,7 +2,7 @@
 from .server import app, server
 #DASH
 import dash
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -32,7 +32,12 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
-from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
+
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
 # file name for VIC1 Spot print (2019) (Pulling straight from GitHub for Heroku)
@@ -40,6 +45,35 @@ Price_URL = 'https://github.com/DOCraven/GRAPHY_SIMPLE/blob/master/assets/VIC1_S
 VIC1_Price_Data_Raw = pd.read_excel(Price_URL) #read teh file , header=None
 # Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
 Data_Analyser(Price_file = VIC1_Price_Data_Raw, execute_price_analysis=True) #create daily/weekly averages of price file
+
+### SET UP PRICING DATA ###
+
+config.spotPrices = pd.read_csv("INPUT Data/Spot Price.csv", index_col=0)
+config.spotPrices.index = pd.to_datetime(config.spotPrices.index)
+
+
+config.lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
+
+
+config.networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
+config.networkTariffs['Tariff Structure'] = config.networkTariffs['Tariff Structure'].astype(str)
+config.networkTariffs['Capacity ($/kVA/year)'] = config.networkTariffs['Capacity ($/kVA/year)'].fillna(0)
+config.demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
+
+
+config.tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
+
+config.tariffType2 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff2", index_col=0)
+
+config.tariffType3 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff3", index_col=0)
+config.tariffType13 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff13", index_col=0)
+config.tariffType14 = pd.read_excel(config.tariffTypeExcel, sheet_name="Tariff14", index_col=0)
+config.tariffTypeNDM = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
+config.tariffTypeLLV = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
+config.tariffTypeND5 = pd.read_excel(config.tariffTypeExcel, sheet_name="TariffND5", index_col=0)
+config.facilityIndex = pd.read_excel(config.tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
+config.timeOfUse = pd.read_excel(config.tariffTypeExcel, sheet_name="TOU", index_col=0)
+
 
 ### MAIN - hacked together for now ###
 config.Solar_Imported = False
@@ -301,7 +335,7 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
-### CALLBACK TO SAVE AVERAGE LOAD SHIFTED FILE ###
+
 
 
 if __name__ == '__main__': ## run the server

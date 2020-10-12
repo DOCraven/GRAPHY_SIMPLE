@@ -5,6 +5,11 @@ import os
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 def dataJoiner(Full_df, incomplete_df):
     """
     function to join merge a smaller dataframe to a larger on, on a common index 
@@ -103,4 +108,145 @@ def dataframe_saver(time_frame = 'Average'):
     return #nothing
 
 
+def dataframe_matcher(input_site):
+    """
+    function to align input names to output names 
+    """
+    chosen_site_OUTPUT_LIST = ['Yarrawonga Offtake Pump station', 
+                                'Yarrawonga Wastewater Winter Storage - Irrigation', 
+                                'Non Potable Offtake Water Pump Station (purple pipe)', 
+                                'Wangaratta Kerr St Tanks', 
+                                'Wangaratta Wastewater Purification Plant', 
+                                'Myrtleford Buffalo Creek Sewer Pump Station', 
+                                'Baranduda Low Level Water Pump Station', 
+                                'Wodonga (Baranduda) Wastewater Purification Plant', 
+                                'Mount Beauty Wastewater Purification Plant', 
+                                'Bright Wastewater Purification Plant', 
+                                'Wangaratta - Phillipson St Storage  Clear Water Pump Station', 
+                                'Myrtleford Water Treatment Plant & Reservoir', 
+                                'Corryong Water Treatment Plant - Water Storage 3', 
+                                'Wodonga Head Office', 
+                                'Bright Water Treatment Plant & Off stream storage', 
+                                'Wodonga Raw Water Pump Station', 
+                                'Wangaratta Offtake / Treatment Plant / Distribution Pumping', 
+                                'Benalla Wastewater Purification Plant / Farm', 
+                                'Bright Hawthorn Lane Sewer pump station', 
+                                'Wangaratta Wastewater Purification Plant', 
+                                'Wangaratta Swan St Sewer Pump Station', 
+                                'Wangaratta Trade Waste Treatment Plant', 
+                                'Wahgunyah Wastewater Purification Plant', 
+                                'Wodonga Pump Station 01', 
+                                'Wahgunyah Water Treatment Plant', 
+                                'Wodonga High Level Water Pump Station', 
+                                'Corryong Offtake Sewer Pump Station (Nariel Creek)', 
+                                'Wodonga Water Treatment Plant', 
+                                'Benalla Water Treatment Plant', 
+                                'Myrtleford Wastewater Purification Plant - Area 2 (Depot)', 
+                                'Yarrawonga Water Treatment Plant', 
+                                'Wodonga West Wod Wastewater Purification Plant', 
+                            ]
+    
+    chosen_site_INPUT_LIST = [
+                                'River Road YARRAWONGA - kWh Consumption', 
+                                'Beatties Road YARRAWONGA - kWh Consumption', 
+                                '40 Bailey Street BUNDALONG - kWh Consumption', 
+                                'Kerr Street WANGARATTA - kWh Consumption', 
+                                'Detour Road WANGARATTA - kWh Consumption', 
+                                'Buffalo Creek Road BUFFALO CREEK - kWh Consumption', 
+                                'Murray Valley Highway BANDIANA   - kWh Consumption', 
+                                '261 Whytes Road BARANDUDA  - kWh Consumption', 
+                                'Embankment Dr MOUNT BEAUTY - kWh Consumption', 
+                                'Back Porepunkah Rd BRIGHT - kWh Consumption', 
+                                '228 Phillipson Street WANGARATTA - kWh Consumption', 
+                                'Halls Road MYRTLEFORD - kWh Consumption', 
+                                'Greenwattle Gap Road CORRYONG - kWh Consumption', 
+                                '83 Thomas Mitchell Drive WODONGA - kWh Consumption', 
+                                'Great Alpine Road FREEBURGH - kWh Consumption', 
+                                'Mill Street WODONGA - kWh Consumption', 
+                                'Faithful Street WANGARATTA - kWh Consumption', 
+                                'Holdsworth Road BENALLA - kWh Consumption', 
+                                'Hawthorn Lane BRIGHT - kWh Consumption', 
+                                'Detour Road WANGARATTA - kWh Consumption', 
+                                'Swan Street WANGARATTA - kWh Consumption', 
+                                'Sandford Road WANGARATTA - kWh Consumption', 
+                                'Back Wahgunyah Road WAHGUNYAH - kWh Consumption', 
+                                'South Street WODONGA - kWh Consumption', 
+                                'Cadel Terrace WAHGUNYAH - kWh Consumption', 
+                                'Beechworth Road WODONGA - kWh Consumption', 
+                                'Nariel Rd CUDGEWA - kWh Consumption', 
+                                'Murray Valley Hwy BANDIANA MILPO - kWh Consumption', 
+                                'Kilfera Road MOLYULLAH - kWh Consumption', 
+                                'Great Alpine Road MYRTLEFORD - kWh Consumption', 
+                                'Witt Street YARRAWONGA - kWh Consumption', 
+                                'Wodonga WTP', 
+                            ]
+    
+    if input_site ==  chosen_site_INPUT_LIST[0]:
+        return chosen_site_OUTPUT_LIST[0]
+    elif input_site ==  chosen_site_INPUT_LIST[1]:
+        return chosen_site_OUTPUT_LIST[1]
+    elif input_site ==  chosen_site_INPUT_LIST[2]:
+        return chosen_site_OUTPUT_LIST[2]
+    elif input_site ==  chosen_site_INPUT_LIST[3]:
+        return chosen_site_OUTPUT_LIST[3]
+    elif input_site ==  chosen_site_INPUT_LIST[4]:
+        return chosen_site_OUTPUT_LIST[4]
+    elif input_site ==  chosen_site_INPUT_LIST[5]:
+        return chosen_site_OUTPUT_LIST[5]
+    elif input_site ==  chosen_site_INPUT_LIST[6]:
+        return chosen_site_OUTPUT_LIST[6]
+    elif input_site ==  chosen_site_INPUT_LIST[7]:
+        return chosen_site_OUTPUT_LIST[7]
+    elif input_site ==  chosen_site_INPUT_LIST[8]:
+        return chosen_site_OUTPUT_LIST[8]
+    elif input_site ==  chosen_site_INPUT_LIST[9]:
+        return chosen_site_OUTPUT_LIST[9]
+    elif input_site ==  chosen_site_INPUT_LIST[10]:
+        return chosen_site_OUTPUT_LIST[10]
+    elif input_site ==  chosen_site_INPUT_LIST[11]:
+        return chosen_site_OUTPUT_LIST[11]
+    elif input_site ==  chosen_site_INPUT_LIST[12]:
+        return chosen_site_OUTPUT_LIST[12]
+    elif input_site ==  chosen_site_INPUT_LIST[13]:
+        return chosen_site_OUTPUT_LIST[13]
+    elif input_site ==  chosen_site_INPUT_LIST[14]:
+        return chosen_site_OUTPUT_LIST[14]
+    elif input_site ==  chosen_site_INPUT_LIST[15]:
+        return chosen_site_OUTPUT_LIST[15]
+    elif input_site ==  chosen_site_INPUT_LIST[16]:
+        return chosen_site_OUTPUT_LIST[16]
+    elif input_site ==  chosen_site_INPUT_LIST[17]:
+        return chosen_site_OUTPUT_LIST[17]
+    elif input_site ==  chosen_site_INPUT_LIST[18]:
+        return chosen_site_OUTPUT_LIST[18]
+    elif input_site ==  chosen_site_INPUT_LIST[19]:
+        return chosen_site_OUTPUT_LIST[19]
+    elif input_site ==  chosen_site_INPUT_LIST[20]:
+        return chosen_site_OUTPUT_LIST[20]
+    elif input_site ==  chosen_site_INPUT_LIST[21]:
+        return chosen_site_OUTPUT_LIST[21]
+    elif input_site ==  chosen_site_INPUT_LIST[22]:
+        return chosen_site_OUTPUT_LIST[22]
+    elif input_site ==  chosen_site_INPUT_LIST[23]:
+        return chosen_site_OUTPUT_LIST[23]
+    elif input_site ==  chosen_site_INPUT_LIST[24]:
+        return chosen_site_OUTPUT_LIST[24]
+    elif input_site ==  chosen_site_INPUT_LIST[25]:
+        return chosen_site_OUTPUT_LIST[25]
+    elif input_site ==  chosen_site_INPUT_LIST[26]:
+        return chosen_site_OUTPUT_LIST[26]
+    elif input_site ==  chosen_site_INPUT_LIST[27]:
+        return chosen_site_OUTPUT_LIST[27]
+    elif input_site ==  chosen_site_INPUT_LIST[28]:
+        return chosen_site_OUTPUT_LIST[28]
+    elif input_site ==  chosen_site_INPUT_LIST[29]:
+        return chosen_site_OUTPUT_LIST[29]
+    elif input_site ==  chosen_site_INPUT_LIST[30]:
+        return chosen_site_OUTPUT_LIST[30]
+    elif input_site ==  chosen_site_INPUT_LIST[31]:
+        return chosen_site_OUTPUT_LIST[31]
+    elif input_site ==  chosen_site_INPUT_LIST[32]:
+        return chosen_site_OUTPUT_LIST[32]
+ 
 
+    #END OF FCN
