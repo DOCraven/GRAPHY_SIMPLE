@@ -2,7 +2,7 @@
 from .server import app, server
 #DASH
 import dash
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -32,7 +32,12 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
-from dash.dependencies import Input, Output #NEED TO ENSURE ONE CAN STORE DATA IN DCC.STORE
+
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 
 ###### IMPORTING AND DEALING WITH SPOT PRICE 
 # file name for VIC1 Spot print (2019) (Pulling straight from GitHub for Heroku)
@@ -330,7 +335,7 @@ def render_content(tab):
 
 
 ### CALLBACK TESTING ###
-### CALLBACK TO SAVE AVERAGE LOAD SHIFTED FILE ###
+
 
 
 if __name__ == '__main__': ## run the server

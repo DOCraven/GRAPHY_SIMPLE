@@ -7,6 +7,11 @@ import sys
 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 startTime = time.time()
 
 from fcn_pricing import spot_Component, network_Component, demandCharge_Component, market_Component, retailerFee_Component

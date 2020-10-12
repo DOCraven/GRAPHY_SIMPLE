@@ -34,6 +34,11 @@ from myproject.pricing import total_Retail_Bill, tou, populate_NEW_Retail_Bill
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 ####################################################
 #
 # HEROKU DEPLOYMENT NOTES (relative to local development machine)

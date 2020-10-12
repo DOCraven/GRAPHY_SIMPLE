@@ -5,6 +5,11 @@ import os
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 def dataJoiner(Full_df, incomplete_df):
     """
     function to join merge a smaller dataframe to a larger on, on a common index 

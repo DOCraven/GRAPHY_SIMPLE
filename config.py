@@ -1,6 +1,11 @@
 import pandas as pd 
 ## file to define global variables ##
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
+
 #interval data
 Weekly_Interval_Data = []
 Daily_Interval_Data = []
@@ -43,30 +48,12 @@ Entire_Yearly_Site_With_Single_Shifted = pd.DataFrame() #for shifted pricing dat
 yearly_summed_positive = 0
 shifted_site_value = 0 #ie, the slider value for shifting
 summed = 0 #total kWh hours summed
+
 ### PRICING DATA ###
-
-# networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
-# networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
-# networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
-# demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
-
-# tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
-# tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
-# tariffType3 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff3", index_col=0)
-# tariffType13 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff13", index_col=0)
-# tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0)
-# tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
-# tariffTypeLLV = pd.read_excel(tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
-# tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col=0)
-# facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
-# timeOfUse = pd.read_excel(tariffTypeExcel, sheet_name="TOU", index_col=0)
-
 spotPrices = pd.DataFrame()
 lossFactors = pd.DataFrame()
-
 networkTariffs = pd.DataFrame()
 demandCapacity = pd.DataFrame()
-
 tariffTypeExcel = pd.DataFrame()
 tariffType2 = pd.DataFrame()
 tariffType3 = pd.DataFrame()
@@ -77,7 +64,6 @@ tariffTypeLLV = pd.DataFrame()
 tariffTypeND5 = pd.DataFrame()
 facilityIndex = pd.DataFrame()
 timeOfUse = pd.DataFrame()
-
 demandProfiles = pd.DataFrame()   
 
 total_site_bill = 0

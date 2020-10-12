@@ -11,6 +11,10 @@ from calendar import day_name
 import cufflinks as cf
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
 
 ### FUNCTIONS ###
 def DailyAverage(monthly_data):

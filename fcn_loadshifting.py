@@ -6,6 +6,10 @@ from fcn_UTILS import dataJoiner, CopyCat, dataframe_list_generator, dataframe_c
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
 
 
 def load_shifter_average(dataframe_to_shift, value_to_shift):

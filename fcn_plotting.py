@@ -4,6 +4,10 @@ import cufflinks as cf
 #IMPORT USER DEFINED GLOBAL VARIABLES 
 import config
 
+#########################################
+## CODE IS UP TO DATE AS OF 12/10/2020 ##
+#########################################
+
 
 def character_removal(string_to_filter): 
     """Sanitises input characters to essentially select a substring between two \' characters"""

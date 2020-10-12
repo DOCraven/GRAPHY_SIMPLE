@@ -7,39 +7,6 @@ import io
 import config
 
 
-# spotPrices = pd.read_csv("INPUT Data/Spot Price.csv", index_col=0)
-# spotPrices.index = pd.to_datetime(spotPrices.index)
-
-
-# lossFactors = pd.read_csv("INPUT DATA/Loss Factors.csv", index_col=0)
-
-# demandProfiles = pd.read_csv("INPUT DATA/Input Demand Profile.csv", index_col=0)
-# demandProfiles = config.Entire_Yearly_Site_With_Single_Shifted #pass yearly site data to the dataframe
-# demandProfiles.index = pd.to_datetime(demandProfiles.index)
-
-### MOVED TO config.py
-# networkTariffs = pd.read_csv("INPUT Data/Network Tariffs.csv")
-# networkTariffs['Tariff Structure'] = networkTariffs['Tariff Structure'].astype(str)
-# networkTariffs['Capacity ($/kVA/year)'] = networkTariffs['Capacity ($/kVA/year)'].fillna(0)
-# demandCapacity = pd.read_csv("INPUT DATA/Capacity Charges.csv")
-
-
-# tariffTypeExcel = pd.ExcelFile("INPUT DATA/Tariff Type.xlsx")
-# tariffType2 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff2", index_col=0)
-# tariffType3 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff3", index_col=0)
-# tariffType13 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff13", index_col=0)
-# tariffType14 = pd.read_excel(tariffTypeExcel, sheet_name="Tariff14", index_col=0)
-# tariffTypeNDM = pd.read_excel(tariffTypeExcel, sheet_name="TariffNDM", index_col=0)
-# tariffTypeLLV = pd.read_excel(tariffTypeExcel, sheet_name="TariffLLV", index_col=0)
-# tariffTypeND5 = pd.read_excel(tariffTypeExcel, sheet_name="TariffND5", index_col=0)
-# facilityIndex = pd.read_excel(tariffTypeExcel, sheet_name="FacilityIndex", index_col=0)
-# timeOfUse = pd.read_excel(tariffTypeExcel, sheet_name="TOU", index_col=0)
-
-
-
-
-
-
 """
 facility = 25
 demandFacility = int(facilityIndex.iloc[facility, 0])
@@ -175,21 +142,6 @@ def retailerFee_Component(demandFacility):
     sumR = retailerFeeDF['Retailer Fee'].sum()
     print("Retailer Fee: $", round(sumR,2))
     return retailerFeeDF['Retailer Fee']
-
-
-
-
-
-
-# ### To be transfered to pricing.py ####
-# def populate_NEW_Retail_Bill():
-#     newRetailBillDF = pd.DataFrame(index=range(17520), columns=config.facilityIndex.index)
-#     newRetailBillDF.index = demandProfiles.index
-#     for i in range(32):
-#         bill = total_Retail_Bill(i)
-#         newRetailBillDF.iloc[:,i] = bill
-
-#     newRetailBillDF.to_excel("INPUT DATA/NEW Retail Bill.xlsx")
 
 
 """
