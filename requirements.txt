@@ -112,7 +112,7 @@ twython==3.8.2
 typing-extensions==3.7.4.2
 urllib3==1.25.10
 vispy==0.6.4
-waitress==1.4.4
+waitress==2.1.1
 wcwidth==0.2.5
 webbot==0.1.4
 webencodings==0.5.1
